@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import os
 from enum import Enum
 
 class CellState(Enum):
@@ -26,8 +27,15 @@ class MinesweeperGame:
         self.screen_height = self.HEIGHT * self.CELL_SIZE + self.PADDING
         
         pygame.init()
+        info = pygame.display.Info()
+        screen_x = (info.current_w - self.screen_width) // 2
+        screen_y = (info.current_h - self.screen_height) // 2
+        
+        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{screen_x},{screen_y}"
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption("扫雷游戏")
+        
+        pygame.display.flip()
         
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 24)
@@ -275,36 +283,7 @@ class MinesweeperGame:
         sys.exit()
 
 def main():
-    print("=" * 40)
-    print("        扫雷游戏 - 配置选项")
-    print("=" * 40)
-    
-    try:
-        width = int(input(f"请输入棋盘宽度 (默认 9): ") or 9)
-        height = int(input(f"请输入棋盘高度 (默认 9): ") or 9)
-        mines = int(input(f"请输入地雷数量 (默认 10): ") or 10)
-        
-        if width < 5 or width > 30:
-            print("宽度范围应在 5-30 之间，使用默认值 9")
-            width = 9
-        if height < 5 or height > 30:
-            print("高度范围应在 5-30 之间，使用默认值 9")
-            height = 9
-        if mines < 1 or mines >= width * height:
-            print(f"地雷数量应在 1-{width * height - 1} 之间，使用默认值 10")
-            mines = min(10, width * height - 1)
-        
-    except ValueError:
-        print("输入无效，使用默认配置")
-        width, height, mines = 9, 9, 10
-    
-    print(f"\n游戏配置: {width}×{height} 棋盘，{mines} 个地雷")
-    print("游戏规则:")
-    print("  - 左键点击: 翻开格子")
-    print("  - 右键点击: 标记/取消标记地雷")
-    print("  - R 键: 重新开始")
-    print("  - Q 键: 退出游戏")
-    print("=" * 40 + "\n")
+    width, height, mines = 9, 9, 10
     
     game = MinesweeperGame(width, height, mines)
     game.run()
