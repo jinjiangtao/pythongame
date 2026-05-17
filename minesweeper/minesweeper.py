@@ -38,8 +38,23 @@ class MinesweeperGame:
         pygame.display.flip()
         
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 24)
-        self.big_font = pygame.font.Font(None, 36)
+        
+        font_names = ["msyh", "simhei", "simsun", "arial", "dejavusans"]
+        self.font = None
+        self.big_font = None
+        
+        for font_name in font_names:
+            try:
+                self.font = pygame.font.SysFont(font_name, 24)
+                self.big_font = pygame.font.SysFont(font_name, 36)
+                test_text = self.font.render("测试", True, (255, 255, 255))
+                break
+            except:
+                continue
+        
+        if self.font is None:
+            self.font = pygame.font.Font(None, 24)
+            self.big_font = pygame.font.Font(None, 36)
         
         self.number_colors = {
             1: (0, 0, 255),
