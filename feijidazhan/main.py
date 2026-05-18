@@ -17,10 +17,10 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption('飞机大战')
+        pygame.display.set_caption('Airplane Battle')
         
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.SysFont('SimHei', FONT_SIZE)
+        self.font = pygame.font.Font(None, FONT_SIZE)
         
         self.game_state = 'start'
         self.game_map = GameMap()
@@ -189,9 +189,9 @@ class Game:
         pygame.display.flip()
         
     def draw_start_screen(self):
-        title_text = self.font.render('飞机大战', True, (255, 255, 255))
-        start_text = self.font.render('按空格键开始', True, (255, 255, 255))
-        controls_text = self.font.render('WASD/方向键移动 | 空格射击 | B炸弹 | P暂停', True, (150, 150, 150))
+        title_text = self.font.render('Airplane Battle', True, (255, 255, 255))
+        start_text = self.font.render('Press SPACE to start', True, (255, 255, 255))
+        controls_text = self.font.render('WASD/Arrow Move | SPACE Fire | B Bomb | P Pause', True, (150, 150, 150))
         
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//3))
         start_rect = start_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
@@ -212,19 +212,19 @@ class Game:
         self.draw_hud()
         
     def draw_hud(self):
-        score_text = self.font.render(f'得分: {self.game_core.score}', True, (255, 255, 255))
-        level_text = self.font.render(f'关卡: {self.game_core.level}', True, (255, 255, 255))
-        health_text = self.font.render(f'血量: {self.player.get_health()}', True, (255, 255, 255))
-        bomb_text = self.font.render(f'炸弹: {self.player.get_bomb_count()}', True, (255, 255, 255))
+        score_text = self.font.render(f'Score: {self.game_core.score}', True, (255, 255, 255))
+        level_text = self.font.render(f'Level: {self.game_core.level}', True, (255, 255, 255))
+        health_text = self.font.render(f'HP: {self.player.get_health()}', True, (255, 255, 255))
+        bomb_text = self.font.render(f'Bomb: {self.player.get_bomb_count()}', True, (255, 255, 255))
         
         self.screen.blit(score_text, (10, 10))
         self.screen.blit(level_text, (10, 40))
-        self.screen.blit(health_text, (SCREEN_WIDTH - 100, 10))
-        self.screen.blit(bomb_text, (SCREEN_WIDTH - 100, 40))
+        self.screen.blit(health_text, (SCREEN_WIDTH - 80, 10))
+        self.screen.blit(bomb_text, (SCREEN_WIDTH - 90, 40))
         
     def draw_pause_screen(self):
-        pause_text = self.font.render('游戏暂停', True, (255, 255, 255))
-        resume_text = self.font.render('按P键继续', True, (200, 200, 200))
+        pause_text = self.font.render('Game Paused', True, (255, 255, 255))
+        resume_text = self.font.render('Press P to resume', True, (200, 200, 200))
         
         pause_rect = pause_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
         resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 30))
@@ -239,12 +239,12 @@ class Game:
         self.screen.blit(overlay, (0, 0))
         
         if self.game_core.boss_defeated:
-            title_text = self.font.render('恭喜通关！', True, (0, 255, 0))
+            title_text = self.font.render('Victory!', True, (0, 255, 0))
         else:
-            title_text = self.font.render('游戏结束', True, (255, 0, 0))
+            title_text = self.font.render('Game Over', True, (255, 0, 0))
             
-        score_text = self.font.render(f'最终得分: {self.game_core.score}', True, (255, 255, 255))
-        restart_text = self.font.render('按空格键返回主菜单', True, (200, 200, 200))
+        score_text = self.font.render(f'Final Score: {self.game_core.score}', True, (255, 255, 255))
+        restart_text = self.font.render('Press SPACE to restart', True, (200, 200, 200))
         
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//3))
         score_rect = score_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
