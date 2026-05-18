@@ -37,7 +37,21 @@ EMPTY = 0
 pygame.font.init()
 
 FONT = None
-font_paths = [
+
+import os
+
+windows_font_paths = [
+    "C:/Windows/Fonts/simhei.ttf",
+    "C:/Windows/Fonts/simsun.ttc",
+    "C:/Windows/Fonts/msyh.ttc",
+    "C:/Windows/Fonts/msyhbd.ttc",
+    "C:/Windows/Fonts/simkai.ttf",
+    "C:/Windows/Fonts/simsong.ttf",
+    "C:/Windows/Fonts/kaiu.ttf",
+    "C:/Windows/Fonts/kaiti.ttf"
+]
+
+local_font_paths = [
     "simhei.ttf",
     "simsun.ttc",
     "msyh.ttc",
@@ -46,18 +60,25 @@ font_paths = [
     "simsong.ttf"
 ]
 
-for font_path in font_paths:
-    try:
-        FONT = pygame.font.Font(font_path, 24)
-        break
-    except FileNotFoundError:
-        continue
+for font_path in local_font_paths:
+    if os.path.exists(font_path):
+        try:
+            FONT = pygame.font.Font(font_path, 24)
+            break
+        except:
+            continue
+
+if FONT is None:
+    for font_path in windows_font_paths:
+        if os.path.exists(font_path):
+            try:
+                FONT = pygame.font.Font(font_path, 24)
+                break
+            except:
+                continue
 
 if FONT is None:
     try:
-        FONT = pygame.font.SysFont("simhei", 24)
+        FONT = pygame.font.SysFont("Arial", 24)
     except:
-        try:
-            FONT = pygame.font.SysFont("Microsoft YaHei", 24)
-        except:
-            FONT = pygame.font.Font(None, 24)
+        FONT = pygame.font.Font(None, 24)
