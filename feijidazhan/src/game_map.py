@@ -1,4 +1,5 @@
 import pygame
+import random
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, GAME_COLORS
 
 class GameMap:
@@ -9,10 +10,10 @@ class GameMap:
         
     def init_stars(self):
         for _ in range(100):
-            x = pygame.randint(0, SCREEN_WIDTH)
-            y = pygame.randint(0, SCREEN_HEIGHT)
-            size = pygame.randint(1, 3)
-            speed = pygame.randint(1, 3)
+            x = random.randint(0, SCREEN_WIDTH)
+            y = random.randint(0, SCREEN_HEIGHT)
+            size = random.randint(1, 3)
+            speed = random.randint(1, 3)
             self.stars.append({'x': x, 'y': y, 'size': size, 'speed': speed})
             
     def update(self):
@@ -20,7 +21,7 @@ class GameMap:
             star['y'] += star['speed']
             if star['y'] > SCREEN_HEIGHT:
                 star['y'] = 0
-                star['x'] = pygame.randint(0, SCREEN_WIDTH)
+                star['x'] = random.randint(0, SCREEN_WIDTH)
                 
     def draw(self, screen):
         screen.fill(GAME_COLORS['background'])

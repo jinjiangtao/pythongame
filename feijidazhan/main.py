@@ -20,7 +20,7 @@ class Game:
         pygame.display.set_caption('飞机大战')
         
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, FONT_SIZE)
+        self.font = pygame.font.SysFont('SimHei', FONT_SIZE)
         
         self.game_state = 'start'
         self.game_map = GameMap()
