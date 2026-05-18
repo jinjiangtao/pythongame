@@ -18,7 +18,7 @@ class GameConfig:
     """游戏配置类"""
     # 游戏窗口尺寸
     WINDOW_WIDTH = 800
-    WINDOW_HEIGHT = 600
+    WINDOW_HEIGHT = 700
     
     # 游戏板尺寸 (列数 x 行数)
     BOARD_COLS = 10
@@ -275,9 +275,8 @@ class GameController:
             (GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT)
         )
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 36)
-        self.font_large = pygame.font.Font(None, 48)
-        self.font_small = pygame.font.Font(None, 24)
+        
+        self._init_fonts()
         
         self.board = GameBoard()
         self.current_piece: Optional[Piece] = None
@@ -291,6 +290,27 @@ class GameController:
         self.drop_speed = GameConfig.SPEED_LEVELS[0]
         
         self._generate_next_piece()
+    
+    def _init_fonts(self) -> None:
+        """初始化中文字体"""
+        try:
+            font_names = ['Microsoft YaHei', 'SimHei', 'SimSun', 'Arial']
+            for font_name in font_names:
+                try:
+                    self.font = pygame.font.SysFont(font_name, 36)
+                    self.font_large = pygame.font.SysFont(font_name, 48)
+                    self.font_small = pygame.font.SysFont(font_name, 24)
+                    return
+                except:
+                    continue
+            
+            self.font = pygame.font.Font(None, 36)
+            self.font_large = pygame.font.Font(None, 48)
+            self.font_small = pygame.font.Font(None, 24)
+        except:
+            self.font = pygame.font.Font(None, 36)
+            self.font_large = pygame.font.Font(None, 48)
+            self.font_small = pygame.font.Font(None, 24)
     
     def _generate_next_piece(self) -> None:
         """生成下一个方块"""
