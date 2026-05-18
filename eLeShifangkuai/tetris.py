@@ -292,25 +292,47 @@ class GameController:
         self._generate_next_piece()
     
     def _init_fonts(self) -> None:
-        """初始化中文字体"""
-        try:
-            font_names = ['Microsoft YaHei', 'SimHei', 'SimSun', 'Arial']
-            for font_name in font_names:
+        """初始化中文字体 - 确保中文正常显示"""
+        import os
+        
+        # Windows系统字体路径
+        font_paths = [
+            r'C:\Windows\Fonts\msyh.ttc',      # 微软雅黑
+            r'C:\Windows\Fonts\simhei.ttf',    # 黑体
+            r'C:\Windows\Fonts\simsun.ttc',    # 宋体
+            r'C:\Windows\Fonts\kaiu.ttf',      # 楷体
+            r'C:\Windows\Fonts\msyhbd.ttc',    # 微软雅黑粗体
+        ]
+        
+        # 尝试加载系统字体文件
+        for font_path in font_paths:
+            if os.path.exists(font_path):
                 try:
-                    self.font = pygame.font.SysFont(font_name, 36)
-                    self.font_large = pygame.font.SysFont(font_name, 48)
-                    self.font_small = pygame.font.SysFont(font_name, 24)
+                    self.font = pygame.font.Font(font_path, 36)
+                    self.font_large = pygame.font.Font(font_path, 48)
+                    self.font_small = pygame.font.Font(font_path, 24)
                     return
-                except:
+                except Exception as e:
                     continue
-            
-            self.font = pygame.font.Font(None, 36)
-            self.font_large = pygame.font.Font(None, 48)
-            self.font_small = pygame.font.Font(None, 24)
-        except:
-            self.font = pygame.font.Font(None, 36)
-            self.font_large = pygame.font.Font(None, 48)
-            self.font_small = pygame.font.Font(None, 24)
+        
+        # 尝试使用SysFont加载字体名称
+        font_names = ['Microsoft YaHei', 'SimHei', 'SimSun', 'KaiTi', 'Arial Unicode MS']
+        for font_name in font_names:
+            try:
+                self.font = pygame.font.SysFont(font_name, 36)
+                self.font_large = pygame.font.SysFont(font_name, 48)
+                self.font_small = pygame.font.SysFont(font_name, 24)
+                # 测试中文字符是否能正常渲染
+                test_surface = self.font.render('测试中文', True, (255, 255, 255))
+                if test_surface:
+                    return
+            except Exception as e:
+                continue
+        
+        # 最后回退到默认字体，并启用抗锯齿
+        self.font = pygame.font.Font(None, 36)
+        self.font_large = pygame.font.Font(None, 48)
+        self.font_small = pygame.font.Font(None, 24)
     
     def _generate_next_piece(self) -> None:
         """生成下一个方块"""
