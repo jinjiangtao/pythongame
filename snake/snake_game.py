@@ -43,6 +43,24 @@ SPEED_INCREMENT = 0.5
 SCORE_PER_FOOD = 10
 HIGH_SCORE_FILE = "snake_high_score.json"
 
+def get_windows_font_path(font_name):
+    """获取Windows系统字体文件路径"""
+    font_dir = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'Fonts')
+    
+    font_map = {
+        'simsun': ['simsun.ttc', 'simsun.ttf'],
+        'simhei': ['simhei.ttf', 'simhei.ttc'],
+        'msyh': ['msyh.ttc', 'msyh.ttf'],
+        'simfang': ['simfang.ttf']
+    }
+    
+    if font_name.lower() in font_map:
+        for filename in font_map[font_name.lower()]:
+            font_path = os.path.join(font_dir, filename)
+            if os.path.exists(font_path):
+                return font_path
+    return None
+
 
 class Snake:
     """贪吃蛇类"""
@@ -145,16 +163,16 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("Snake Game")
+        pygame.display.set_caption("经典贪吃蛇游戏")
         
-        # 设置中文字体
-        try:
-            # 尝试使用系统自带的中文字体
-            self.font = pygame.font.SysFont('simsun', 36)
-            self.small_font = pygame.font.SysFont('simsun', 24)
-            self.title_font = pygame.font.SysFont('simsun', 48)
-        except:
-            # 如果失败，使用默认字体
+        # 设置中文字体 - 直接加载字体文件
+        simsun_path = get_windows_font_path('simsun')
+        if simsun_path:
+            self.font = pygame.font.Font(simsun_path, 36)
+            self.small_font = pygame.font.Font(simsun_path, 24)
+            self.title_font = pygame.font.Font(simsun_path, 48)
+        else:
+            # 如果找不到中文字体，使用默认字体
             self.font = pygame.font.Font(None, 36)
             self.small_font = pygame.font.Font(None, 24)
             self.title_font = pygame.font.Font(None, 48)
