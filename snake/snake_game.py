@@ -137,7 +137,7 @@ class Food:
             GRID_SIZE - 2,
             GRID_SIZE - 2
         )
-        pygame.draw.ellipse(screen, RED, rect, border_radius=5)
+        pygame.draw.ellipse(screen, RED, rect)
 
 
 class Game:
@@ -145,13 +145,23 @@ class Game:
 
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("经典贪吃蛇游戏")
+        pygame.display.set_caption("Snake Game")
+        
+        # 设置中文字体
+        try:
+            # 尝试使用系统自带的中文字体
+            self.font = pygame.font.SysFont('simsun', 36)
+            self.small_font = pygame.font.SysFont('simsun', 24)
+            self.title_font = pygame.font.SysFont('simsun', 48)
+        except:
+            # 如果失败，使用默认字体
+            self.font = pygame.font.Font(None, 36)
+            self.small_font = pygame.font.Font(None, 24)
+            self.title_font = pygame.font.Font(None, 48)
+        
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)
-        self.title_font = pygame.font.Font(None, 48)
-
+        
         self.snake = Snake()
         self.food = Food()
         self.score = 0
