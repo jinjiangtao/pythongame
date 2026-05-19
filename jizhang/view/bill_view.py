@@ -12,40 +12,37 @@ class BillView:
         self.header_frame = ctk.CTkFrame(self.frame)
         self.header_frame.pack(fill=ctk.X, pady=10)
 
-        self.filter_frame = ctk.CTkFrame(self.header_frame)
-        self.filter_frame.pack(side=ctk.LEFT, padx=10)
-
-        self.type_var = ctk.StringVar(value="all")
-        self.all_radio = ctk.CTkRadioButton(self.filter_frame, text="全部",
-                                            variable=self.type_var, value="all")
-        self.all_radio.grid(row=0, column=0, padx=5)
-        self.expense_radio = ctk.CTkRadioButton(self.filter_frame, text="支出",
-                                                variable=self.type_var, value="expense")
-        self.expense_radio.grid(row=0, column=1, padx=5)
-        self.income_radio = ctk.CTkRadioButton(self.filter_frame, text="收入",
-                                               variable=self.type_var, value="income")
-        self.income_radio.grid(row=0, column=2, padx=5)
-
-        self.date_frame = ctk.CTkFrame(self.header_frame)
-        self.date_frame.pack(side=ctk.LEFT, padx=20)
-
-        self.start_date_label = ctk.CTkLabel(self.date_frame, text="开始日期:")
-        self.start_date_label.grid(row=0, column=0, padx=5)
-        self.start_date_entry = ctk.CTkEntry(self.date_frame, width=100)
-        self.start_date_entry.grid(row=0, column=1, padx=5)
-
-        self.end_date_label = ctk.CTkLabel(self.date_frame, text="结束日期:")
-        self.end_date_label.grid(row=0, column=2, padx=5)
-        self.end_date_entry = ctk.CTkEntry(self.date_frame, width=100)
-        self.end_date_entry.grid(row=0, column=3, padx=5)
-
-        self.search_button = ctk.CTkButton(self.date_frame, text="查询", width=60, height=25,
-                                           fg_color="#95a5a6", hover_color="#7f8c8d")
-        self.search_button.grid(row=0, column=4, padx=10)
-
         self.add_button = ctk.CTkButton(self.header_frame, text="新增账单", width=120, height=35,
                                         fg_color=ACCENT_COLOR, hover_color="#2980b9")
         self.add_button.pack(side=ctk.RIGHT, padx=10)
+
+        self.filter_container = ctk.CTkFrame(self.header_frame)
+        self.filter_container.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=10)
+
+        self.type_var = ctk.StringVar(value="all")
+        self.all_radio = ctk.CTkRadioButton(self.filter_container, text="全部",
+                                            variable=self.type_var, value="all")
+        self.all_radio.pack(side=ctk.LEFT, padx=5)
+        self.expense_radio = ctk.CTkRadioButton(self.filter_container, text="支出",
+                                                variable=self.type_var, value="expense")
+        self.expense_radio.pack(side=ctk.LEFT, padx=5)
+        self.income_radio = ctk.CTkRadioButton(self.filter_container, text="收入",
+                                               variable=self.type_var, value="income")
+        self.income_radio.pack(side=ctk.LEFT, padx=5)
+
+        self.start_date_label = ctk.CTkLabel(self.filter_container, text="开始日期:")
+        self.start_date_label.pack(side=ctk.LEFT, padx=20)
+        self.start_date_entry = ctk.CTkEntry(self.filter_container, width=100)
+        self.start_date_entry.pack(side=ctk.LEFT, padx=5)
+
+        self.end_date_label = ctk.CTkLabel(self.filter_container, text="结束日期:")
+        self.end_date_label.pack(side=ctk.LEFT, padx=10)
+        self.end_date_entry = ctk.CTkEntry(self.filter_container, width=100)
+        self.end_date_entry.pack(side=ctk.LEFT, padx=5)
+
+        self.search_button = ctk.CTkButton(self.filter_container, text="查询", width=60, height=25,
+                                           fg_color="#95a5a6", hover_color="#7f8c8d")
+        self.search_button.pack(side=ctk.LEFT, padx=10)
 
         self.summary_frame = ctk.CTkFrame(self.frame)
         self.summary_frame.pack(fill=ctk.X, pady=10)
