@@ -14,26 +14,82 @@ class BillController:
         self.category_model = CategoryModel()
         self.view.set_add_command(self.handle_add)
         self.view.set_export_command(self.handle_export)
-        self.view.set_search_command(self.load_bills)
+        self.view.set_search_command(self.handle_search)
+        self.view.set_prev_page_command(self.handle_prev_page)
+        self.view.set_next_page_command(self.handle_next_page)
         self.view.set_edit_callback(self.handle_edit)
         self.view.set_delete_callback(self.handle_delete)
+        self.load_categories()
         self.load_bills()
+
+    def load_categories(self):
+        categories = self.category_model.get_categories(self.user["id"])
+        self.view.set_categories(categories)
 
     def load_bills(self):
         params = self.view.get_filter_params()
+        category_id = None
+        if params["category_id"]:
+            try:
+                category_id = int(params["category_id"].split(":")[0])
+            except (ValueError, IndexError):
+                category_id = None
+
+        current_page = self.view.get_current_page()
+        page_size = self.view.get_page_size()
+
         bills = self.bill_model.get_bills(
             self.user["id"],
             type_=params["type"],
+            category_id=category_id,
+            start_date=params["start_date"],
+            end_date=params["end_date"],
+            page=current_page,
+            page_size=page_size
+        )
+
+        total_count = self.bill_model.get_bills_count(
+            self.user["id"],
+            type_=params["type"],
+            category_id=category_id,
             start_date=params["start_date"],
             end_date=params["end_date"]
         )
+
+        total_pages = (total_count + page_size - 1) // page_size
+        self.view.update_pagination(current_page, max(total_pages, 1), total_count)
         self.view.display_bills(bills)
         self.update_summary()
 
+    def handle_search(self):
+        self.view.reset_page()
+        self.load_bills()
+
+    def handle_prev_page(self):
+        current_page = self.view.get_current_page()
+        if current_page > 1:
+            self.view.update_pagination(current_page - 1, self.view.total_pages, self.view.total_count)
+            self.load_bills()
+
+    def handle_next_page(self):
+        current_page = self.view.get_current_page()
+        if current_page < self.view.total_pages:
+            self.view.update_pagination(current_page + 1, self.view.total_pages, self.view.total_count)
+            self.load_bills()
+
     def update_summary(self):
         params = self.view.get_filter_params()
+        category_id = None
+        if params["category_id"]:
+            try:
+                category_id = int(params["category_id"].split(":")[0])
+            except (ValueError, IndexError):
+                category_id = None
+
         summary = self.bill_model.get_summary(
             self.user["id"],
+            type_=params["type"],
+            category_id=category_id,
             start_date=params["start_date"],
             end_date=params["end_date"]
         )

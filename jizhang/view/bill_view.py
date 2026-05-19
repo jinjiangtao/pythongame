@@ -26,6 +26,12 @@ class BillView:
                                                variable=self.type_var, value="income")
         self.income_radio.pack(side=ctk.LEFT, padx=5)
 
+        self.category_label = ctk.CTkLabel(self.filter_container, text="分类:")
+        self.category_label.pack(side=ctk.LEFT, padx=20)
+        self.category_var = ctk.StringVar(value="")
+        self.category_combobox = ctk.CTkComboBox(self.filter_container, variable=self.category_var, width=120)
+        self.category_combobox.pack(side=ctk.LEFT, padx=5)
+
         self.start_date_label = ctk.CTkLabel(self.filter_container, text="开始日期:")
         self.start_date_label.pack(side=ctk.LEFT, padx=20)
         self.start_date_entry = ctk.CTkEntry(self.filter_container, width=100)
@@ -75,11 +81,33 @@ class BillView:
         self.message_label = ctk.CTkLabel(self.frame, text="", text_color="#27ae60", font=ctk.CTkFont(size=12))
         self.message_label.pack(pady=10)
 
+        self.pagination_frame = ctk.CTkFrame(self.frame)
+        self.pagination_frame.pack(fill=ctk.X, pady=10)
+
+        self.prev_button = ctk.CTkButton(self.pagination_frame, text="上一页", width=80, height=25,
+                                         fg_color="#95a5a6", hover_color="#7f8c8d", state=ctk.DISABLED)
+        self.prev_button.pack(side=ctk.LEFT, padx=5)
+
+        self.page_label = ctk.CTkLabel(self.pagination_frame, text="第 1 / 1 页")
+        self.page_label.pack(side=ctk.LEFT, padx=10)
+
+        self.next_button = ctk.CTkButton(self.pagination_frame, text="下一页", width=80, height=25,
+                                         fg_color="#95a5a6", hover_color="#7f8c8d", state=ctk.DISABLED)
+        self.next_button.pack(side=ctk.LEFT, padx=5)
+
+        self.total_label = ctk.CTkLabel(self.pagination_frame, text="共 0 条记录")
+        self.total_label.pack(side=ctk.RIGHT, padx=10)
+
         self.bills = []
+        self.current_page = 1
+        self.total_pages = 1
+        self.total_count = 0
+        self.page_size = 20
 
     def get_filter_params(self):
         return {
             "type": self.type_var.get() if self.type_var.get() != "all" else None,
+            "category_id": self.category_var.get() if self.category_var.get() else None,
             "start_date": self.start_date_entry.get().strip() or None,
             "end_date": self.end_date_entry.get().strip() or None
         }
@@ -93,6 +121,12 @@ class BillView:
     def set_search_command(self, command):
         self.search_button.configure(command=command)
 
+    def set_prev_page_command(self, command):
+        self.prev_button.configure(command=command)
+
+    def set_next_page_command(self, command):
+        self.next_button.configure(command=command)
+
     def set_type_change_command(self, command):
         self.all_radio.configure(command=command)
         self.expense_radio.configure(command=command)
@@ -101,6 +135,30 @@ class BillView:
     def clear_bills(self):
         for widget in self.tree.winfo_children():
             widget.destroy()
+
+    def set_categories(self, categories):
+        category_list = [""] + [f"{cat[0]}:{cat[1]}" for cat in categories]
+        self.category_combobox.configure(values=category_list)
+
+    def update_pagination(self, current_page, total_pages, total_count):
+        self.current_page = current_page
+        self.total_pages = total_pages
+        self.total_count = total_count
+
+        self.page_label.configure(text=f"第 {current_page} / {total_pages} 页")
+        self.total_label.configure(text=f"共 {total_count} 条记录")
+
+        self.prev_button.configure(state=ctk.NORMAL if current_page > 1 else ctk.DISABLED)
+        self.next_button.configure(state=ctk.NORMAL if current_page < total_pages else ctk.DISABLED)
+
+    def get_current_page(self):
+        return self.current_page
+
+    def get_page_size(self):
+        return self.page_size
+
+    def reset_page(self):
+        self.current_page = 1
 
     def display_bills(self, bills):
         self.clear_bills()

@@ -91,7 +91,7 @@ class BillModel:
         )
         return True, "删除成功"
 
-    def get_bills(self, user_id, type_=None, start_date=None, end_date=None):
+    def get_bills(self, user_id, type_=None, start_date=None, end_date=None, category_id=None, page=None, page_size=None):
         query = "SELECT b.id, b.type, b.category_id, c.name as category_name, " \
                 "b.amount, b.remark, b.payment_method, b.date, b.created_at " \
                 "FROM bills b JOIN categories c ON b.category_id = c.id " \
@@ -101,6 +101,10 @@ class BillModel:
         if type_:
             query += " AND b.type = ?"
             params.append(type_)
+        
+        if category_id:
+            query += " AND b.category_id = ?"
+            params.append(category_id)
         
         if start_date:
             query += " AND b.date >= ?"
@@ -112,7 +116,36 @@ class BillModel:
 
         query += " ORDER BY b.date DESC, b.created_at DESC"
 
+        if page is not None and page_size is not None:
+            offset = (page - 1) * page_size
+            query += " LIMIT ? OFFSET ?"
+            params.append(page_size)
+            params.append(offset)
+
         return self.db.query(query, params)
+
+    def get_bills_count(self, user_id, type_=None, start_date=None, end_date=None, category_id=None):
+        query = "SELECT COUNT(*) FROM bills b JOIN categories c ON b.category_id = c.id WHERE b.user_id = ?"
+        params = [user_id]
+
+        if type_:
+            query += " AND b.type = ?"
+            params.append(type_)
+        
+        if category_id:
+            query += " AND b.category_id = ?"
+            params.append(category_id)
+        
+        if start_date:
+            query += " AND b.date >= ?"
+            params.append(start_date)
+        
+        if end_date:
+            query += " AND b.date <= ?"
+            params.append(end_date)
+
+        result = self.db.query_one(query, params)
+        return result[0] if result else 0
 
     def get_bill_by_id(self, bill_id, user_id):
         return self.db.query_one(
@@ -123,10 +156,18 @@ class BillModel:
             (bill_id, user_id)
         )
 
-    def get_summary(self, user_id, start_date=None, end_date=None):
+    def get_summary(self, user_id, type_=None, category_id=None, start_date=None, end_date=None):
         query = "SELECT type, SUM(amount) FROM bills WHERE user_id = ?"
         params = [user_id]
 
+        if type_:
+            query += " AND type = ?"
+            params.append(type_)
+        
+        if category_id:
+            query += " AND category_id = ?"
+            params.append(category_id)
+        
         if start_date:
             query += " AND date >= ?"
             params.append(start_date)
