@@ -13,15 +13,7 @@ class BillView:
         self.header_frame.pack(fill=ctk.X, pady=10)
 
         self.filter_container = ctk.CTkFrame(self.header_frame)
-        self.filter_container.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=10)
-
-        self.add_button = ctk.CTkButton(self.header_frame, text="新增账单", width=120, height=35,
-                                        fg_color=ACCENT_COLOR, hover_color="#2980b9")
-        self.add_button.pack(side=ctk.RIGHT, padx=5)
-        
-        self.export_button = ctk.CTkButton(self.header_frame, text="导出Excel", width=100, height=35,
-                                          fg_color="#27ae60", hover_color="#1e8449")
-        self.export_button.pack(side=ctk.RIGHT, padx=5)
+        self.filter_container.pack(fill=ctk.X, pady=5)
 
         self.type_var = ctk.StringVar(value="all")
         self.all_radio = ctk.CTkRadioButton(self.filter_container, text="全部",
@@ -47,6 +39,17 @@ class BillView:
         self.search_button = ctk.CTkButton(self.filter_container, text="查询", width=60, height=25,
                                            fg_color="#95a5a6", hover_color="#7f8c8d")
         self.search_button.pack(side=ctk.LEFT, padx=10)
+
+        self.button_container = ctk.CTkFrame(self.header_frame)
+        self.button_container.pack(fill=ctk.X, pady=5)
+
+        self.add_button = ctk.CTkButton(self.button_container, text="新增账单", width=120, height=35,
+                                        fg_color=ACCENT_COLOR, hover_color="#2980b9")
+        self.add_button.pack(side=ctk.RIGHT, padx=5)
+        
+        self.export_button = ctk.CTkButton(self.button_container, text="导出Excel", width=100, height=35,
+                                          fg_color="#27ae60", hover_color="#1e8449")
+        self.export_button.pack(side=ctk.RIGHT, padx=5)
 
         self.summary_frame = ctk.CTkFrame(self.frame)
         self.summary_frame.pack(fill=ctk.X, pady=10)
