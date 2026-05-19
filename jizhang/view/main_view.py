@@ -50,16 +50,14 @@ class MainView:
 
     def highlight_bill_button(self):
         self.bill_button.configure(fg_color=ACCENT_COLOR, hover_color="#2980b9", 
-                                   border_color="transparent", border_width=0,
-                                   text_color="white")
-        self.category_button.configure(fg_color="transparent", hover_color="gray", 
+                                   border_width=0, text_color="white")
+        self.category_button.configure(fg_color="white", hover_color="#e0e0e0", 
                                        border_color=ACCENT_COLOR, border_width=2,
                                        text_color=ACCENT_COLOR)
 
     def highlight_category_button(self):
         self.category_button.configure(fg_color=ACCENT_COLOR, hover_color="#2980b9", 
-                                       border_color="transparent", border_width=0,
-                                       text_color="white")
-        self.bill_button.configure(fg_color="transparent", hover_color="gray", 
+                                       border_width=0, text_color="white")
+        self.bill_button.configure(fg_color="white", hover_color="#e0e0e0", 
                                    border_color=ACCENT_COLOR, border_width=2,
                                    text_color=ACCENT_COLOR)
