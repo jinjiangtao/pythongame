@@ -49,6 +49,10 @@ class BillView:
                                            fg_color="#95a5a6", hover_color="#7f8c8d")
         self.search_button.pack(side=ctk.LEFT, padx=10)
 
+        self.statistics_button = ctk.CTkButton(self.button_container, text="数据统计", width=80, height=25,
+                                               fg_color="#f39c12", hover_color="#d68910")
+        self.statistics_button.pack(side=ctk.LEFT, padx=10)
+
         self.add_button = ctk.CTkButton(self.button_container, text="新增账单", width=120, height=35,
                                         fg_color=ACCENT_COLOR, hover_color="#2980b9")
         self.add_button.pack(side=ctk.RIGHT, padx=5)
@@ -74,6 +78,37 @@ class BillView:
 
         self.tree_frame = ctk.CTkFrame(self.frame)
         self.tree_frame.pack(fill=ctk.BOTH, expand=True)
+
+        self.header_row = ctk.CTkFrame(self.tree_frame, fg_color="#3498db")
+        self.header_row.pack(fill=ctk.X)
+
+        type_header = ctk.CTkLabel(self.header_row, text="类型", width=60, anchor=ctk.CENTER, 
+                                   text_color="white", font=ctk.CTkFont(weight="bold"))
+        type_header.pack(side=ctk.LEFT, padx=5)
+
+        date_header = ctk.CTkLabel(self.header_row, text="日期", width=100, anchor=ctk.CENTER, 
+                                   text_color="white", font=ctk.CTkFont(weight="bold"))
+        date_header.pack(side=ctk.LEFT, padx=5)
+
+        cat_header = ctk.CTkLabel(self.header_row, text="分类", width=100, anchor=ctk.CENTER, 
+                                  text_color="white", font=ctk.CTkFont(weight="bold"))
+        cat_header.pack(side=ctk.LEFT, padx=5)
+
+        amount_header = ctk.CTkLabel(self.header_row, text="金额", width=100, anchor=ctk.CENTER, 
+                                     text_color="white", font=ctk.CTkFont(weight="bold"))
+        amount_header.pack(side=ctk.LEFT, padx=5)
+
+        pm_header = ctk.CTkLabel(self.header_row, text="付款方式", width=80, anchor=ctk.CENTER, 
+                                  text_color="white", font=ctk.CTkFont(weight="bold"))
+        pm_header.pack(side=ctk.LEFT, padx=5)
+
+        remark_header = ctk.CTkLabel(self.header_row, text="备注", width=120, anchor=ctk.CENTER, 
+                                     text_color="white", font=ctk.CTkFont(weight="bold"))
+        remark_header.pack(side=ctk.LEFT, padx=5)
+
+        action_header = ctk.CTkLabel(self.header_row, text="操作", width=150, anchor=ctk.CENTER, 
+                                     text_color="white", font=ctk.CTkFont(weight="bold"))
+        action_header.pack(side=ctk.RIGHT, padx=5)
 
         self.tree = ctk.CTkScrollableFrame(self.tree_frame)
         self.tree.pack(fill=ctk.BOTH, expand=True)
@@ -120,6 +155,9 @@ class BillView:
 
     def set_search_command(self, command):
         self.search_button.configure(command=command)
+
+    def set_statistics_command(self, command):
+        self.statistics_button.configure(command=command)
 
     def set_prev_page_command(self, command):
         self.prev_button.configure(command=command)
@@ -318,3 +356,139 @@ class BillView:
 
     def get_frame(self):
         return self.frame
+
+    def show_statistics_dialog(self, statistics_data):
+        dialog = ctk.CTkToplevel(self.parent)
+        dialog.title("数据统计")
+        dialog.geometry("900x700")
+        dialog.resizable(False, False)
+        dialog.transient(self.parent)
+        dialog.grab_set()
+
+        notebook = ctk.CTkTabview(dialog, width=880, height=650)
+        notebook.pack(pady=10)
+
+        notebook.add("收支概览")
+        notebook.add("月度统计")
+        notebook.add("年度统计")
+        notebook.add("支出分类占比")
+        notebook.add("收支趋势")
+
+        summary_frame = ctk.CTkFrame(notebook.tab("收支概览"))
+        summary_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
+
+        total_income = statistics_data.get('total_income', 0)
+        total_expense = statistics_data.get('total_expense', 0)
+        balance = total_income - total_expense
+
+        income_card = ctk.CTkFrame(summary_frame, fg_color="#27ae60", corner_radius=10)
+        income_card.pack(fill=ctk.X, pady=10)
+        income_label = ctk.CTkLabel(income_card, text=f"总收入: ¥{total_income:.2f}", 
+                                    text_color="white", font=ctk.CTkFont(size=24, weight="bold"))
+        income_label.pack(pady=20, padx=20)
+
+        expense_card = ctk.CTkFrame(summary_frame, fg_color="#e74c3c", corner_radius=10)
+        expense_card.pack(fill=ctk.X, pady=10)
+        expense_label = ctk.CTkLabel(expense_card, text=f"总支出: ¥{total_expense:.2f}", 
+                                     text_color="white", font=ctk.CTkFont(size=24, weight="bold"))
+        expense_label.pack(pady=20, padx=20)
+
+        balance_card = ctk.CTkFrame(summary_frame, fg_color=ACCENT_COLOR, corner_radius=10)
+        balance_card.pack(fill=ctk.X, pady=10)
+        balance_label = ctk.CTkLabel(balance_card, text=f"结余: ¥{balance:.2f}", 
+                                     text_color="white", font=ctk.CTkFont(size=24, weight="bold"))
+        balance_label.pack(pady=20, padx=20)
+
+        monthly_frame = ctk.CTkFrame(notebook.tab("月度统计"))
+        monthly_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
+        monthly_scroll = ctk.CTkScrollableFrame(monthly_frame)
+        monthly_scroll.pack(fill=ctk.BOTH, expand=True)
+
+        monthly_data = statistics_data.get('monthly_data', [])
+        for month_data in monthly_data:
+            month, income, expense = month_data
+            row_frame = ctk.CTkFrame(monthly_scroll)
+            row_frame.pack(fill=ctk.X, pady=5)
+            
+            month_label = ctk.CTkLabel(row_frame, text=f"{month}月", width=80)
+            month_label.pack(side=ctk.LEFT, padx=10)
+            
+            income_label = ctk.CTkLabel(row_frame, text=f"收入: ¥{income:.2f}", width=150, text_color="#27ae60")
+            income_label.pack(side=ctk.LEFT, padx=10)
+            
+            expense_label = ctk.CTkLabel(row_frame, text=f"支出: ¥{expense:.2f}", width=150, text_color="#e74c3c")
+            expense_label.pack(side=ctk.LEFT, padx=10)
+            
+            balance_label = ctk.CTkLabel(row_frame, text=f"结余: ¥{(income - expense):.2f}", width=150)
+            balance_label.pack(side=ctk.LEFT, padx=10)
+
+        yearly_frame = ctk.CTkFrame(notebook.tab("年度统计"))
+        yearly_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
+        
+        yearly_data = statistics_data.get('yearly_data', [])
+        for year_data in yearly_data:
+            year, income, expense = year_data
+            row_frame = ctk.CTkFrame(yearly_frame)
+            row_frame.pack(fill=ctk.X, pady=10)
+            
+            year_label = ctk.CTkLabel(row_frame, text=f"{year}年", width=100, font=ctk.CTkFont(size=16, weight="bold"))
+            year_label.pack(side=ctk.LEFT, padx=10)
+            
+            income_label = ctk.CTkLabel(row_frame, text=f"收入: ¥{income:.2f}", width=200, text_color="#27ae60", font=ctk.CTkFont(size=14))
+            income_label.pack(side=ctk.LEFT, padx=10)
+            
+            expense_label = ctk.CTkLabel(row_frame, text=f"支出: ¥{expense:.2f}", width=200, text_color="#e74c3c", font=ctk.CTkFont(size=14))
+            expense_label.pack(side=ctk.LEFT, padx=10)
+
+        category_frame = ctk.CTkFrame(notebook.tab("支出分类占比"))
+        category_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
+        category_scroll = ctk.CTkScrollableFrame(category_frame)
+        category_scroll.pack(fill=ctk.BOTH, expand=True)
+
+        category_data = statistics_data.get('category_data', [])
+        total_expense_for_categories = sum(item[1] for item in category_data)
+        colors = ["#e74c3c", "#f39c12", "#9b59b6", "#3498db", "#1abc9c", "#2ecc71", "#e91e63", "#00bcd4"]
+        
+        for i, (category_name, amount) in enumerate(category_data):
+            percentage = (amount / total_expense_for_categories * 100) if total_expense_for_categories > 0 else 0
+            row_frame = ctk.CTkFrame(category_scroll)
+            row_frame.pack(fill=ctk.X, pady=5)
+            
+            cat_label = ctk.CTkLabel(row_frame, text=category_name, width=120)
+            cat_label.pack(side=ctk.LEFT, padx=10)
+            
+            bar_frame = ctk.CTkFrame(row_frame, width=300, height=20)
+            bar_frame.pack(side=ctk.LEFT, padx=10)
+            bar_fill = ctk.CTkFrame(bar_frame, width=int(percentage * 3), height=20, fg_color=colors[i % len(colors)])
+            bar_fill.pack(side=ctk.LEFT)
+            
+            amount_label = ctk.CTkLabel(row_frame, text=f"¥{amount:.2f}", width=100)
+            amount_label.pack(side=ctk.LEFT, padx=10)
+            
+            percent_label = ctk.CTkLabel(row_frame, text=f"{percentage:.1f}%", width=60)
+            percent_label.pack(side=ctk.LEFT, padx=10)
+
+        trend_frame = ctk.CTkFrame(notebook.tab("收支趋势"))
+        trend_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
+        trend_scroll = ctk.CTkScrollableFrame(trend_frame)
+        trend_scroll.pack(fill=ctk.BOTH, expand=True)
+
+        monthly_trend = statistics_data.get('monthly_data', [])
+        max_amount = max(max(item[1], item[2]) for item in monthly_trend) if monthly_trend else 1
+        
+        for month, income, expense in monthly_trend:
+            row_frame = ctk.CTkFrame(trend_scroll)
+            row_frame.pack(fill=ctk.X, pady=10)
+            
+            month_label = ctk.CTkLabel(row_frame, text=f"{month}月", width=60)
+            month_label.pack(side=ctk.LEFT, padx=10)
+            
+            income_bar_frame = ctk.CTkFrame(row_frame, width=300, height=25, bg_color="#ecf0f1")
+            income_bar_frame.pack(side=ctk.LEFT, padx=10)
+            income_bar = ctk.CTkFrame(income_bar_frame, width=int(income / max_amount * 300), height=25, fg_color="#27ae60")
+            income_bar.pack(side=ctk.LEFT)
+            
+            expense_bar_frame = ctk.CTkFrame(row_frame, width=300, height=25, bg_color="#ecf0f1")
+            expense_bar_frame.pack(side=ctk.LEFT, padx=10)
+            expense_bar = ctk.CTkFrame(expense_bar_frame, width=int(expense / max_amount * 300), height=25, fg_color="#e74c3c")
+            expense_bar.pack(side=ctk.LEFT)

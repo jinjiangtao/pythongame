@@ -71,10 +71,15 @@ class Database:
                 user_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 type TEXT NOT NULL CHECK(type IN ('income', 'expense')),
+                description TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         ''')
+        try:
+            cursor.execute('ALTER TABLE categories ADD COLUMN description TEXT')
+        except sqlite3.OperationalError:
+            pass
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS bills (

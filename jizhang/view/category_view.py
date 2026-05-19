@@ -33,6 +33,21 @@ class CategoryView:
         self.tree_frame = ctk.CTkFrame(self.frame)
         self.tree_frame.pack(fill=ctk.BOTH, expand=True)
 
+        self.header_row = ctk.CTkFrame(self.tree_frame, fg_color="#3498db")
+        self.header_row.pack(fill=ctk.X)
+
+        name_header = ctk.CTkLabel(self.header_row, text="分类名称", width=200, anchor=ctk.W, 
+                                   text_color="white", font=ctk.CTkFont(weight="bold"))
+        name_header.pack(side=ctk.LEFT, padx=10)
+
+        desc_header = ctk.CTkLabel(self.header_row, text="分类说明", width=300, anchor=ctk.W, 
+                                   text_color="white", font=ctk.CTkFont(weight="bold"))
+        desc_header.pack(side=ctk.LEFT, padx=10)
+
+        action_header = ctk.CTkLabel(self.header_row, text="操作", width=150, anchor=ctk.CENTER, 
+                                     text_color="white", font=ctk.CTkFont(weight="bold"))
+        action_header.pack(side=ctk.RIGHT, padx=10)
+
         self.tree = ctk.CTkScrollableFrame(self.tree_frame)
         self.tree.pack(fill=ctk.BOTH, expand=True)
 
@@ -68,12 +83,16 @@ class CategoryView:
         self.categories = categories
         
         for cat in categories:
-            cat_id, name, type_ = cat
+            cat_id, name, type_, description = cat
             row_frame = ctk.CTkFrame(self.tree)
             row_frame.pack(fill=ctk.X, pady=2)
 
             name_label = ctk.CTkLabel(row_frame, text=name, width=200, anchor=ctk.W)
             name_label.pack(side=ctk.LEFT, padx=10)
+
+            desc_label = ctk.CTkLabel(row_frame, text=description[:20] + "..." if description and len(description) > 20 else description or "", 
+                                      width=300, anchor=ctk.W)
+            desc_label.pack(side=ctk.LEFT, padx=10)
 
             edit_button = ctk.CTkButton(row_frame, text="编辑", width=60, height=25,
                                         fg_color="#f39c12", hover_color="#d68910",
@@ -89,10 +108,10 @@ class CategoryView:
         color = "#e74c3c" if is_error else "#27ae60"
         self.message_label.configure(text=message, text_color=color)
 
-    def show_add_dialog(self, callback, existing_name="", category_id=None):
+    def show_add_dialog(self, callback, existing_name="", category_id=None, existing_description=""):
         dialog = ctk.CTkToplevel(self.parent)
         dialog.title("新增分类" if not category_id else "编辑分类")
-        dialog.geometry("300x200")
+        dialog.geometry("400x280")
         dialog.resizable(False, False)
         dialog.transient(self.parent)
         dialog.grab_set()
@@ -100,15 +119,24 @@ class CategoryView:
         name_label = ctk.CTkLabel(dialog, text="分类名称")
         name_label.pack(pady=(20, 5))
         
-        name_entry = ctk.CTkEntry(dialog, width=240)
+        name_entry = ctk.CTkEntry(dialog, width=340)
         name_entry.pack(pady=5)
         if existing_name:
             name_entry.insert(0, existing_name)
 
+        desc_label = ctk.CTkLabel(dialog, text="分类说明")
+        desc_label.pack(pady=(10, 5))
+        
+        desc_entry = ctk.CTkEntry(dialog, width=340, placeholder_text="请输入分类说明（可选）")
+        desc_entry.pack(pady=5)
+        if existing_description:
+            desc_entry.insert(0, existing_description)
+
         def on_ok():
             name = name_entry.get().strip()
+            description = desc_entry.get().strip()
             if name:
-                callback(name, category_id)
+                callback(name, category_id, description)
                 dialog.destroy()
 
         ok_button = ctk.CTkButton(dialog, text="确定", width=100, command=on_ok)

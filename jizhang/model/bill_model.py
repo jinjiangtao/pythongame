@@ -184,3 +184,61 @@ class BillModel:
             summary[row[0]] = row[1]
         
         return summary
+
+    def get_total_summary(self, user_id):
+        query = "SELECT type, SUM(amount) FROM bills WHERE user_id = ? GROUP BY type"
+        result = self.db.query(query, [user_id])
+        summary = {"income": 0, "expense": 0}
+        for row in result:
+            summary[row[0]] = row[1]
+        return summary
+
+    def get_monthly_statistics(self, user_id, year=None):
+        if year is None:
+            year = datetime.now().year
+        
+        query = """
+            SELECT strftime('%m', date) as month, 
+                   SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                   SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+            FROM bills 
+            WHERE user_id = ? AND strftime('%Y', date) = ?
+            GROUP BY month
+            ORDER BY month
+        """
+        result = self.db.query(query, (user_id, str(year)))
+        monthly_data = []
+        for row in result:
+            monthly_data.append((int(row[0]), row[1], row[2]))
+        return monthly_data
+
+    def get_yearly_statistics(self, user_id):
+        query = """
+            SELECT strftime('%Y', date) as year, 
+                   SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+                   SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expense
+            FROM bills 
+            WHERE user_id = ?
+            GROUP BY year
+            ORDER BY year DESC
+        """
+        result = self.db.query(query, [user_id])
+        yearly_data = []
+        for row in result:
+            yearly_data.append((int(row[0]), row[1], row[2]))
+        return yearly_data
+
+    def get_expense_category_statistics(self, user_id):
+        query = """
+            SELECT c.name as category_name, SUM(b.amount) as total_amount
+            FROM bills b
+            JOIN categories c ON b.category_id = c.id
+            WHERE b.user_id = ? AND b.type = 'expense'
+            GROUP BY c.id, c.name
+            ORDER BY total_amount DESC
+        """
+        result = self.db.query(query, [user_id])
+        category_data = []
+        for row in result:
+            category_data.append((row[0], row[1]))
+        return category_data

@@ -15,6 +15,7 @@ class BillController:
         self.view.set_add_command(self.handle_add)
         self.view.set_export_command(self.handle_export)
         self.view.set_search_command(self.handle_search)
+        self.view.set_statistics_command(self.handle_statistics)
         self.view.set_prev_page_command(self.handle_prev_page)
         self.view.set_next_page_command(self.handle_next_page)
         self.view.set_edit_callback(self.handle_edit)
@@ -183,3 +184,19 @@ class BillController:
             self.view.show_message(f"导出成功！文件已保存到桌面：{filename}")
         except Exception as e:
             self.view.show_message(f"导出失败：{str(e)}", is_error=True)
+
+    def handle_statistics(self):
+        summary = self.bill_model.get_total_summary(self.user["id"])
+        monthly_data = self.bill_model.get_monthly_statistics(self.user["id"])
+        yearly_data = self.bill_model.get_yearly_statistics(self.user["id"])
+        category_data = self.bill_model.get_expense_category_statistics(self.user["id"])
+
+        statistics_data = {
+            'total_income': summary.get('income', 0),
+            'total_expense': summary.get('expense', 0),
+            'monthly_data': monthly_data,
+            'yearly_data': yearly_data,
+            'category_data': category_data
+        }
+
+        self.view.show_statistics_dialog(statistics_data)

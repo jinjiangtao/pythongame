@@ -5,7 +5,7 @@ class CategoryModel:
     def __init__(self):
         self.db = Database()
 
-    def add_category(self, user_id, name, type_):
+    def add_category(self, user_id, name, type_, description=None):
         if not name:
             return False, "分类名称不能为空"
         
@@ -20,12 +20,12 @@ class CategoryModel:
             return False, "该分类已存在"
 
         self.db.execute(
-            "INSERT INTO categories (user_id, name, type) VALUES (?, ?, ?)",
-            (user_id, name, type_)
+            "INSERT INTO categories (user_id, name, type, description) VALUES (?, ?, ?, ?)",
+            (user_id, name, type_, description)
         )
         return True, "添加成功"
 
-    def update_category(self, category_id, user_id, name):
+    def update_category(self, category_id, user_id, name, description=None):
         if not name:
             return False, "分类名称不能为空"
 
@@ -44,8 +44,8 @@ class CategoryModel:
             return False, "该分类名称已存在"
 
         self.db.execute(
-            "UPDATE categories SET name = ? WHERE id = ? AND user_id = ?",
-            (name, category_id, user_id)
+            "UPDATE categories SET name = ?, description = ? WHERE id = ? AND user_id = ?",
+            (name, description, category_id, user_id)
         )
         return True, "更新成功"
 
@@ -64,7 +64,7 @@ class CategoryModel:
         return True, "删除成功"
 
     def get_categories(self, user_id, type_=None, keyword=None):
-        query = "SELECT id, name, type FROM categories WHERE user_id = ?"
+        query = "SELECT id, name, type, description FROM categories WHERE user_id = ?"
         params = [user_id]
 
         if type_:
@@ -81,6 +81,6 @@ class CategoryModel:
 
     def get_category_by_id(self, category_id, user_id):
         return self.db.query_one(
-            "SELECT id, name, type FROM categories WHERE id = ? AND user_id = ?",
+            "SELECT id, name, type, description FROM categories WHERE id = ? AND user_id = ?",
             (category_id, user_id)
         )
