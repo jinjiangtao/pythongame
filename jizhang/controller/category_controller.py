@@ -8,13 +8,15 @@ class CategoryController:
         self.category_model = CategoryModel()
         self.view.set_add_command(self.handle_add)
         self.view.set_type_change_command(self.load_categories)
+        self.view.set_search_command(self.load_categories)
         self.view.set_edit_callback(self.handle_edit)
         self.view.set_delete_callback(self.handle_delete)
         self.load_categories()
 
     def load_categories(self):
         type_ = self.view.get_selected_type()
-        categories = self.category_model.get_categories(self.user["id"], type_)
+        keyword = self.view.get_search_keyword()
+        categories = self.category_model.get_categories(self.user["id"], type_, keyword)
         self.view.display_categories(categories)
 
     def handle_add(self):

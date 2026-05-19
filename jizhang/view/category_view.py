@@ -23,6 +23,13 @@ class CategoryView:
                                                variable=self.type_var, value="income")
         self.income_radio.pack(side=ctk.LEFT, padx=10)
 
+        self.search_entry = ctk.CTkEntry(self.header_frame, placeholder_text="搜索分类名称", width=150)
+        self.search_entry.pack(side=ctk.RIGHT, padx=10)
+        
+        self.search_button = ctk.CTkButton(self.header_frame, text="搜索", width=60, height=25,
+                                           fg_color="#95a5a6", hover_color="#7f8c8d")
+        self.search_button.pack(side=ctk.RIGHT, padx=5)
+
         self.tree_frame = ctk.CTkFrame(self.frame)
         self.tree_frame.pack(fill=ctk.BOTH, expand=True)
 
@@ -39,8 +46,14 @@ class CategoryView:
     def get_selected_type(self):
         return self.type_var.get()
 
+    def get_search_keyword(self):
+        return self.search_entry.get().strip()
+
     def set_add_command(self, command):
         self.add_button.configure(command=command)
+
+    def set_search_command(self, command):
+        self.search_button.configure(command=command)
 
     def set_type_change_command(self, command):
         self.expense_radio.configure(command=command)

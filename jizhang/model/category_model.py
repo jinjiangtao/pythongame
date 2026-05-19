@@ -63,17 +63,21 @@ class CategoryModel:
         )
         return True, "删除成功"
 
-    def get_categories(self, user_id, type_=None):
+    def get_categories(self, user_id, type_=None, keyword=None):
+        query = "SELECT id, name, type FROM categories WHERE user_id = ?"
+        params = [user_id]
+
         if type_:
-            return self.db.query(
-                "SELECT id, name, type FROM categories WHERE user_id = ? AND type = ? ORDER BY type, name",
-                (user_id, type_)
-            )
-        else:
-            return self.db.query(
-                "SELECT id, name, type FROM categories WHERE user_id = ? ORDER BY type, name",
-                (user_id,)
-            )
+            query += " AND type = ?"
+            params.append(type_)
+        
+        if keyword:
+            query += " AND name LIKE ?"
+            params.append(f"%{keyword}%")
+        
+        query += " ORDER BY type, name"
+        
+        return self.db.query(query, params)
 
     def get_category_by_id(self, category_id, user_id):
         return self.db.query_one(

@@ -14,7 +14,11 @@ class BillView:
 
         self.add_button = ctk.CTkButton(self.header_frame, text="新增账单", width=120, height=35,
                                         fg_color=ACCENT_COLOR, hover_color="#2980b9")
-        self.add_button.pack(side=ctk.RIGHT, padx=10)
+        self.add_button.pack(side=ctk.RIGHT, padx=5)
+        
+        self.export_button = ctk.CTkButton(self.header_frame, text="导出Excel", width=100, height=35,
+                                          fg_color="#27ae60", hover_color="#1e8449")
+        self.export_button.pack(side=ctk.RIGHT, padx=10)
 
         self.filter_container = ctk.CTkFrame(self.header_frame)
         self.filter_container.pack(side=ctk.LEFT, fill=ctk.X, expand=True, padx=10)
@@ -79,6 +83,9 @@ class BillView:
 
     def set_add_command(self, command):
         self.add_button.configure(command=command)
+
+    def set_export_command(self, command):
+        self.export_button.configure(command=command)
 
     def set_search_command(self, command):
         self.search_button.configure(command=command)
