@@ -83,7 +83,11 @@ class CategoryView:
         self.categories = categories
         
         for cat in categories:
-            cat_id, name, type_, description = cat
+            cat_id = cat[0]
+            name = cat[1] if len(cat) > 1 else ""
+            type_ = cat[2] if len(cat) > 2 else ""
+            description = cat[3] if len(cat) > 3 else ""
+            
             row_frame = ctk.CTkFrame(self.tree)
             row_frame.pack(fill=ctk.X, pady=2)
 
@@ -149,11 +153,7 @@ class CategoryView:
 
     def on_edit(self, category_id):
         if self.edit_callback:
-            for cat in self.categories:
-                if cat[0] == category_id:
-                    description = cat[3] if len(cat) > 3 else ""
-                    self.show_add_dialog(self.edit_callback, cat[1], category_id, description)
-                    break
+            self.edit_callback(category_id)
 
     def on_delete(self, category_id):
         if self.delete_callback:
