@@ -100,10 +100,9 @@ class BillController:
         headers = ["类型", "日期", "分类", "金额", "付款方式", "备注", "创建时间"]
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col, value=header)
-            cell.font = Font(bold=True)
+            cell.font = Font(bold=True, color="FFFFFF")
             cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
             cell.alignment = Alignment(horizontal="center")
-            cell.font.color.rgb = "FFFFFF"
 
         for row, bill in enumerate(bills, 2):
             bill_id, type_, category_id, category_name, amount, remark, payment_method, date, created_at = bill
