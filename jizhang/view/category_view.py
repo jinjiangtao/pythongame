@@ -151,7 +151,8 @@ class CategoryView:
         if self.edit_callback:
             for cat in self.categories:
                 if cat[0] == category_id:
-                    self.show_add_dialog(self.edit_callback, cat[1], category_id)
+                    description = cat[3] if len(cat) > 3 else ""
+                    self.show_add_dialog(self.edit_callback, cat[1], category_id, description)
                     break
 
     def on_delete(self, category_id):

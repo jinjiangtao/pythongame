@@ -6,6 +6,12 @@ matplotlib.use('TkAgg')
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+
+font_path = 'C:/Windows/Fonts/msyh.ttc'
+font_prop = fm.FontProperties(fname=font_path, size=12)
+matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 
 class BillView:
