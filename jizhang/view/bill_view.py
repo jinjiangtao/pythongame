@@ -42,12 +42,12 @@ class BillView:
         self.end_date_entry = ctk.CTkEntry(self.filter_container, width=100)
         self.end_date_entry.pack(side=ctk.LEFT, padx=5)
 
-        self.search_button = ctk.CTkButton(self.filter_container, text="查询", width=60, height=25,
-                                           fg_color="#95a5a6", hover_color="#7f8c8d")
-        self.search_button.pack(side=ctk.LEFT, padx=10)
-
         self.button_container = ctk.CTkFrame(self.header_frame)
         self.button_container.pack(fill=ctk.X, pady=5)
+
+        self.search_button = ctk.CTkButton(self.button_container, text="查询", width=80, height=25,
+                                           fg_color="#95a5a6", hover_color="#7f8c8d")
+        self.search_button.pack(side=ctk.LEFT, padx=10)
 
         self.add_button = ctk.CTkButton(self.button_container, text="新增账单", width=120, height=35,
                                         fg_color=ACCENT_COLOR, hover_color="#2980b9")
