@@ -1,6 +1,11 @@
 import customtkinter as ctk
 from datetime import datetime
 from config import ACCENT_COLOR, PAYMENT_METHODS
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
 
 
 class BillView:
@@ -442,53 +447,44 @@ class BillView:
 
         category_frame = ctk.CTkFrame(notebook.tab("支出分类占比"))
         category_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
-        category_scroll = ctk.CTkScrollableFrame(category_frame)
-        category_scroll.pack(fill=ctk.BOTH, expand=True)
 
         category_data = statistics_data.get('category_data', [])
-        total_expense_for_categories = sum(item[1] for item in category_data)
-        colors = ["#e74c3c", "#f39c12", "#9b59b6", "#3498db", "#1abc9c", "#2ecc71", "#e91e63", "#00bcd4"]
-        
-        for i, (category_name, amount) in enumerate(category_data):
-            percentage = (amount / total_expense_for_categories * 100) if total_expense_for_categories > 0 else 0
-            row_frame = ctk.CTkFrame(category_scroll)
-            row_frame.pack(fill=ctk.X, pady=5)
+        if category_data:
+            labels = [item[0] for item in category_data]
+            sizes = [item[1] for item in category_data]
+            colors = ["#e74c3c", "#f39c12", "#9b59b6", "#3498db", "#1abc9c", "#2ecc71", "#e91e63", "#00bcd4", "#ff5722", "#607d8b"]
             
-            cat_label = ctk.CTkLabel(row_frame, text=category_name, width=120)
-            cat_label.pack(side=ctk.LEFT, padx=10)
+            fig = Figure(figsize=(8, 6), dpi=100)
+            ax = fig.add_subplot(111)
+            wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                                              shadow=True, startangle=90)
+            ax.axis('equal')
+            plt.setp(texts, fontsize=10)
+            plt.setp(autotexts, fontsize=9, weight='bold')
             
-            bar_frame = ctk.CTkFrame(row_frame, width=300, height=20)
-            bar_frame.pack(side=ctk.LEFT, padx=10)
-            bar_fill = ctk.CTkFrame(bar_frame, width=int(percentage * 3), height=20, fg_color=colors[i % len(colors)])
-            bar_fill.pack(side=ctk.LEFT)
-            
-            amount_label = ctk.CTkLabel(row_frame, text=f"¥{amount:.2f}", width=100)
-            amount_label.pack(side=ctk.LEFT, padx=10)
-            
-            percent_label = ctk.CTkLabel(row_frame, text=f"{percentage:.1f}%", width=60)
-            percent_label.pack(side=ctk.LEFT, padx=10)
+            canvas = FigureCanvasTkAgg(fig, master=category_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)
 
         trend_frame = ctk.CTkFrame(notebook.tab("收支趋势"))
         trend_frame.pack(fill=ctk.BOTH, expand=True, padx=20, pady=20)
-        trend_scroll = ctk.CTkScrollableFrame(trend_frame)
-        trend_scroll.pack(fill=ctk.BOTH, expand=True)
 
         monthly_trend = statistics_data.get('monthly_data', [])
-        max_amount = max(max(item[1], item[2]) for item in monthly_trend) if monthly_trend else 1
-        
-        for month, income, expense in monthly_trend:
-            row_frame = ctk.CTkFrame(trend_scroll)
-            row_frame.pack(fill=ctk.X, pady=10)
+        if monthly_trend:
+            months = [f"{item[0]}月" for item in monthly_trend]
+            income_data = [item[1] for item in monthly_trend]
+            expense_data = [item[2] for item in monthly_trend]
             
-            month_label = ctk.CTkLabel(row_frame, text=f"{month}月", width=60)
-            month_label.pack(side=ctk.LEFT, padx=10)
+            fig = Figure(figsize=(8, 5), dpi=100)
+            ax = fig.add_subplot(111)
+            ax.plot(months, income_data, marker='o', label='收入', color='#27ae60', linewidth=2)
+            ax.plot(months, expense_data, marker='s', label='支出', color='#e74c3c', linewidth=2)
+            ax.set_xlabel('月份')
+            ax.set_ylabel('金额 (¥)')
+            ax.set_title('月度收支趋势')
+            ax.legend()
+            ax.grid(True, linestyle='--', alpha=0.7)
             
-            income_bar_frame = ctk.CTkFrame(row_frame, width=300, height=25, bg_color="#ecf0f1")
-            income_bar_frame.pack(side=ctk.LEFT, padx=10)
-            income_bar = ctk.CTkFrame(income_bar_frame, width=int(income / max_amount * 300), height=25, fg_color="#27ae60")
-            income_bar.pack(side=ctk.LEFT)
-            
-            expense_bar_frame = ctk.CTkFrame(row_frame, width=300, height=25, bg_color="#ecf0f1")
-            expense_bar_frame.pack(side=ctk.LEFT, padx=10)
-            expense_bar = ctk.CTkFrame(expense_bar_frame, width=int(expense / max_amount * 300), height=25, fg_color="#e74c3c")
-            expense_bar.pack(side=ctk.LEFT)
+            canvas = FigureCanvasTkAgg(fig, master=trend_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill=ctk.BOTH, expand=True)

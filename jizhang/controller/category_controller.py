@@ -35,7 +35,7 @@ class CategoryController:
         else:
             self.view.show_message(message, is_error=True)
 
-    def handle_edit(self, category_id):
+    def handle_edit(self, category_id, *args):
         category = self.category_model.get_category_by_id(category_id, self.user["id"])
         if category:
             self.view.show_add_dialog(self.save_category, category[1], category_id, category[3])
