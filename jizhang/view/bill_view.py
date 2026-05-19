@@ -12,12 +12,8 @@ class BillView:
         self.header_frame = ctk.CTkFrame(self.frame)
         self.header_frame.pack(fill=ctk.X, pady=10)
 
-        self.add_button = ctk.CTkButton(self.header_frame, text="新增账单", width=120, height=35,
-                                        fg_color=ACCENT_COLOR, hover_color="#2980b9")
-        self.add_button.pack(side=ctk.RIGHT)
-
         self.filter_frame = ctk.CTkFrame(self.header_frame)
-        self.filter_frame.pack(side=ctk.LEFT)
+        self.filter_frame.pack(side=ctk.LEFT, padx=10)
 
         self.type_var = ctk.StringVar(value="all")
         self.all_radio = ctk.CTkRadioButton(self.filter_frame, text="全部",
@@ -46,6 +42,10 @@ class BillView:
         self.search_button = ctk.CTkButton(self.date_frame, text="查询", width=60, height=25,
                                            fg_color="#95a5a6", hover_color="#7f8c8d")
         self.search_button.grid(row=0, column=4, padx=10)
+
+        self.add_button = ctk.CTkButton(self.header_frame, text="新增账单", width=120, height=35,
+                                        fg_color=ACCENT_COLOR, hover_color="#2980b9")
+        self.add_button.pack(side=ctk.RIGHT, padx=10)
 
         self.summary_frame = ctk.CTkFrame(self.frame)
         self.summary_frame.pack(fill=ctk.X, pady=10)
@@ -151,7 +151,7 @@ class BillView:
     def show_add_dialog(self, categories, callback, existing_bill=None):
         dialog = ctk.CTkToplevel(self.parent)
         dialog.title("新增账单" if not existing_bill else "编辑账单")
-        dialog.geometry("400x450")
+        dialog.geometry("420x500")
         dialog.resizable(False, False)
         dialog.transient(self.parent)
         dialog.grab_set()
@@ -160,39 +160,42 @@ class BillView:
         type_frame = ctk.CTkFrame(dialog)
         type_frame.pack(fill=ctk.X, pady=10, padx=20)
         expense_radio = ctk.CTkRadioButton(type_frame, text="支出", variable=type_var, value="expense")
-        expense_radio.pack(side=ctk.LEFT, padx=20)
+        expense_radio.pack(side=ctk.LEFT, padx=30)
         income_radio = ctk.CTkRadioButton(type_frame, text="收入", variable=type_var, value="income")
-        income_radio.pack(side=ctk.LEFT, padx=20)
+        income_radio.pack(side=ctk.LEFT, padx=30)
 
         category_label = ctk.CTkLabel(dialog, text="分类")
         category_label.pack(pady=(10, 5))
         category_var = ctk.StringVar()
-        category_combobox = ctk.CTkComboBox(dialog, variable=category_var, width=320, 
+        category_combobox = ctk.CTkComboBox(dialog, variable=category_var, width=340, 
                                             values=[cat[1] for cat in categories])
         category_combobox.pack(pady=5)
 
         amount_label = ctk.CTkLabel(dialog, text="金额")
         amount_label.pack(pady=(10, 5))
-        amount_entry = ctk.CTkEntry(dialog, width=320)
+        amount_entry = ctk.CTkEntry(dialog, width=340)
         amount_entry.pack(pady=5)
 
         payment_label = ctk.CTkLabel(dialog, text="付款方式")
         payment_label.pack(pady=(10, 5))
         payment_var = ctk.StringVar()
-        payment_combobox = ctk.CTkComboBox(dialog, variable=payment_var, width=320,
+        payment_combobox = ctk.CTkComboBox(dialog, variable=payment_var, width=340,
                                            values=PAYMENT_METHODS)
         payment_combobox.pack(pady=5)
 
         date_label = ctk.CTkLabel(dialog, text="日期")
         date_label.pack(pady=(10, 5))
-        date_entry = ctk.CTkEntry(dialog, width=320)
+        date_entry = ctk.CTkEntry(dialog, width=340)
         date_entry.pack(pady=5)
         date_entry.insert(0, datetime.now().strftime("%Y-%m-%d"))
 
         remark_label = ctk.CTkLabel(dialog, text="备注")
         remark_label.pack(pady=(10, 5))
-        remark_entry = ctk.CTkEntry(dialog, width=320)
+        remark_entry = ctk.CTkEntry(dialog, width=340)
         remark_entry.pack(pady=5)
+
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(fill=ctk.X, pady=15)
 
         if existing_bill:
             bill_id, type_, category_id, category_name, amount, remark, payment_method, date = existing_bill
@@ -224,13 +227,15 @@ class BillView:
                      existing_bill[0] if existing_bill else None)
             dialog.destroy()
 
-        ok_button = ctk.CTkButton(dialog, text="确定", width=120, command=on_ok)
-        ok_button.pack(pady=20)
+        ok_button = ctk.CTkButton(button_frame, text="确定", width=120, height=40,
+                                  fg_color=ACCENT_COLOR, hover_color="#2980b9",
+                                  command=on_ok)
+        ok_button.pack(side=ctk.LEFT, padx=40)
 
-        cancel_button = ctk.CTkButton(dialog, text="取消", width=120,
-                                      fg_color="transparent", border_color="gray",
+        cancel_button = ctk.CTkButton(button_frame, text="取消", width=120, height=40,
+                                      fg_color="#95a5a6", hover_color="#7f8c8d",
                                       command=dialog.destroy)
-        cancel_button.pack(pady=5)
+        cancel_button.pack(side=ctk.RIGHT, padx=40)
 
     def on_edit(self, bill_id):
         if self.edit_callback:
