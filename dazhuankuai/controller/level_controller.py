@@ -1,3 +1,4 @@
+import random
 from model.brick_model import BrickGenerator
 from model.ball_model import BallModel
 from model.paddle_model import PaddleModel
@@ -12,8 +13,8 @@ class LevelController:
 
     def start_level(self, level):
         self.game_model.bricks = self.brick_generator.generate_level(level)
-        self.game_model.paddle = PaddleModel(screen_width // 2, screen_height - 50)
-        self.game_model.balls = [BallModel(screen_width // 2, screen_height - 70)]
+        self.game_model.paddle = PaddleModel(self.screen_width // 2, self.screen_height - 50)
+        self.game_model.balls = [BallModel(self.screen_width // 2, self.screen_height - 70)]
         self.game_model.props = []
         self.game_model.explosions = []
         self.countdown = 3
