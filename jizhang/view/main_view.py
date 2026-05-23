@@ -29,6 +29,15 @@ class MainView:
                                              border_width=2, text_color=ACCENT_COLOR)
         self.category_button.pack(pady=5)
 
+        self.log_button = ctk.CTkButton(self.sidebar, text="操作日志", width=140, height=40,
+                                        fg_color="transparent", border_color=ACCENT_COLOR,
+                                        border_width=2, text_color=ACCENT_COLOR)
+        self.log_button.pack(pady=5)
+
+        self.theme_button = ctk.CTkButton(self.sidebar, text="切换主题", width=140, height=40,
+                                          fg_color="#95a5a6", hover_color="#7f8c8d")
+        self.theme_button.pack(pady=5)
+
         self.logout_button = ctk.CTkButton(self.sidebar, text="退出登录", width=140, height=40,
                                            fg_color="#e74c3c", hover_color="#c0392b")
         self.logout_button.pack(pady=(10, 20), side=ctk.BOTTOM)
@@ -41,6 +50,12 @@ class MainView:
 
     def set_category_command(self, command):
         self.category_button.configure(command=command)
+
+    def set_log_command(self, command):
+        self.log_button.configure(command=command)
+
+    def set_theme_command(self, command):
+        self.theme_button.configure(command=command)
 
     def set_logout_command(self, command):
         self.logout_button.configure(command=command)
@@ -58,6 +73,19 @@ class MainView:
     def highlight_category_button(self):
         self.category_button.configure(fg_color=ACCENT_COLOR, hover_color="#2980b9", 
                                        border_width=0, text_color="white")
-        self.bill_button.configure(fg_color="white", hover_color="#e0e0e0", 
+        self.bill_button.configure(fg_color="transparent", hover_color="#e0e0e0", 
                                    border_color=ACCENT_COLOR, border_width=2,
                                    text_color=ACCENT_COLOR)
+        self.log_button.configure(fg_color="transparent", hover_color="#e0e0e0", 
+                                  border_color=ACCENT_COLOR, border_width=2,
+                                  text_color=ACCENT_COLOR)
+
+    def highlight_log_button(self):
+        self.log_button.configure(fg_color=ACCENT_COLOR, hover_color="#2980b9", 
+                                  border_width=0, text_color="white")
+        self.bill_button.configure(fg_color="transparent", hover_color="#e0e0e0", 
+                                   border_color=ACCENT_COLOR, border_width=2,
+                                   text_color=ACCENT_COLOR)
+        self.category_button.configure(fg_color="transparent", hover_color="#e0e0e0", 
+                                       border_color=ACCENT_COLOR, border_width=2,
+                                       text_color=ACCENT_COLOR)

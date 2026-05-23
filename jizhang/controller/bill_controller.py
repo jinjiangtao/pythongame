@@ -1,5 +1,6 @@
 from model.bill_model import BillModel
 from model.category_model import CategoryModel
+from model.log_model import LogModel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 from datetime import datetime
@@ -12,6 +13,7 @@ class BillController:
         self.user = user
         self.bill_model = BillModel()
         self.category_model = CategoryModel()
+        self.log_model = LogModel()
         self.view.set_add_command(self.handle_add)
         self.view.set_export_command(self.handle_export)
         self.view.set_search_command(self.handle_search)
@@ -111,10 +113,16 @@ class BillController:
             success, message = self.bill_model.update_bill(
                 bill_id, self.user["id"], type_, category_id, amount, remark, payment_method, date
             )
+            if success:
+                self.log_model.add_log(self.user["id"], self.user["username"], "edit", 
+                                      f"编辑账单: {amount}元, {date}")
         else:
             success, message = self.bill_model.add_bill(
                 self.user["id"], type_, category_id, amount, remark, payment_method, date
             )
+            if success:
+                self.log_model.add_log(self.user["id"], self.user["username"], "add", 
+                                      f"新增账单: {amount}元, {date}")
         
         if success:
             self.view.show_message(message)
@@ -132,6 +140,8 @@ class BillController:
         success, message = self.bill_model.delete_bill(bill_id, self.user["id"])
         
         if success:
+            self.log_model.add_log(self.user["id"], self.user["username"], "delete", 
+                                  f"删除账单: ID={bill_id}")
             self.view.show_message(message)
             self.load_bills()
         else:
@@ -181,6 +191,8 @@ class BillController:
 
         try:
             wb.save(file_path)
+            self.log_model.add_log(self.user["id"], self.user["username"], "export", 
+                                  f"导出账单数据到Excel文件")
             self.view.show_message(f"导出成功！文件已保存到桌面：{filename}")
         except Exception as e:
             self.view.show_message(f"导出失败：{str(e)}", is_error=True)
