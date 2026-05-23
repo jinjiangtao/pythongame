@@ -1,10 +1,11 @@
 import pygame
+from view.font_utils import get_chinese_font
 
 class GameView:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)
+        self.font = get_chinese_font(36)
+        self.small_font = get_chinese_font(24)
         self.white = (255, 255, 255)
         self.black = (0, 0, 0)
         self.grey = (100, 100, 100)
