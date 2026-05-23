@@ -1,10 +1,12 @@
 from model.user_model import UserModel
+from model.operation_log_model import OperationLogModel
 
 
 class UserController:
     def __init__(self, view):
         self.view = view
         self.user_model = UserModel()
+        self.log_model = OperationLogModel()
         self.view.set_login_command(self.handle_login)
         self.view.set_register_command(self.handle_register)
 
@@ -15,6 +17,7 @@ class UserController:
         user, message = self.user_model.login(username, password)
         
         if user:
+            self.log_model.add_log(user["id"], "LOGIN", description=f"用户 {username} 登录成功")
             self.view.show_error("")
             if self.on_login_success:
                 self.on_login_success(user)

@@ -29,6 +29,22 @@ class MainView:
                                              border_width=2, text_color=ACCENT_COLOR)
         self.category_button.pack(pady=5)
 
+        self.log_button = ctk.CTkButton(self.sidebar, text="操作日志", width=140, height=40,
+                                        fg_color="transparent", border_color="#9b59b6",
+                                        border_width=2, text_color="#9b59b6")
+        self.log_button.pack(pady=5)
+
+        self.theme_frame = ctk.CTkFrame(self.sidebar)
+        self.theme_frame.pack(pady=10, side=ctk.BOTTOM, fill=ctk.X, padx=10)
+
+        self.theme_label = ctk.CTkLabel(self.theme_frame, text="主题切换", font=ctk.CTkFont(size=12))
+        self.theme_label.pack(pady=5)
+
+        self.theme_var = ctk.StringVar(value="light")
+        self.theme_switch = ctk.CTkSegmentedButton(self.theme_frame, variable=self.theme_var, 
+                                                    values=["浅色", "深色"])
+        self.theme_switch.pack(pady=5, padx=10)
+
         self.logout_button = ctk.CTkButton(self.sidebar, text="退出登录", width=140, height=40,
                                            fg_color="#e74c3c", hover_color="#c0392b")
         self.logout_button.pack(pady=(10, 20), side=ctk.BOTTOM)
@@ -42,8 +58,14 @@ class MainView:
     def set_category_command(self, command):
         self.category_button.configure(command=command)
 
+    def set_log_command(self, command):
+        self.log_button.configure(command=command)
+
     def set_logout_command(self, command):
         self.logout_button.configure(command=command)
+
+    def set_theme_change_command(self, command):
+        self.theme_switch.configure(command=command)
 
     def get_content_frame(self):
         return self.content_frame
@@ -54,6 +76,9 @@ class MainView:
         self.category_button.configure(fg_color="white", hover_color="#e0e0e0", 
                                        border_color=ACCENT_COLOR, border_width=2,
                                        text_color=ACCENT_COLOR)
+        self.log_button.configure(fg_color="white", hover_color="#e0e0e0",
+                                  border_color="#9b59b6", border_width=2,
+                                  text_color="#9b59b6")
 
     def highlight_category_button(self):
         self.category_button.configure(fg_color=ACCENT_COLOR, hover_color="#2980b9", 
@@ -61,3 +86,26 @@ class MainView:
         self.bill_button.configure(fg_color="white", hover_color="#e0e0e0", 
                                    border_color=ACCENT_COLOR, border_width=2,
                                    text_color=ACCENT_COLOR)
+        self.log_button.configure(fg_color="white", hover_color="#e0e0e0",
+                                  border_color="#9b59b6", border_width=2,
+                                  text_color="#9b59b6")
+
+    def highlight_log_button(self):
+        self.log_button.configure(fg_color="#9b59b6", hover_color="#8e44ad",
+                                  border_width=0, text_color="white")
+        self.bill_button.configure(fg_color="white", hover_color="#e0e0e0",
+                                   border_color=ACCENT_COLOR, border_width=2,
+                                   text_color=ACCENT_COLOR)
+        self.category_button.configure(fg_color="white", hover_color="#e0e0e0",
+                                       border_color=ACCENT_COLOR, border_width=2,
+                                       text_color=ACCENT_COLOR)
+
+    def get_theme(self):
+        theme_text = self.theme_var.get()
+        return "light" if theme_text == "浅色" else "dark"
+
+    def set_theme(self, theme):
+        if theme == "light":
+            self.theme_var.set("浅色")
+        else:
+            self.theme_var.set("深色")

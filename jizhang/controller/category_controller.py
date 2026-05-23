@@ -1,4 +1,5 @@
 from model.category_model import CategoryModel
+from model.operation_log_model import OperationLogModel
 
 
 class CategoryController:
@@ -6,6 +7,7 @@ class CategoryController:
         self.view = view
         self.user = user
         self.category_model = CategoryModel()
+        self.log_model = OperationLogModel()
         self.view.set_add_command(self.handle_add)
         self.view.set_type_change_command(self.load_categories)
         self.view.set_search_command(self.load_categories)
@@ -25,9 +27,23 @@ class CategoryController:
     def save_category(self, name, category_id=None, description=None):
         if category_id:
             success, message = self.category_model.update_category(category_id, self.user["id"], name, description)
+            if success:
+                self.log_model.add_log(
+                    self.user["id"],
+                    "UPDATE_CATEGORY",
+                    description=f"更新分类",
+                    details=f"分类ID: {category_id}, 名称: {name}"
+                )
         else:
             type_ = self.view.get_selected_type()
             success, message = self.category_model.add_category(self.user["id"], name, type_, description)
+            if success:
+                self.log_model.add_log(
+                    self.user["id"],
+                    "ADD_CATEGORY",
+                    description=f"添加分类",
+                    details=f"分类名称: {name}, 类型: {'收入' if type_ == 'income' else '支出'}"
+                )
         
         if success:
             self.view.show_message(message)
@@ -44,6 +60,12 @@ class CategoryController:
         success, message = self.category_model.delete_category(category_id, self.user["id"])
         
         if success:
+            self.log_model.add_log(
+                self.user["id"],
+                "DELETE_CATEGORY",
+                description=f"删除分类",
+                details=f"分类ID: {category_id}"
+            )
             self.view.show_message(message)
             self.load_categories()
         else:
