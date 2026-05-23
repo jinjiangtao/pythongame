@@ -1,5 +1,4 @@
 from model.category_model import CategoryModel
-from model.log_model import LogModel
 
 
 class CategoryController:
@@ -7,7 +6,6 @@ class CategoryController:
         self.view = view
         self.user = user
         self.category_model = CategoryModel()
-        self.log_model = LogModel()
         self.view.set_add_command(self.handle_add)
         self.view.set_type_change_command(self.load_categories)
         self.view.set_search_command(self.load_categories)
@@ -27,15 +25,9 @@ class CategoryController:
     def save_category(self, name, category_id=None, description=None):
         if category_id:
             success, message = self.category_model.update_category(category_id, self.user["id"], name, description)
-            if success:
-                self.log_model.add_log(self.user["id"], self.user["username"], "edit", 
-                                      f"编辑分类: {name}")
         else:
             type_ = self.view.get_selected_type()
             success, message = self.category_model.add_category(self.user["id"], name, type_, description)
-            if success:
-                self.log_model.add_log(self.user["id"], self.user["username"], "add", 
-                                      f"新增分类: {name}")
         
         if success:
             self.view.show_message(message)
@@ -52,8 +44,6 @@ class CategoryController:
         success, message = self.category_model.delete_category(category_id, self.user["id"])
         
         if success:
-            self.log_model.add_log(self.user["id"], self.user["username"], "delete", 
-                                  f"删除分类: ID={category_id}")
             self.view.show_message(message)
             self.load_categories()
         else:

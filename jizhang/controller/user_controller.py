@@ -1,12 +1,10 @@
 from model.user_model import UserModel
-from model.log_model import LogModel
 
 
 class UserController:
     def __init__(self, view):
         self.view = view
         self.user_model = UserModel()
-        self.log_model = LogModel()
         self.view.set_login_command(self.handle_login)
         self.view.set_register_command(self.handle_register)
 
@@ -18,7 +16,6 @@ class UserController:
         
         if user:
             self.view.show_error("")
-            self.log_model.add_log(user["id"], user["username"], "login", "用户登录成功")
             if self.on_login_success:
                 self.on_login_success(user)
         else:

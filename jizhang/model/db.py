@@ -97,19 +97,6 @@ class Database:
             )
         ''')
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS operation_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                username TEXT NOT NULL,
-                operation_type TEXT NOT NULL,
-                operation_desc TEXT,
-                ip_address TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-            )
-        ''')
-
         self.connection.commit()
 
     def get_last_insert_id(self):
