@@ -5,6 +5,7 @@ from controller.ball_controller import BallController
 from controller.prop_controller import PropController
 from controller.level_controller import LevelController
 from model.prop_model import PropGenerator
+from model.ball_model import BallModel
 
 class GameController:
     def __init__(self, game_model, screen_width, screen_height):
