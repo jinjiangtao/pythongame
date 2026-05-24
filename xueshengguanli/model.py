@@ -42,10 +42,16 @@ class StudentModel:
     
     def delete_student(self, student_id):
         """删除学生"""
-        for i, s in enumerate(self.students):
+        found = False
+        new_students = []
+        for s in self.students:
             if s['id'] == student_id:
-                del self.students[i]
-                return True, "删除成功"
+                found = True
+            else:
+                new_students.append(s)
+        self.students = new_students
+        if found:
+            return True, "删除成功"
         return False, "未找到该学生"
     
     def update_student(self, student_id, new_data):

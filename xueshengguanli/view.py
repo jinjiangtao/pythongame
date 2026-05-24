@@ -301,8 +301,12 @@ class MainView:
     
     def update_table(self, students):
         """更新表格数据"""
+        # 清除所有选择
+        self.tree.selection_remove(self.tree.selection())
+        # 删除所有现有项目
         for item in self.tree.get_children():
             self.tree.delete(item)
+        # 插入新数据
         for student in students:
             self.tree.insert('', tk.END, values=(
                 student['id'], student['name'], student['gender'],
