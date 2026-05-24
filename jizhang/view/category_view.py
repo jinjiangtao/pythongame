@@ -1,7 +1,6 @@
 import customtkinter as ctk
 from config import ACCENT_COLOR
 
-
 class CategoryView:
     def __init__(self, parent):
         self.parent = parent

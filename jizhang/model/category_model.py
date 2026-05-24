@@ -1,6 +1,5 @@
 from model.db import Database
 
-
 class CategoryModel:
     def __init__(self):
         self.db = Database()
