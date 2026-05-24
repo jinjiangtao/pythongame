@@ -34,6 +34,9 @@ class StudentModel:
     
     def add_student(self, student):
         """添加学生"""
+        # 确保ID是字符串类型
+        student = student.copy()
+        student['id'] = str(student['id'])
         for s in self.students:
             if s['id'] == student['id']:
                 return False, "学号已存在"
@@ -42,10 +45,11 @@ class StudentModel:
     
     def delete_student(self, student_id):
         """删除学生"""
+        student_id_str = str(student_id)
         found = False
         new_students = []
         for s in self.students:
-            if s['id'] == student_id:
+            if str(s['id']) == student_id_str:
                 found = True
             else:
                 new_students.append(s)
@@ -56,11 +60,12 @@ class StudentModel:
     
     def update_student(self, student_id, new_data):
         """更新学生信息"""
+        student_id_str = str(student_id)
         for i, s in enumerate(self.students):
-            if s['id'] == student_id:
-                if new_data['id'] != student_id:
+            if str(s['id']) == student_id_str:
+                if str(new_data['id']) != student_id_str:
                     for other in self.students:
-                        if other['id'] == new_data['id'] and other != s:
+                        if str(other['id']) == str(new_data['id']) and other != s:
                             return False, "新学号已存在"
                 self.students[i] = new_data
                 return True, "更新成功"
