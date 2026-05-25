@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class StatusBar:
     def __init__(self, screen):
@@ -9,10 +10,7 @@ class StatusBar:
         self.bg_color = (50, 50, 50)
         self.text_color = (255, 255, 255)
         
-        try:
-            self.font = pygame.font.Font('simhei.ttf', 16)
-        except:
-            self.font = pygame.font.Font(None, 16)
+        self.font = self.get_chinese_font(16)
         
         self.shape_names = {
             'circle': '圆形',
@@ -21,6 +19,32 @@ class StatusBar:
             'diamond': '四边形',
             'star': '星形'
         }
+    
+    def get_chinese_font(self, size):
+        font_paths = [
+            'msyh.ttc',
+            'simsun.ttc',
+            'simhei.ttf',
+            'STSong.ttf',
+            'STHeiti.ttf'
+        ]
+        
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                return pygame.font.Font(font_path, size)
+        
+        font_dirs = [
+            'C:/Windows/Fonts/',
+            'C:/Windows/WinSxS/'
+        ]
+        
+        for font_dir in font_dirs:
+            for font_path in font_paths:
+                full_path = os.path.join(font_dir, font_path)
+                if os.path.exists(full_path):
+                    return pygame.font.Font(full_path, size)
+        
+        return pygame.font.Font(None, size)
     
     def draw(self, current_shape_type, status_message):
         pygame.draw.rect(self.screen, self.bg_color, self.rect)
