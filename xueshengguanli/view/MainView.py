@@ -214,8 +214,6 @@ class MainView:
         
         self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        self.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
     
     def get_input_data(self):
         scores = {}
