@@ -242,25 +242,23 @@ class FarmView:
         self.screen.blit(close_text, (popup_x + popup_width - 35, popup_y + 12))
         
         item_y = popup_y + 60
-        for crop_name, count in model.backpack.items():
+        for crop_id, count in model.backpack.items():
             if count > 0:
-                for crop_id, crop_info in CROPS.items():
-                    if crop_info["name"] == crop_name:
-                        pygame.draw.circle(self.screen, crop_info["color"], (popup_x + 30, item_y + 15), 15)
-                        name_text = self.font.render(crop_name, True, COLORS["text_dark"])
-                        count_text = self.font.render(f"x{count}", True, COLORS["text_dark"])
-                        price_text = self.small_font.render(f"💰{crop_info['sell_price']}", True, COLORS["gold"])
-                        
-                        self.screen.blit(name_text, (popup_x + 60, item_y))
-                        self.screen.blit(count_text, (popup_x + 150, item_y))
-                        self.screen.blit(price_text, (popup_x + 220, item_y))
-                        
-                        sell_button = pygame.draw.rect(self.screen, (100, 200, 100), (popup_x + 300, item_y, 80, 30))
-                        sell_text = self.small_font.render("出售", True, COLORS["text"])
-                        self.screen.blit(sell_text, (popup_x + 325, item_y + 5))
-                        
-                        item_y += 45
-                        break
+                crop_info = CROPS[crop_id]
+                pygame.draw.circle(self.screen, crop_info["color"], (popup_x + 30, item_y + 15), 15)
+                name_text = self.font.render(crop_info["name"], True, COLORS["text_dark"])
+                count_text = self.font.render(f"x{count}", True, COLORS["text_dark"])
+                price_text = self.small_font.render(f"💰{crop_info['sell_price']}", True, COLORS["gold"])
+                
+                self.screen.blit(name_text, (popup_x + 60, item_y))
+                self.screen.blit(count_text, (popup_x + 150, item_y))
+                self.screen.blit(price_text, (popup_x + 220, item_y))
+                
+                sell_button = pygame.draw.rect(self.screen, (100, 200, 100), (popup_x + 300, item_y, 80, 30))
+                sell_text = self.small_font.render("出售", True, COLORS["text"])
+                self.screen.blit(sell_text, (popup_x + 325, item_y + 5))
+                
+                item_y += 45
         
         if item_y == popup_y + 60:
             empty_text = self.font.render("背包是空的", True, COLORS["text_dark"])
@@ -329,6 +327,10 @@ class FarmView:
             pygame.draw.rect(self.screen, (255, 255, 200), (SIDE_PANEL_WIDTH + 20, SCREEN_HEIGHT - BOTTOM_BAR_HEIGHT - 40, 300, 30))
             message_text = self.small_font.render(message, True, COLORS["text_dark"])
             self.screen.blit(message_text, (SIDE_PANEL_WIDTH + 25, SCREEN_HEIGHT - BOTTOM_BAR_HEIGHT - 30))
+        
+        # 绘制悬停提示（在最后，确保它显示在最上层）
+        mouse_pos = pygame.mouse.get_pos()
+        self.draw_hover_tip(model, mouse_pos)
         
         pygame.display.flip()
 
@@ -411,13 +413,13 @@ class FarmView:
             return None
         
         item_y = popup_y + 60
-        for crop_name, count in model.backpack.items():
+        for crop_id, count in model.backpack.items():
             if count > 0:
                 sell_x, sell_y = popup_x + 300, item_y
                 sell_w, sell_h = 80, 30
                 
                 if sell_x <= x <= sell_x + sell_w and sell_y <= y <= sell_y + sell_h:
-                    return crop_name
+                    return crop_id
                 
                 item_y += 45
         

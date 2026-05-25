@@ -82,10 +82,11 @@ class FarmModel:
         
         cell = self.get_cell(row, col)
         if cell:
+            crop_id = cell.crop_type
             crop_info = cell.harvest()
             if crop_info:
                 self.stamina -= HARVEST_COST
-                self.backpack[crop_info["name"]] = self.backpack.get(crop_info["name"], 0) + 1
+                self.backpack[crop_id] = self.backpack.get(crop_id, 0) + 1
                 return crop_info["sell_price"], f"收获成功！获得 {crop_info['name']} x1"
         return 0, "无法收获"
 
@@ -105,14 +106,13 @@ class FarmModel:
             return True, f"已选择 {CROPS[crop_type]['name']}"
         return False, "无效作物"
 
-    def sell_crop(self, crop_name, amount):
-        if self.backpack.get(crop_name, 0) >= amount:
-            for crop_id, crop_info in CROPS.items():
-                if crop_info["name"] == crop_name:
-                    total_value = crop_info["sell_price"] * amount
-                    self.backpack[crop_name] -= amount
-                    self.gold += total_value
-                    return True, f"出售成功！获得 {total_value} 金币"
+    def sell_crop(self, crop_id, amount):
+        if self.backpack.get(crop_id, 0) >= amount:
+            crop_info = CROPS[crop_id]
+            total_value = crop_info["sell_price"] * amount
+            self.backpack[crop_id] -= amount
+            self.gold += total_value
+            return True, f"出售成功！获得 {total_value} 金币"
         return False, "库存不足"
 
     def buy_seed(self, crop_type):
