@@ -15,7 +15,7 @@ class App:
         pygame.init()
         
         self.WINDOW_WIDTH = 1000
-        self.WINDOW_HEIGHT = 700
+        self.WINDOW_HEIGHT = 850
         
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         pygame.display.set_caption('创意设计搭建小游戏')

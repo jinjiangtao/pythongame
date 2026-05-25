@@ -104,11 +104,6 @@ class Toolbar:
         
         y += 10
         self.custom_color_button_y = y
-        custom_color_rect = pygame.Rect(10, y, self.width - 20, self.button_height)
-        pygame.draw.rect(self.screen, (80, 80, 80), custom_color_rect, border_radius=5)
-        text_surface = self.font.render('自定义颜色', True, self.text_color)
-        self.screen.blit(text_surface, (custom_color_rect.centerx - text_surface.get_width() // 2,
-                                       custom_color_rect.centery - text_surface.get_height() // 2))
     
     def get_chinese_font(self, size):
         font_paths = [
@@ -207,12 +202,23 @@ class Toolbar:
             self.screen.blit(text_surface, (btn_rect.centerx - text_surface.get_width() // 2, 
                                            btn_rect.centery - text_surface.get_height() // 2))
             y += self.button_height + self.button_padding
+        
+        # 绘制自定义颜色按钮
+        custom_color_rect = pygame.Rect(10, self.custom_color_button_y, self.width - 20, self.button_height)
+        pygame.draw.rect(self.screen, (80, 80, 80), custom_color_rect, border_radius=5)
+        text_surface = self.font.render('自定义颜色', True, self.text_color)
+        self.screen.blit(text_surface, (custom_color_rect.centerx - text_surface.get_width() // 2,
+                                       custom_color_rect.centery - text_surface.get_height() // 2))
     
     def handle_click(self, pos, current_shape_type):
         x, y = pos
         
         if x > self.width or y < 50:
             return None, None
+        
+        custom_color_rect = pygame.Rect(10, self.custom_color_button_y, self.width - 20, self.button_height)
+        if custom_color_rect.collidepoint(pos):
+            return 'action', 'custom_color'
         
         if y >= self.shape_button_start_y and y <= self.shape_button_start_y + (self.button_height + self.button_padding) * len(self.shape_buttons):
             btn_y = self.shape_button_start_y

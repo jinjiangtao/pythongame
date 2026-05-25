@@ -25,38 +25,30 @@ class Shape:
         if not self.selected:
             return
         
-        shadow_offset = 4
-        shadow_color = (0, 0, 0, 100)
-        
         bounding_box = self.get_bounding_box()
         
-        shadow_rect = pygame.Rect(
-            bounding_box[0] + shadow_offset,
-            bounding_box[1] + shadow_offset,
-            bounding_box[2],
-            bounding_box[3]
-        )
+        # 绘制高亮边框
+        pygame.draw.rect(screen, (255, 255, 0), bounding_box, 3, border_radius=3)
         
-        shadow_surface = pygame.Surface((shadow_rect.width + 8, shadow_rect.height + 8), pygame.SRCALPHA)
-        shadow_surface.fill((0, 0, 0, 50))
-        pygame.draw.rect(shadow_surface, (0, 0, 0, 80), 
-                        (4, 4, shadow_rect.width, shadow_rect.height), 
-                        border_radius=3)
-        screen.blit(shadow_surface, (shadow_rect.x - 4, shadow_rect.y - 4))
-        
-        highlight_surface = pygame.Surface((bounding_box[2] + 6, bounding_box[3] + 6), pygame.SRCALPHA)
-        pygame.draw.rect(highlight_surface, (255, 255, 0, 60), 
-                        (3, 3, bounding_box[2], bounding_box[3]), 
-                        border_radius=3)
-        screen.blit(highlight_surface, (bounding_box[0] - 3, bounding_box[1] - 3))
-        
-        pygame.draw.rect(screen, (255, 255, 0), bounding_box, 2, border_radius=3)
-        
+        # 绘制控制点
         control_points = self.get_control_points()
         for point in control_points:
-            pygame.draw.circle(screen, (255, 255, 255), point, 5)
+            pygame.draw.circle(screen, (255, 255, 255), point, 6)
             pygame.draw.circle(screen, (255, 200, 0), point, 4)
             pygame.draw.circle(screen, (255, 255, 255), point, 2)
+    
+    def rotate_point(self, point, center, angle):
+        angle_rad = math.radians(angle)
+        cos_a = math.cos(angle_rad)
+        sin_a = math.sin(angle_rad)
+        dx = point[0] - center[0]
+        dy = point[1] - center[1]
+        new_x = center[0] + dx * cos_a - dy * sin_a
+        new_y = center[1] + dx * sin_a + dy * cos_a
+        return (new_x, new_y)
+    
+    def rotate_points(self, points, center, angle):
+        return [self.rotate_point(p, center, angle) for p in points]
     
     def get_bounding_box(self):
         return (self.x - self.size, self.y - self.size, self.size * 2, self.size * 2)
@@ -178,19 +170,6 @@ class Triangle(Shape):
         has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
         
         return not (has_neg and has_pos)
-    
-    def rotate_point(self, point, center, angle):
-        angle_rad = math.radians(angle)
-        cos_a = math.cos(angle_rad)
-        sin_a = math.sin(angle_rad)
-        dx = point[0] - center[0]
-        dy = point[1] - center[1]
-        new_x = center[0] + dx * cos_a - dy * sin_a
-        new_y = center[1] + dx * sin_a + dy * cos_a
-        return (new_x, new_y)
-    
-    def rotate_points(self, points, center, angle):
-        return [self.rotate_point(p, center, angle) for p in points]
     
     def get_bounding_box(self):
         scaled_size = self.size * self.scale
