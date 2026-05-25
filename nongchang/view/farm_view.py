@@ -18,21 +18,42 @@ class FarmView:
     def get_font(self, size):
         import os
         font_paths = [
+            "C:/Windows/Fonts/simhei.ttf",
+            "C:/Windows/Fonts/msyh.ttc",
+            "C:/Windows/Fonts/simsun.ttc",
+            "C:/Windows/Fonts/msyhbd.ttc",
+            "C:/Windows/Fonts/msyhl.ttc",
+            "C:/Windows/Fonts/kaiu.ttf",
+            "C:/Windows/Fonts/fangsong.ttf",
+            "C:/Windows/Fonts/STSong.ttf",
+            "C:/Windows/Fonts/STHeiti.ttf",
+            "C:\\Windows\\Fonts\\simhei.ttf",
+            "C:\\Windows\\Fonts\\msyh.ttc",
+            "C:\\Windows\\Fonts\\simsun.ttc",
+            "/Library/Fonts/Songti.ttc",
+            "/Library/Fonts/Hiragino Sans GB W3.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
             "simhei.ttf",
             "msyh.ttc",
             "simsun.ttc",
-            "/Library/Fonts/Songti.ttc",
-            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
         ]
         for font_path in font_paths:
-            try:
-                return pygame.font.Font(font_path, size)
-            except:
-                continue
+            if os.path.exists(font_path):
+                try:
+                    font = pygame.font.Font(font_path, size)
+                    test_surface = font.render("测试", True, (0, 0, 0))
+                    if test_surface:
+                        return font
+                except:
+                    continue
         try:
-            return pygame.font.Font(pygame.font.match_font('simhei'), size)
+            font = pygame.font.Font(pygame.font.match_font('arial'), size)
+            if font:
+                return font
         except:
-            return pygame.font.Font(None, size)
+            pass
+        return pygame.font.Font(None, size)
 
     def draw_top_bar(self, gold, day):
         pygame.draw.rect(self.screen, (60, 60, 60), (0, 0, SCREEN_WIDTH, TOP_BAR_HEIGHT))
