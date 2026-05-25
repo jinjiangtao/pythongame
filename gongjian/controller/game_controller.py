@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 from model.game_objects import Archer, Arrow, Target, FlyingTarget, PowerUp, GameState
 
 class GameController:
@@ -56,7 +57,7 @@ class GameController:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             dx = mouse_x - self.archer.x
             dy = mouse_y - self.archer.y
-            angle = pygame.math.degrees(pygame.math.atan2(dy, dx))
+            angle = math.degrees(math.atan2(dy, dx))
             
             new_arrow = Arrow(self.archer.x + 20, self.archer.y - 20, angle, power)
             self.arrows.append(new_arrow)

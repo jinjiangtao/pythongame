@@ -161,7 +161,7 @@ class GameView:
         arrows_text = self.font.render(f"箭矢: {game_state.arrows}", True, (255, 255, 255))
         self.screen.blit(arrows_text, (20, 60))
 
-        lives_text = self.font.render(f"生命: {'❤' * game_state.lives}", True, (255, 0, 0))
+        lives_text = self.font.render(f"生命: {'心' * game_state.lives}", True, (255, 0, 0))
         self.screen.blit(lives_text, (20, 100))
 
         level_text = self.font.render(f"关卡: {game_state.level}", True, (255, 255, 255))
