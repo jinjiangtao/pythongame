@@ -14,7 +14,8 @@ class FarmView:
         self.small_font = self.get_font(18)
         self.tiny_font = self.get_font(14)
         self.grid_x = SIDE_PANEL_WIDTH + 20
-        self.grid_y = TOP_BAR_HEIGHT + 20
+        self.grid_y = TOP_BAR_HEIGHT + 60
+        self.water_height = 40
         self.hover_cell = None
 
     def get_font(self, size):
@@ -144,11 +145,13 @@ class FarmView:
             pygame.draw.circle(self.screen, crop_color, (center_x + offset, y + 25), 12)
 
     def draw_side_panel(self):
-        pygame.draw.rect(self.screen, COLORS["panel"], (0, TOP_BAR_HEIGHT + 40, SIDE_PANEL_WIDTH, SCREEN_HEIGHT - TOP_BAR_HEIGHT - 40 - BOTTOM_BAR_HEIGHT))
+        panel_top = TOP_BAR_HEIGHT + self.water_height
+        panel_height = SCREEN_HEIGHT - panel_top - BOTTOM_BAR_HEIGHT
+        pygame.draw.rect(self.screen, COLORS["panel"], (0, panel_top, SIDE_PANEL_WIDTH, panel_height))
         
         button_width = SIDE_PANEL_WIDTH - 20
         button_height = 45
-        button_y = TOP_BAR_HEIGHT + 55
+        button_y = TOP_BAR_HEIGHT + self.water_height + 15
         
         buttons = [
             ("🎒 背包", (255, 192, 203)),
@@ -336,9 +339,9 @@ class FarmView:
 
     def get_side_button_click(self, pos):
         x, y = pos
-        if x < SIDE_PANEL_WIDTH and y > TOP_BAR_HEIGHT + 40:
+        if x < SIDE_PANEL_WIDTH and y > TOP_BAR_HEIGHT + self.water_height:
             button_height = 45
-            button_y_start = TOP_BAR_HEIGHT + 55
+            button_y_start = TOP_BAR_HEIGHT + self.water_height + 15
             
             for i in range(3):
                 button_y = button_y_start + i * (button_height + 10)
