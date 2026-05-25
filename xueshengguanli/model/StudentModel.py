@@ -1,40 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Model层：负责数据管理
-"""
-
-
-class UserModel:
-    """用户数据模型"""
-    
-    def __init__(self):
-        self.users = {}
-    
-    def register(self, username, password):
-        """注册新用户"""
-        if username in self.users:
-            return False, "用户名已存在"
-        self.users[username] = password
-        return True, "注册成功"
-    
-    def login(self, username, password):
-        """用户登录"""
-        if username not in self.users:
-            return False, "用户不存在"
-        if self.users[username] != password:
-            return False, "密码错误"
-        return True, "登录成功"
-
 
 class StudentModel:
-    """学生数据模型"""
-    
     def __init__(self):
         self.students = []
     
     def add_student(self, student):
-        """添加学生"""
-        # 确保ID是字符串类型
         student = student.copy()
         student['id'] = str(student['id'])
         for s in self.students:
@@ -44,7 +14,6 @@ class StudentModel:
         return True, "添加成功"
     
     def delete_student(self, student_id):
-        """删除学生"""
         student_id_str = str(student_id)
         found = False
         new_students = []
@@ -59,7 +28,6 @@ class StudentModel:
         return False, "未找到该学生"
     
     def update_student(self, student_id, new_data):
-        """更新学生信息"""
         student_id_str = str(student_id)
         for i, s in enumerate(self.students):
             if str(s['id']) == student_id_str:
@@ -72,7 +40,6 @@ class StudentModel:
         return False, "未找到该学生"
     
     def search_students(self, keyword):
-        """搜索学生"""
         results = []
         for s in self.students:
             if keyword in s['id'] or keyword in s['name']:
@@ -80,5 +47,32 @@ class StudentModel:
         return results
     
     def get_all_students(self):
-        """获取所有学生"""
         return self.students
+    
+    def get_class_distribution(self):
+        distribution = {}
+        for s in self.students:
+            class_name = s.get('class', '未分类')
+            distribution[class_name] = distribution.get(class_name, 0) + 1
+        return distribution
+    
+    def get_subject_averages(self, subjects):
+        averages = {}
+        for subject in subjects:
+            total = 0.0
+            count = 0
+            for s in self.students:
+                score = s.get('scores', {}).get(subject, '0')
+                try:
+                    total += float(score)
+                    count += 1
+                except ValueError:
+                    pass
+            if count > 0:
+                averages[subject] = round(total / count, 2)
+            else:
+                averages[subject] = 0.0
+        return averages
+    
+    def get_total_count(self):
+        return len(self.students)

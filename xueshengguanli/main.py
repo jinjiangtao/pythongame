@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
-"""
-主程序入口
-"""
 import tkinter as tk
-from controller import Controller
-
+from controller.MainController import MainController
 
 def main():
     root = tk.Tk()
     root.title("学生信息管理系统")
-    controller = Controller(root)
+    controller = MainController(root)
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
