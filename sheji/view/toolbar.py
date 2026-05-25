@@ -34,7 +34,7 @@ class Toolbar:
             (0, 255, 255),  # 青
         ]
         
-        self.size_slider_rect = pygame.Rect(20, 350, 110, 20)
+        self.size_slider_rect = pygame.Rect(20, 400, 110, 20)
         self.size_value = 30
         
         self.action_buttons = [
@@ -44,16 +44,22 @@ class Toolbar:
         ]
         
         self.button_height = 35
-        self.button_padding = 8
+        self.button_padding = 10
         
         self.title_y = 60
         self.shape_button_start_y = 90
-        self.color_title_y = 280
-        self.color_button_start_y = 300
+        
+        last_shape_button_y = self.shape_button_start_y + (self.button_height + self.button_padding) * len(self.shape_buttons) - self.button_padding
+        self.color_title_y = last_shape_button_y + 25
+        self.color_button_start_y = self.color_title_y + 25
+        
         self.color_button_size = 28
         self.color_button_gap = 4
-        self.size_title_y = 380
-        self.action_button_start_y = 420
+        
+        last_color_button_y = self.color_button_start_y + ((self.color_button_size + self.color_button_gap) * ((len(self.color_buttons) + 3) // 4)) - self.color_button_gap
+        self.size_title_y = last_color_button_y + 25
+        
+        self.action_button_start_y = self.size_title_y + 50
     
     def get_chinese_font(self, size):
         font_paths = [
@@ -139,18 +145,17 @@ class Toolbar:
         if x > self.width or y < 50:
             return None, None
         
-        y -= 50
+        y_screen = y
         
-        if y >= self.shape_button_start_y - 50 and y <= self.shape_button_start_y - 50 + (self.button_height + self.button_padding) * len(self.shape_buttons):
-            btn_y = self.shape_button_start_y - 50
+        if y_screen >= self.shape_button_start_y and y_screen <= self.shape_button_start_y + (self.button_height + self.button_padding) * len(self.shape_buttons):
+            btn_y = self.shape_button_start_y
             for btn in self.shape_buttons:
-                btn_rect = pygame.Rect(10, btn_y + 50, self.width - 20, self.button_height)
+                btn_rect = pygame.Rect(10, btn_y, self.width - 20, self.button_height)
                 if btn_rect.collidepoint(pos):
                     return 'shape', btn['type']
                 btn_y += self.button_height + self.button_padding
         
-        y_screen = y + 50
-        if y_screen >= self.color_button_start_y and y_screen <= self.color_button_start_y + self.color_button_size * 2:
+        if y_screen >= self.color_button_start_y and y_screen <= self.color_button_start_y + (self.color_button_size + self.color_button_gap) * 2:
             x_btn = 20
             y_color = self.color_button_start_y
             for color in self.color_buttons:
