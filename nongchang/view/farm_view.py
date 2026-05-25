@@ -66,14 +66,19 @@ class FarmView:
         stamina_text = self.font.render(f"❤️ 体力: {stamina}/{MAX_STAMINA}", True, COLORS["stamina"])
         crops_text = self.font.render(f"🌱 作物: {total_crops}", True, (100, 200, 100))
         
-        self.screen.blit(gold_text, (20, 15))
-        self.screen.blit(stamina_text, (200, 15))
-        self.screen.blit(crops_text, (380, 15))
-        self.screen.blit(day_text, (SCREEN_WIDTH - 150, 15))
+        gold_x = 20
+        stamina_x = gold_x + self.font.size(f"💰 金币: {gold}")[0] + 30
+        crops_x = stamina_x + self.font.size(f"❤️ 体力: {stamina}/{MAX_STAMINA}")[0] + 140
+        day_x = SCREEN_WIDTH - self.font.size(f"📅 第 {day} 天")[0] - 20
+        
+        self.screen.blit(gold_text, (gold_x, 15))
+        self.screen.blit(stamina_text, (stamina_x, 15))
+        self.screen.blit(crops_text, (crops_x, 15))
+        self.screen.blit(day_text, (day_x, 15))
         
         stamina_bar_width = 120
         stamina_bar_height = 12
-        stamina_bar_x = 200 + self.font.size(f"❤️ 体力: {stamina}/{MAX_STAMINA}")[0] + 10
+        stamina_bar_x = stamina_x + self.font.size(f"❤️ 体力: {stamina}/{MAX_STAMINA}")[0] + 10
         stamina_bar_y = TOP_BAR_HEIGHT // 2 - stamina_bar_height // 2
         
         pygame.draw.rect(self.screen, (100, 100, 100), (stamina_bar_x, stamina_bar_y, stamina_bar_width, stamina_bar_height))
