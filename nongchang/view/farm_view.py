@@ -10,10 +10,29 @@ from model.farm_model import CropState
 class FarmView:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.Font(None, 24)
-        self.small_font = pygame.font.Font(None, 18)
+        self.font = self.get_font(24)
+        self.small_font = self.get_font(18)
         self.grid_x = SIDE_PANEL_WIDTH + 20
         self.grid_y = TOP_BAR_HEIGHT + 20
+
+    def get_font(self, size):
+        import os
+        font_paths = [
+            "simhei.ttf",
+            "msyh.ttc",
+            "simsun.ttc",
+            "/Library/Fonts/Songti.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+        ]
+        for font_path in font_paths:
+            try:
+                return pygame.font.Font(font_path, size)
+            except:
+                continue
+        try:
+            return pygame.font.Font(pygame.font.match_font('simhei'), size)
+        except:
+            return pygame.font.Font(None, size)
 
     def draw_top_bar(self, gold, day):
         pygame.draw.rect(self.screen, (60, 60, 60), (0, 0, SCREEN_WIDTH, TOP_BAR_HEIGHT))
