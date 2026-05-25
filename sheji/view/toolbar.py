@@ -34,7 +34,7 @@ class Toolbar:
             (0, 255, 255),  # 青
         ]
         
-        self.size_slider_rect = pygame.Rect(20, 380, 110, 20)
+        self.size_slider_rect = pygame.Rect(20, 350, 110, 20)
         self.size_value = 30
         
         self.action_buttons = [
@@ -43,16 +43,17 @@ class Toolbar:
             {'action': 'save', 'label': '保存图片'}
         ]
         
-        self.button_height = 40
-        self.button_padding = 10
+        self.button_height = 35
+        self.button_padding = 8
         
-        self.shape_button_y = 20
-        self.color_button_x = 20
-        self.color_button_y = 260
-        self.color_button_size = 30
-        self.color_button_gap = 5
-        
-        self.action_button_y = 460
+        self.title_y = 60
+        self.shape_button_start_y = 90
+        self.color_title_y = 280
+        self.color_button_start_y = 300
+        self.color_button_size = 28
+        self.color_button_gap = 4
+        self.size_title_y = 380
+        self.action_button_start_y = 420
     
     def get_chinese_font(self, size):
         font_paths = [
@@ -84,9 +85,9 @@ class Toolbar:
         pygame.draw.rect(self.screen, self.bg_color, self.rect)
         
         title_surface = self.font.render('素材工具栏', True, self.text_color)
-        self.screen.blit(title_surface, (self.width // 2 - title_surface.get_width() // 2, 60))
+        self.screen.blit(title_surface, (self.width // 2 - title_surface.get_width() // 2, self.title_y))
         
-        y = self.shape_button_y + 50
+        y = self.shape_button_start_y
         for btn in self.shape_buttons:
             btn_rect = pygame.Rect(10, y, self.width - 20, self.button_height)
             if btn['type'] == current_shape_type:
@@ -100,26 +101,29 @@ class Toolbar:
             y += self.button_height + self.button_padding
         
         color_title = self.font.render('颜色选择', True, self.text_color)
-        self.screen.blit(color_title, (20, self.color_button_y + 35))
+        self.screen.blit(color_title, (20, self.color_title_y))
         
-        x = self.color_button_x
-        y_color = self.color_button_y + 60
+        x = 20
+        y_color = self.color_button_start_y
         for color in self.color_buttons:
             color_rect = pygame.Rect(x, y_color, self.color_button_size, self.color_button_size)
             pygame.draw.rect(self.screen, color, color_rect, border_radius=3)
             if color == current_color:
                 pygame.draw.rect(self.screen, (255, 255, 255), color_rect, 2, border_radius=3)
             x += self.color_button_size + self.color_button_gap
+            if x + self.color_button_size > self.width - 20:
+                x = 20
+                y_color += self.color_button_size + self.color_button_gap
         
         size_title = self.font.render(f'大小: {current_size}', True, self.text_color)
-        self.screen.blit(size_title, (20, 360))
+        self.screen.blit(size_title, (20, self.size_title_y))
         
         pygame.draw.rect(self.screen, (60, 60, 60), self.size_slider_rect)
         slider_pos = ((current_size - 10) / 80) * (self.size_slider_rect.width - 10)
         pygame.draw.circle(self.screen, (100, 150, 200), 
                           (int(self.size_slider_rect.x + slider_pos + 5), self.size_slider_rect.centery), 8)
         
-        y = self.action_button_y + 50
+        y = self.action_button_start_y
         for btn in self.action_buttons:
             btn_rect = pygame.Rect(10, y, self.width - 20, self.button_height)
             pygame.draw.rect(self.screen, (80, 80, 80), btn_rect, border_radius=5)
@@ -135,24 +139,28 @@ class Toolbar:
         if x > self.width or y < 50:
             return None, None
         
-        y_rel = y - 50
+        y -= 50
         
-        if y_rel >= self.shape_button_y:
-            btn_y = self.shape_button_y
+        if y >= self.shape_button_start_y - 50 and y <= self.shape_button_start_y - 50 + (self.button_height + self.button_padding) * len(self.shape_buttons):
+            btn_y = self.shape_button_start_y - 50
             for btn in self.shape_buttons:
                 btn_rect = pygame.Rect(10, btn_y + 50, self.width - 20, self.button_height)
                 if btn_rect.collidepoint(pos):
                     return 'shape', btn['type']
                 btn_y += self.button_height + self.button_padding
         
-        if y >= self.color_button_y + 60 and y <= self.color_button_y + 60 + self.color_button_size:
-            btn_x = self.color_button_x
-            y_color = self.color_button_y + 60
+        y_screen = y + 50
+        if y_screen >= self.color_button_start_y and y_screen <= self.color_button_start_y + self.color_button_size * 2:
+            x_btn = 20
+            y_color = self.color_button_start_y
             for color in self.color_buttons:
-                color_rect = pygame.Rect(btn_x, y_color, self.color_button_size, self.color_button_size)
+                color_rect = pygame.Rect(x_btn, y_color, self.color_button_size, self.color_button_size)
                 if color_rect.collidepoint(pos):
                     return 'color', color
-                btn_x += self.color_button_size + self.color_button_gap
+                x_btn += self.color_button_size + self.color_button_gap
+                if x_btn + self.color_button_size > self.width - 20:
+                    x_btn = 20
+                    y_color += self.color_button_size + self.color_button_gap
         
         if self.size_slider_rect.collidepoint(pos):
             relative_x = pos[0] - self.size_slider_rect.x
@@ -160,8 +168,8 @@ class Toolbar:
             new_size = max(10, min(90, new_size))
             return 'size', new_size
         
-        if y >= self.action_button_y + 50:
-            btn_y = self.action_button_y + 50
+        if y_screen >= self.action_button_start_y and y_screen <= self.action_button_start_y + (self.button_height + self.button_padding) * len(self.action_buttons):
+            btn_y = self.action_button_start_y
             for btn in self.action_buttons:
                 btn_rect = pygame.Rect(10, btn_y, self.width - 20, self.button_height)
                 if btn_rect.collidepoint(pos):
