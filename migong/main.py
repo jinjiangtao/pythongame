@@ -9,7 +9,7 @@ from controller.game_controller import GameController
 def main():
     pygame.init()
     
-    SCREEN_WIDTH = 750
+    SCREEN_WIDTH = 750 + 180
     SCREEN_HEIGHT = 750 + 60
     
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))

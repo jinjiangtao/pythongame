@@ -16,6 +16,8 @@ class Colors:
     UI_BG = (200, 200, 200)
     MESSAGE_BG = (200, 200, 200)
     MESSAGE_TEXT = (30, 30, 30)
+    HELP_BG = (230, 230, 230)
+    HELP_TEXT = (50, 50, 50)
 
 class GameView:
     def __init__(self, screen):
@@ -54,6 +56,7 @@ class GameView:
 
     def render(self, maze, player, item_manager, level):
         self.draw_background()
+        self.draw_help_panel()
         self.draw_maze(maze)
         self.draw_items(item_manager, maze)
         self.draw_player(player)
@@ -65,10 +68,11 @@ class GameView:
 
     def draw_maze(self, maze):
         cell_size = maze.cell_size
+        offset_x = 180
         for y in range(maze.height):
             for x in range(maze.width):
                 rect = pygame.Rect(
-                    x * cell_size,
+                    x * cell_size + offset_x,
                     y * cell_size,
                     cell_size - 1,
                     cell_size - 1
@@ -82,15 +86,16 @@ class GameView:
         end_x, end_y = maze.get_screen_coords(maze.end[0], maze.end[1])
         
         pygame.draw.circle(self.screen, Colors.START, 
-                          (start_x + cell_size // 2, start_y + cell_size // 2), 
+                          (start_x + cell_size // 2 + offset_x, start_y + cell_size // 2), 
                           cell_size // 3)
         pygame.draw.circle(self.screen, Colors.END, 
-                          (end_x + cell_size // 2, end_y + cell_size // 2), 
+                          (end_x + cell_size // 2 + offset_x, end_y + cell_size // 2), 
                           cell_size // 3)
 
     def draw_player(self, player):
         cell_size = player.maze.cell_size
-        center_x = player.screen_x + cell_size // 2
+        offset_x = 180
+        center_x = player.screen_x + cell_size // 2 + offset_x
         center_y = player.screen_y + cell_size // 2
         
         pygame.draw.circle(self.screen, Colors.PLAYER_OUTLINE, (center_x, center_y), cell_size // 2 + 2)
@@ -106,10 +111,11 @@ class GameView:
 
     def draw_items(self, item_manager, maze):
         cell_size = maze.cell_size
+        offset_x = 180
         for item in item_manager.items:
             if not item.collected:
                 x, y = item.get_screen_coords(maze)
-                center_x = x + cell_size // 2
+                center_x = x + cell_size // 2 + offset_x
                 center_y = y + cell_size // 2
                 
                 if item.type == ItemType.HEALTH:
@@ -136,7 +142,7 @@ class GameView:
         pygame.draw.rect(self.screen, Colors.UI_BG, (0, ui_y, self.screen.get_width(), self.ui_height))
         
         level_text = self.font.render(f"关卡: {level}", True, Colors.UI_TEXT)
-        health_text = self.font.render(f"生命: {'❤️' * player.health}", True, (255, 0, 0))
+        health_text = self.font.render(f"生命: {player.health}/{player.max_health}", True, (255, 0, 0))
         steps_text = self.font.render(f"步数: {player.steps}", True, Colors.UI_TEXT)
         
         self.screen.blit(level_text, (20, ui_y + 15))
@@ -145,6 +151,59 @@ class GameView:
         
         pause_text = self.font.render("P: 暂停 | R: 重新开始 | ESC: 退出", True, Colors.UI_TEXT)
         self.screen.blit(pause_text, (self.screen.get_width() - 400, ui_y + 15))
+    
+    def draw_help_panel(self):
+        panel_width = 180
+        panel_height = self.screen.get_height() - self.ui_height
+        
+        pygame.draw.rect(self.screen, Colors.HELP_BG, (0, 0, panel_width, panel_height))
+        pygame.draw.rect(self.screen, (150, 150, 150), (panel_width - 1, 0, 1, panel_height))
+        
+        help_lines = [
+            "游戏说明",
+            "",
+            "操作方式:",
+            "↑↓←→ / WASD",
+            "移动角色",
+            "",
+            "游戏目标:",
+            "从绿色起点",
+            "到达红色终点",
+            "",
+            "道具说明:",
+            "❤ 绿色心形",
+            "恢复1点生命",
+            "✱ 红色陷阱",
+            "减少1点生命",
+            "",
+            "游戏规则:",
+            "步数超限或",
+            "生命耗尽则",
+            "游戏结束",
+            "",
+            "快捷键:",
+            "P - 暂停",
+            "R - 重新开始",
+            "ESC - 退出",
+        ]
+        
+        start_y = 20
+        line_height = 22
+        
+        for i, line in enumerate(help_lines):
+            if line == "":
+                start_y += line_height
+                continue
+            
+            if i == 0:
+                text = self.font.render(line, True, (0, 80, 150))
+            elif line in ["操作方式:", "游戏目标:", "道具说明:", "游戏规则:", "快捷键:"]:
+                text = self.font.render(line, True, (80, 80, 80))
+            else:
+                text = self.font.render(line, True, Colors.HELP_TEXT)
+            
+            self.screen.blit(text, (15, start_y))
+            start_y += line_height
 
     def show_message(self, message, duration=1500):
         self.current_message = message
