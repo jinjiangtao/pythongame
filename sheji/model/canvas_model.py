@@ -7,6 +7,8 @@ class CanvasModel:
         self.current_shape_type = 'circle'
         self.current_color = (255, 0, 0)
         self.current_size = 30
+        self.current_rotation = 0
+        self.current_scale = 1.0
         self.status_message = '欢迎使用创意设计工具！选择左侧素材开始创作。'
     
     def add_shape(self, x, y):
@@ -83,3 +85,19 @@ class CanvasModel:
     def update_current_size(self, size):
         self.current_size = size
         self.status_message = f'大小设置为 {size}'
+    
+    def update_current_rotation(self, rotation):
+        self.current_rotation = rotation
+        if self.selected_shape:
+            self.selected_shape.rotation = rotation
+            self.status_message = f'旋转角度设置为 {rotation}°'
+        else:
+            self.status_message = f'旋转角度设置为 {rotation}°'
+    
+    def update_current_scale(self, scale):
+        self.current_scale = scale
+        if self.selected_shape:
+            self.selected_shape.scale = scale
+            self.status_message = f'缩放比例设置为 {int(scale * 100)}%'
+        else:
+            self.status_message = f'缩放比例设置为 {int(scale * 100)}%'

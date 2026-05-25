@@ -51,7 +51,8 @@ class App:
             self.screen.fill((30, 30, 30))
             
             self.status_bar.draw(self.model.current_shape_type, self.model.status_message)
-            self.toolbar.draw(self.model.current_shape_type, self.model.current_color, self.model.current_size)
+            self.toolbar.draw(self.model.current_shape_type, self.model.current_color, 
+                            self.model.current_size, self.model.current_rotation, self.model.current_scale)
             self.canvas.draw(self.model.shapes)
             
             pygame.display.flip()

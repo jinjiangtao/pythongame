@@ -47,6 +47,10 @@ class EventHandler:
                 if self.model.selected_shape:
                     self.model.update_selected_size(toolbar_result[1])
                 self.model.update_current_size(toolbar_result[1])
+            elif toolbar_result[0] == 'rotate':
+                self.model.update_current_rotation(toolbar_result[1])
+            elif toolbar_result[0] == 'scale':
+                self.model.update_current_scale(toolbar_result[1])
             elif toolbar_result[0] == 'action':
                 self.handle_action(toolbar_result[1])
             elif self.canvas.is_inside(pos):
@@ -76,6 +80,8 @@ class EventHandler:
             self.model.clear_all()
         elif action == 'save':
             self.save_canvas()
+        elif action == 'custom_color':
+            self.open_color_picker()
     
     def save_canvas(self):
         canvas_surface = pygame.Surface((self.canvas.width, self.canvas.height))
@@ -99,3 +105,25 @@ class EventHandler:
         filename = f'saved/drawing_{timestamp}.png'
         pygame.image.save(canvas_surface, filename)
         self.model.status_message = f'作品已保存为 {filename}'
+    
+    def open_color_picker(self):
+        try:
+            import tkinter as tk
+            from tkinter import colorchooser
+            
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes('-topmost', True)
+            
+            color = colorchooser.askcolor(title="选择颜色", initialcolor=(255, 0, 0))
+            
+            root.destroy()
+            
+            if color[1]:
+                rgb_color = tuple(int(color[0][i]) for i in range(3))
+                if self.model.selected_shape:
+                    self.model.update_selected_color(rgb_color)
+                self.model.update_current_color(rgb_color)
+                self.model.status_message = f'已选择自定义颜色 {rgb_color}'
+        except Exception as e:
+            self.model.status_message = f'颜色选择器打开失败: {str(e)}'

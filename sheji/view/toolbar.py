@@ -52,6 +52,14 @@ class Toolbar:
         self.slider_width = 110
         self.slider_height = 20
         
+        self.rotate_slider_width = 110
+        self.rotate_slider_height = 20
+        self.rotate_slider_y_offset = 60
+        
+        self.scale_slider_width = 110
+        self.scale_slider_height = 20
+        self.scale_slider_y_offset = 110
+        
         self.layout_positions()
     
     def layout_positions(self):
@@ -77,7 +85,30 @@ class Toolbar:
         self.size_slider_rect = pygame.Rect(20, self.size_slider_y, self.slider_width, self.slider_height)
         
         y += 35
+        self.rotate_title_y = y
+        
+        y += 20
+        self.rotate_slider_y = y
+        self.rotate_slider_rect = pygame.Rect(20, self.rotate_slider_y, self.rotate_slider_width, self.rotate_slider_height)
+        
+        y += 35
+        self.scale_title_y = y
+        
+        y += 20
+        self.scale_slider_y = y
+        self.scale_slider_rect = pygame.Rect(20, self.scale_slider_y, self.scale_slider_width, self.scale_slider_height)
+        
+        y += self.section_spacing
         self.action_button_start_y = y
+        y += (self.button_height + self.button_padding) * len(self.action_buttons)
+        
+        y += 10
+        self.custom_color_button_y = y
+        custom_color_rect = pygame.Rect(10, y, self.width - 20, self.button_height)
+        pygame.draw.rect(self.screen, (80, 80, 80), custom_color_rect, border_radius=5)
+        text_surface = self.font.render('自定义颜色', True, self.text_color)
+        self.screen.blit(text_surface, (custom_color_rect.centerx - text_surface.get_width() // 2,
+                                       custom_color_rect.centery - text_surface.get_height() // 2))
     
     def get_chinese_font(self, size):
         font_paths = [
@@ -105,7 +136,7 @@ class Toolbar:
         
         return pygame.font.Font(None, size)
     
-    def draw(self, current_shape_type, current_color, current_size):
+    def draw(self, current_shape_type, current_color, current_size, current_rotation=0, current_scale=1.0):
         pygame.draw.rect(self.screen, self.bg_color, self.rect)
         
         title_surface = self.font.render('素材工具栏', True, self.text_color)
@@ -148,6 +179,24 @@ class Toolbar:
         slider_pos = ((current_size - 10) / 80) * (self.size_slider_rect.width - 10)
         pygame.draw.circle(self.screen, (100, 150, 200), 
                           (int(self.size_slider_rect.x + slider_pos + 5), self.size_slider_rect.centery), 8)
+        
+        rotation_label = self.font.render(f'旋转: {int(current_rotation)}°', True, self.text_color)
+        self.screen.blit(rotation_label, (20, self.rotate_title_y))
+        
+        pygame.draw.rect(self.screen, (60, 60, 60), self.rotate_slider_rect)
+        rotate_pos = ((current_rotation + 180) / 360) * (self.rotate_slider_rect.width - 10)
+        rotate_pos = max(0, min(rotate_pos, self.rotate_slider_rect.width - 10))
+        pygame.draw.circle(self.screen, (100, 150, 200), 
+                          (int(self.rotate_slider_rect.x + rotate_pos + 5), self.rotate_slider_rect.centery), 8)
+        
+        scale_label = self.font.render(f'缩放: {int(current_scale * 100)}%', True, self.text_color)
+        self.screen.blit(scale_label, (20, self.scale_title_y))
+        
+        pygame.draw.rect(self.screen, (60, 60, 60), self.scale_slider_rect)
+        scale_pos = ((current_scale - 0.5) / 1.5) * (self.scale_slider_rect.width - 10)
+        scale_pos = max(0, min(scale_pos, self.scale_slider_rect.width - 10))
+        pygame.draw.circle(self.screen, (100, 150, 200), 
+                          (int(self.scale_slider_rect.x + scale_pos + 5), self.scale_slider_rect.centery), 8)
         
         y = self.action_button_start_y
         for btn in self.action_buttons:
@@ -192,6 +241,18 @@ class Toolbar:
             new_size = int(10 + (relative_x / self.size_slider_rect.width) * 80)
             new_size = max(10, min(90, new_size))
             return 'size', new_size
+        
+        if self.rotate_slider_rect.collidepoint(pos):
+            relative_x = pos[0] - self.rotate_slider_rect.x
+            new_rotation = -180 + (relative_x / self.rotate_slider_rect.width) * 360
+            new_rotation = max(-180, min(180, new_rotation))
+            return 'rotate', int(new_rotation)
+        
+        if self.scale_slider_rect.collidepoint(pos):
+            relative_x = pos[0] - self.scale_slider_rect.x
+            new_scale = 0.5 + (relative_x / self.scale_slider_rect.width) * 1.5
+            new_scale = max(0.5, min(2.0, new_scale))
+            return 'scale', round(new_scale, 2)
         
         if y >= self.action_button_start_y and y <= self.action_button_start_y + (self.button_height + self.button_padding) * len(self.action_buttons):
             btn_y = self.action_button_start_y
