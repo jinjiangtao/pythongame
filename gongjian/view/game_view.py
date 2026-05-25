@@ -1,14 +1,35 @@
 import pygame
 import math
+import os
 
 class GameView:
     def __init__(self, screen):
         self.screen = screen
         self.width = screen.get_width()
         self.height = screen.get_height()
-        self.font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)
-        self.large_font = pygame.font.Font(None, 72)
+        
+        self.font = self.get_chinese_font(36)
+        self.small_font = self.get_chinese_font(24)
+        self.large_font = self.get_chinese_font(72)
+    
+    def get_chinese_font(self, size):
+        font_paths = [
+            "C:/Windows/Fonts/msyh.ttc",
+            "C:/Windows/Fonts/simsun.ttc",
+            "C:/Windows/Fonts/simhei.ttf",
+            "C:/Windows/Fonts/simkai.ttf",
+            "/Library/Fonts/Songti.ttc",
+            "/System/Library/Fonts/PingFang.ttc",
+        ]
+        
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    return pygame.font.Font(font_path, size)
+                except:
+                    continue
+        
+        return pygame.font.Font(None, size)
 
     def draw_background(self):
         sky_gradient = pygame.Surface((self.width, self.height))
