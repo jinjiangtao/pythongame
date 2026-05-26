@@ -212,7 +212,8 @@ class Game:
         if self.flying_bubble:
             self.flying_bubble.update()
             
-            wall = self.flying_bubble.check_wall_collision(self.game_area_right, self.height)
+            bottom_bound = self.height - 80
+            wall = self.flying_bubble.check_wall_collision(self.game_area_left, self.game_area_right, 0, bottom_bound)
             if wall:
                 self.flying_bubble.reflect(wall)
                 if wall == 'left':
@@ -221,6 +222,13 @@ class Game:
                     self.flying_bubble.x = self.game_area_right - self.flying_bubble.radius - 1
                 elif wall == 'top':
                     self.flying_bubble.y = self.flying_bubble.radius + 1
+                elif wall == 'bottom':
+                    self.flying_bubble.y = bottom_bound - self.flying_bubble.radius - 1
+                    self.flying_bubble = None
+                    self.cannon.set_ready()
+                    self.life_system.lose_life()
+                    self.animation_system.add_damage_animation(self.width // 2, self.height // 2, '-1生命')
+                    return
             
             for bubble in self.bubbles:
                 if self.flying_bubble.check_collision(bubble):

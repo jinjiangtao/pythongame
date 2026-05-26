@@ -181,23 +181,27 @@ class Bubble:
         distance = math.sqrt(dx * dx + dy * dy)
         return distance <= self.radius + other.radius
 
-    def check_wall_collision(self, screen_width, screen_height):
+    def check_wall_collision(self, left_bound, right_bound, top_bound, bottom_bound):
         """
         检测与墙壁的碰撞
         
         参数:
-            screen_width: 屏幕宽度
-            screen_height: 屏幕高度
+            left_bound: 左边界
+            right_bound: 右边界
+            top_bound: 上边界
+            bottom_bound: 下边界
         
         返回:
-            str: 碰撞方向 'left', 'right', 'top', None
+            str: 碰撞方向 'left', 'right', 'top', 'bottom', None
         """
-        if self.x - self.radius <= 0:
+        if self.x - self.radius <= left_bound:
             return 'left'
-        if self.x + self.radius >= screen_width:
+        if self.x + self.radius >= right_bound:
             return 'right'
-        if self.y - self.radius <= 0:
+        if self.y - self.radius <= top_bound:
             return 'top'
+        if self.y + self.radius >= bottom_bound:
+            return 'bottom'
         return None
 
     def reflect(self, wall):
@@ -205,11 +209,11 @@ class Bubble:
         根据碰撞墙壁进行反弹
         
         参数:
-            wall: 碰撞方向 'left', 'right', 'top'
+            wall: 碰撞方向 'left', 'right', 'top', 'bottom'
         """
         if wall in ['left', 'right']:
             self.angle = math.pi - self.angle
-        elif wall == 'top':
+        elif wall in ['top', 'bottom']:
             self.angle = -self.angle
 
     def can_pierce(self):
