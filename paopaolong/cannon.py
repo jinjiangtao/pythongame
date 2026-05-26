@@ -185,7 +185,7 @@ class Cannon:
         bubble.bubble_type = self.current_bubble.bubble_type
         bubble.set_flying(self.angle)
         
-        barrel_length = 30
+        barrel_length = 40
         bubble.x = self.x + math.cos(self.angle) * (barrel_length + bubble.radius)
         bubble.y = self.y + math.sin(self.angle) * (barrel_length + bubble.radius)
         

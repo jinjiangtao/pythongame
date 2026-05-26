@@ -194,13 +194,13 @@ class Bubble:
         返回:
             str: 碰撞方向 'left', 'right', 'top', 'bottom', None
         """
-        if self.x - self.radius <= left_bound:
+        if self.x - self.radius < left_bound:
             return 'left'
-        if self.x + self.radius >= right_bound:
+        if self.x + self.radius > right_bound:
             return 'right'
-        if self.y - self.radius <= top_bound:
+        if self.y - self.radius < top_bound:
             return 'top'
-        if self.y + self.radius >= bottom_bound:
+        if self.y + self.radius > bottom_bound:
             return 'bottom'
         return None
 

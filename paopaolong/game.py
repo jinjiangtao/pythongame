@@ -210,25 +210,35 @@ class Game:
     def _update_flying_bubble(self):
         """更新飞行泡泡的状态"""
         if self.flying_bubble:
+            bottom_bound = self.height - 80
+            
             self.flying_bubble.update()
             
-            bottom_bound = self.height - 80
-            wall = self.flying_bubble.check_wall_collision(self.game_area_left, self.game_area_right, 0, bottom_bound)
-            if wall:
-                self.flying_bubble.reflect(wall)
-                if wall == 'left':
-                    self.flying_bubble.x = self.game_area_left + self.flying_bubble.radius + 1
-                elif wall == 'right':
-                    self.flying_bubble.x = self.game_area_right - self.flying_bubble.radius - 1
-                elif wall == 'top':
-                    self.flying_bubble.y = self.flying_bubble.radius + 1
-                elif wall == 'bottom':
-                    self.flying_bubble.y = bottom_bound - self.flying_bubble.radius - 1
+            max_reflections = 3
+            reflection_count = 0
+            
+            while reflection_count < max_reflections:
+                wall = self.flying_bubble.check_wall_collision(self.game_area_left, self.game_area_right, 0, bottom_bound)
+                if not wall:
+                    break
+                
+                if wall == 'bottom':
                     self.flying_bubble = None
                     self.cannon.set_ready()
                     self.life_system.lose_life()
                     self.animation_system.add_damage_animation(self.width // 2, self.height // 2, '-1生命')
                     return
+                
+                self.flying_bubble.reflect(wall)
+                
+                if wall == 'left':
+                    self.flying_bubble.x = self.game_area_left + self.flying_bubble.radius + 3
+                elif wall == 'right':
+                    self.flying_bubble.x = self.game_area_right - self.flying_bubble.radius - 3
+                elif wall == 'top':
+                    self.flying_bubble.y = self.flying_bubble.radius + 3
+                
+                reflection_count += 1
             
             for bubble in self.bubbles:
                 if self.flying_bubble.check_collision(bubble):
