@@ -200,6 +200,9 @@ class UIManager:
         start_y = 180
         spacing = 35
         
+        button_x = (SCREEN_WIDTH - button_width) // 2
+        print(f"菜单按钮: X={button_x}, Y={start_y}, 宽度={button_width}, 高度={button_height}")
+        
         if self.on_continue_game and self._has_progress():
             self.buttons.append(Button(
                 (SCREEN_WIDTH - button_width) // 2,

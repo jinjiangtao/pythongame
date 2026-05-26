@@ -26,7 +26,6 @@ CHINESE_FONT_PATH = get_chinese_font()
 FONT_LARGE = pygame.font.Font(CHINESE_FONT_PATH, 36) if CHINESE_FONT_PATH else pygame.font.Font(None, 36)
 FONT_MEDIUM = pygame.font.Font(CHINESE_FONT_PATH, 24) if CHINESE_FONT_PATH else pygame.font.Font(None, 24)
 FONT_XLARGE = pygame.font.Font(CHINESE_FONT_PATH, 48) if CHINESE_FONT_PATH else pygame.font.Font(None, 48)
-FONT_SMALL = pygame.font.Font(CHINESE_FONT_PATH, 20) if CHINESE_FONT_PATH else pygame.font.Font(None, 20)
 
 from modules.game_logic import GameLogic
 from modules.game_stats import GameStats
@@ -131,40 +130,30 @@ class Game:
             
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
+                print(f"点击: {mouse_pos}, 界面: {self.current_screen}")
                 
                 if self.current_screen == "menu":
                     for button in self.buttons:
                         if button.handle_click(mouse_pos):
+                            print(f"按钮点击成功: {button.text}")
                             break
                 
                 elif self.current_screen == "game":
                     if self.game_logic.handle_click(mouse_pos):
+                        print("点击了游戏格子")
                         self.game_stats.increment_steps()
                         
                         if self.game_logic.check_win():
+                            print("通关!")
                             self.current_screen = "win"
                     
-                    back_button_rect = pygame.Rect(SCREEN_WIDTH - 130, 10, 120, 40)
-                    if back_button_rect.collidepoint(mouse_pos):
+                    if mouse_pos[0] > SCREEN_WIDTH - 150 and mouse_pos[1] < 60:
                         self.back_to_menu()
                 
                 elif self.current_screen in ["level_select", "settings", "rules", "win"]:
-                    back_button_rect = pygame.Rect((SCREEN_WIDTH - 150) // 2, 520, 150, 45)
-                    if back_button_rect.collidepoint(mouse_pos):
-                        self.back_to_menu()
-                
-                elif self.current_screen == "level_select":
-                    total_levels = self.game_logic.get_total_levels()
-                    cols = 4
-                    for i in range(total_levels):
-                        row = i // cols
-                        col = i % cols
-                        x = 100 + col * 180
-                        y = 120 + row * 120
-                        level_rect = pygame.Rect(x, y, 120, 90)
-                        if level_rect.collidepoint(mouse_pos) and self.game_logic.is_level_unlocked(i):
-                            self.start_game(i)
-                            break
+                    if mouse_pos[0] > (SCREEN_WIDTH - 150) // 2 and mouse_pos[0] < (SCREEN_WIDTH + 150) // 2:
+                        if mouse_pos[1] > 500 and mouse_pos[1] < 560:
+                            self.back_to_menu()
     
     def update(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -215,8 +204,7 @@ class Game:
         
         elif self.current_screen == "level_select":
             title = FONT_LARGE.render("选择关卡", True, theme["text_color"])
-            title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 50))
-            self.screen.blit(title, title_rect)
+            self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 50))
             
             total_levels = self.game_logic.get_total_levels()
             cols = 4
@@ -236,15 +224,13 @@ class Game:
                     num_text = FONT_LARGE.render(str(i + 1), True, theme["text_color"])
                     self.screen.blit(num_text, (x + 50, y + 10))
                     name_text = FONT_MEDIUM.render(level_info["name"], True, theme["text_color"])
-                    name_rect = name_text.get_rect(center=(x + 60, y + 55))
-                    self.screen.blit(name_text, name_rect)
+                    self.screen.blit(name_text, (x + 60 - name_text.get_width() // 2, y + 50))
             
             self.draw_back_button()
         
         elif self.current_screen == "settings":
             title = FONT_LARGE.render("游戏设置", True, theme["text_color"])
-            title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 50))
-            self.screen.blit(title, title_rect)
+            self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 50))
             
             options = ["音效", "音乐", "动画"]
             for i, opt in enumerate(options):
@@ -259,15 +245,13 @@ class Game:
         
         elif self.current_screen == "rules":
             title = FONT_LARGE.render("游戏规则", True, theme["text_color"])
-            title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 50))
-            self.screen.blit(title, title_rect)
+            self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 50))
             
             rules = [
-                "🎮 点击灯格翻转自身及相邻格子",
-                "🎯 点亮所有灯格即可通关",
-                "🧱 障碍格子无法点击",
-                "❄️ 冰冻格子状态固定",
-                "💡 使用提示功能获得帮助"
+                "点击灯格翻转自身及相邻格子",
+                "点亮所有灯格即可通关",
+                "障碍格子无法点击",
+                "冰冻格子状态固定"
             ]
             for i, rule in enumerate(rules):
                 rule_text = FONT_MEDIUM.render(rule, True, theme["text_color"])
@@ -282,12 +266,7 @@ class Game:
             self.screen.blit(overlay, (0, 0))
             
             win_text = FONT_XLARGE.render("🎉 恭喜通关！", True, (255, 255, 0))
-            win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, 200))
-            self.screen.blit(win_text, win_rect)
-            
-            stats_text = FONT_MEDIUM.render(f"步数: {self.game_stats.get_steps()} | 时间: {self.game_stats.format_time()}", True, (255, 255, 255))
-            stats_rect = stats_text.get_rect(center=(SCREEN_WIDTH // 2, 280))
-            self.screen.blit(stats_text, stats_rect)
+            self.screen.blit(win_text, (SCREEN_WIDTH // 2 - win_text.get_width() // 2, 200))
             
             self.draw_back_button()
         

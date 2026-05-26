@@ -96,6 +96,9 @@ class GameLogic:
             pass
     
     def init_board(self, screen_width, screen_height, level_index=0):
+        if self.settings:
+            self.theme = self.settings.get_theme()
+        
         self.current_level = level_index
         level = LEVELS[level_index]
         size = level["size"]
