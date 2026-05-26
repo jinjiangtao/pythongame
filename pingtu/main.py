@@ -76,6 +76,7 @@ class PuzzleGame:
                 elif self.current_state == 'game':
                     if not self.victory:
                         self.handle_game_click(mouse_pos)
+                        self.handle_game_button_click(mouse_pos)
                     else:
                         self.handle_victory_click(mouse_pos)
             
@@ -232,44 +233,46 @@ class PuzzleGame:
         btn_height = 40
         btn_x = 50
         
-        restart_btn = self.renderer.draw_button(
+        self.restart_btn = self.renderer.draw_button(
             "重新开始", btn_x, WINDOW_HEIGHT - 150, btn_width, btn_height,
             PRIMARY_COLOR, SECONDARY_COLOR, font_size='small'
         )
         
-        hint_btn = self.renderer.draw_button(
+        self.hint_btn = self.renderer.draw_button(
             "提示", btn_x + btn_width + 10, WINDOW_HEIGHT - 150, btn_width, btn_height,
             ACCENT_COLOR, (211, 84, 0), font_size='small'
         )
         
-        preview_btn = self.renderer.draw_button(
+        self.preview_btn = self.renderer.draw_button(
             "原图" if self.preview_toggle else "隐藏", 
             btn_x + (btn_width + 10) * 2, WINDOW_HEIGHT - 150, btn_width, btn_height,
             HIGHLIGHT_COLOR, (39, 174, 96), font_size='small'
         )
         
-        menu_btn = self.renderer.draw_button(
+        self.menu_btn = self.renderer.draw_button(
             "返回菜单", WINDOW_WIDTH - btn_width - 50, WINDOW_HEIGHT - 150, 
             btn_width, btn_height,
             (231, 76, 60), (192, 57, 43), font_size='small'
         )
-        
-        mouse_pos = pygame.mouse.get_pos()
-        
-        if restart_btn.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+
+    def handle_game_button_click(self, mouse_pos):
+        """
+        处理游戏界面按钮点击（在事件循环中调用）
+        """
+        if self.restart_btn and self.restart_btn.collidepoint(mouse_pos):
             self.game_logic.reset_game()
             self.victory = False
         
-        elif hint_btn.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+        elif self.hint_btn and self.hint_btn.collidepoint(mouse_pos):
             pygame.time.set_timer(pygame.USEREVENT + 1, 0)
             self.game_logic.reset_hint()
             self.game_logic.get_hint()
         
-        elif preview_btn.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+        elif self.preview_btn and self.preview_btn.collidepoint(mouse_pos):
             self.show_preview = not self.show_preview
             self.preview_toggle = not self.preview_toggle
         
-        elif menu_btn.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+        elif self.menu_btn and self.menu_btn.collidepoint(mouse_pos):
             self.return_to_menu()
 
     def draw_preview_window(self):
