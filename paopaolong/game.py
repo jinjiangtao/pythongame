@@ -35,25 +35,52 @@ class Game:
         pygame.init()
         pygame.font.init()
         
-        # 设置中文字体 - 优先使用系统中文字体
-        chinese_fonts = ['SimHei', 'SimSun', 'Microsoft YaHei', 'KaiTi']
-        font_found = False
+        # 设置中文字体 - 使用Windows系统字体路径
+        import os
+        font_path = None
         
-        for font_name in chinese_fonts:
-            try:
-                self.font = pygame.font.SysFont(font_name, 20)
-                self.font_large = pygame.font.SysFont(font_name, 36)
-                self.font_small = pygame.font.SysFont(font_name, 16)
-                font_found = True
+        # Windows系统字体路径
+        system_font_paths = [
+            'C:/Windows/Fonts/simhei.ttf',
+            'C:/Windows/Fonts/simsun.ttc',
+            'C:/Windows/Fonts/msyh.ttc',
+            'C:/Windows/Fonts/kaiti.ttf',
+            'C:/Windows/Fonts/STHeiti Light.ttc',
+        ]
+        
+        for path in system_font_paths:
+            if os.path.exists(path):
+                font_path = path
                 break
-            except:
-                continue
         
-        if not font_found:
-            # 若系统字体不可用，使用默认字体
-            self.font = pygame.font.Font(None, 20)
-            self.font_large = pygame.font.Font(None, 36)
-            self.font_small = pygame.font.Font(None, 16)
+        if font_path:
+            try:
+                self.font = pygame.font.Font(font_path, 20)
+                self.font_large = pygame.font.Font(font_path, 36)
+                self.font_small = pygame.font.Font(font_path, 16)
+            except:
+                # 加载失败使用默认字体
+                self.font = pygame.font.Font(None, 20)
+                self.font_large = pygame.font.Font(None, 36)
+                self.font_small = pygame.font.Font(None, 16)
+        else:
+            # 尝试使用系统字体名称
+            chinese_fonts = ['SimHei', 'SimSun', 'Microsoft YaHei', 'KaiTi']
+            font_found = False
+            for font_name in chinese_fonts:
+                try:
+                    self.font = pygame.font.SysFont(font_name, 20)
+                    self.font_large = pygame.font.SysFont(font_name, 36)
+                    self.font_small = pygame.font.SysFont(font_name, 16)
+                    font_found = True
+                    break
+                except:
+                    continue
+            
+            if not font_found:
+                self.font = pygame.font.Font(None, 20)
+                self.font_large = pygame.font.Font(None, 36)
+                self.font_small = pygame.font.Font(None, 16)
         
         self.width = width
         self.height = height
