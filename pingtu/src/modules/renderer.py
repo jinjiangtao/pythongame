@@ -1,4 +1,5 @@
 import pygame
+import os
 from config import *
 
 class Renderer:
@@ -8,12 +9,49 @@ class Renderer:
         :param screen: pygame屏幕对象
         """
         self.screen = screen
-        self.fonts = {
-            'small': pygame.font.Font(None, FONT_SIZE_SMALL),
-            'medium': pygame.font.Font(None, FONT_SIZE_MEDIUM),
-            'large': pygame.font.Font(None, FONT_SIZE_LARGE),
-            'xlarge': pygame.font.Font(None, FONT_SIZE_XLARGE)
-        }
+        self.fonts = {}
+        self._init_fonts()
+
+    def _get_chinese_font_path(self):
+        """
+        获取系统中支持中文的字体路径
+        :return: 字体路径，如果找不到则返回None
+        """
+        font_paths = [
+            "C:/Windows/Fonts/simhei.ttf",      
+            "C:/Windows/Fonts/msyh.ttc",        
+            "C:/Windows/Fonts/msyhbd.ttc",      
+            "C:/Windows/Fonts/simsun.ttc",      
+            "/Library/Fonts/Songti.ttc",        
+            "/Library/Fonts/Heiti.ttc",         
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"  
+        ]
+        
+        for path in font_paths:
+            if os.path.exists(path):
+                return path
+        return None
+
+    def _init_fonts(self):
+        """
+        初始化字体，优先使用支持中文的字体
+        """
+        font_path = self._get_chinese_font_path()
+        
+        if font_path:
+            self.fonts = {
+                'small': pygame.font.Font(font_path, FONT_SIZE_SMALL),
+                'medium': pygame.font.Font(font_path, FONT_SIZE_MEDIUM),
+                'large': pygame.font.Font(font_path, FONT_SIZE_LARGE),
+                'xlarge': pygame.font.Font(font_path, FONT_SIZE_XLARGE)
+            }
+        else:
+            self.fonts = {
+                'small': pygame.font.Font(None, FONT_SIZE_SMALL),
+                'medium': pygame.font.Font(None, FONT_SIZE_MEDIUM),
+                'large': pygame.font.Font(None, FONT_SIZE_LARGE),
+                'xlarge': pygame.font.Font(None, FONT_SIZE_XLARGE)
+            }
 
     def draw_text(self, text, font_size, color, x, y, centered=False):
         """

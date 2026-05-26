@@ -78,6 +78,10 @@ class PuzzleGame:
                         self.handle_game_click(mouse_pos)
                     else:
                         self.handle_victory_click(mouse_pos)
+            
+            if event.type == pygame.USEREVENT + 1:
+                if self.game_logic:
+                    self.game_logic.reset_hint()
 
     def handle_menu(self):
         """

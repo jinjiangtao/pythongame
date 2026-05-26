@@ -177,6 +177,8 @@ class GameLogic:
         重置提示状态
         """
         self.hint_piece = None
+        for piece in self.pieces:
+            piece.is_highlighted = False
 
     def reset_game(self):
         """
