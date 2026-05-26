@@ -1,0 +1,28 @@
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 700
+FPS = 60
+
+PRIMARY_COLOR = (52, 152, 219)
+SECONDARY_COLOR = (41, 128, 185)
+ACCENT_COLOR = (230, 126, 34)
+BACKGROUND_COLOR = (245, 245, 245)
+TEXT_COLOR = (255, 255, 255)
+DARK_TEXT_COLOR = (30, 30, 30)
+HIGHLIGHT_COLOR = (46, 204, 113)
+BORDER_COLOR = (189, 195, 199)
+
+FONT_SIZE_SMALL = 16
+FONT_SIZE_MEDIUM = 20
+FONT_SIZE_LARGE = 28
+FONT_SIZE_XLARGE = 48
+
+PUZZLE_PADDING = 10
+PIECE_BORDER_WIDTH = 2
+
+DIFFICULTY_LEVELS = {
+    'easy': {'name': '初级', 'grid_size': 3},
+    'medium': {'name': '中级', 'grid_size': 4},
+    'hard': {'name': '高级', 'grid_size': 5}
+}
+
+DEFAULT_IMAGE_PATH = 'assets/images/default_image.png'
