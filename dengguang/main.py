@@ -148,7 +148,28 @@ class Game:
                     if back_button_rect.collidepoint(mouse_pos):
                         self.back_to_menu()
                 
-                elif self.current_screen in ["level_select", "settings", "rules", "win"]:
+                elif self.current_screen == "settings":
+                    back_button_rect = pygame.Rect((SCREEN_WIDTH - 150) // 2, 520, 150, 45)
+                    if back_button_rect.collidepoint(mouse_pos):
+                        self.back_to_menu()
+                    
+                    options = ["sound", "music", "animation"]
+                    for i, opt in enumerate(options):
+                        y = 150 + i * 60
+                        option_rect = pygame.Rect(150, y, 500, 45)
+                        if option_rect.collidepoint(mouse_pos):
+                            if opt == "sound":
+                                self.settings.toggle_sound()
+                                print(f"音效: {'开启' if self.settings.sound_enabled else '关闭'}")
+                            elif opt == "music":
+                                self.settings.toggle_music()
+                                print(f"音乐: {'开启' if self.settings.music_enabled else '关闭'}")
+                            elif opt == "animation":
+                                self.settings.toggle_animation()
+                                print(f"动画: {'开启' if self.settings.animation_enabled else '关闭'}")
+                            break
+                
+                elif self.current_screen in ["level_select", "rules", "win"]:
                     back_button_rect = pygame.Rect((SCREEN_WIDTH - 150) // 2, 520, 150, 45)
                     if back_button_rect.collidepoint(mouse_pos):
                         self.back_to_menu()
@@ -246,14 +267,22 @@ class Game:
             title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 50))
             self.screen.blit(title, title_rect)
             
-            options = ["音效", "音乐", "动画"]
-            for i, opt in enumerate(options):
+            options = [("音效", self.settings.sound_enabled), 
+                       ("音乐", self.settings.music_enabled), 
+                       ("动画", self.settings.animation_enabled)]
+            for i, (opt, enabled) in enumerate(options):
                 y = 150 + i * 60
                 option_rect = pygame.Rect(150, y, 500, 45)
-                pygame.draw.rect(self.screen, theme["button_color"], option_rect, border_radius=8)
+                
+                color = (0, 200, 0) if enabled else theme["button_color"]
+                pygame.draw.rect(self.screen, color, option_rect, border_radius=8)
                 
                 option_text = FONT_MEDIUM.render(opt, True, theme["text_color"])
                 self.screen.blit(option_text, (170, y + 10))
+                
+                status_text = FONT_MEDIUM.render("开启" if enabled else "关闭", True, theme["text_color"])
+                status_rect = status_text.get_rect(right=630, centery=y + 22)
+                self.screen.blit(status_text, status_rect)
             
             self.draw_back_button()
         
