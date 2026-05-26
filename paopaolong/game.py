@@ -685,7 +685,7 @@ class Game:
                     if self.ui_system.hover_button == '返回主菜单':
                         self.game_state = 'start'
                 elif self.game_state == 'playing' and self.cannon.is_ready:
-                    self.flying_bubble = self.cannon.launch_bubble()
+                    self.flying_bubble = self.cannon.launch_bubble(self.game_area_left, self.game_area_right, self.height)
         
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:

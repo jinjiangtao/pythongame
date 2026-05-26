@@ -170,9 +170,14 @@ class Cannon:
                                (int(aim_points[i][0]), int(aim_points[i][1])),
                                (int(aim_points[i+1][0]), int(aim_points[i+1][1])), 2)
 
-    def launch_bubble(self):
+    def launch_bubble(self, game_area_left=0, game_area_right=800, height=600):
         """
         发射泡泡
+        
+        参数:
+            game_area_left: 游戏区域左边界
+            game_area_right: 游戏区域右边界
+            height: 游戏区域高度
         
         返回:
             Bubble: 发射出去的泡泡
@@ -188,6 +193,9 @@ class Cannon:
         barrel_length = 40
         bubble.x = self.x + math.cos(self.angle) * (barrel_length + bubble.radius)
         bubble.y = self.y + math.sin(self.angle) * (barrel_length + bubble.radius)
+        
+        bubble.x = max(game_area_left + bubble.radius + 5, min(bubble.x, game_area_right - bubble.radius - 5))
+        bubble.y = max(bubble.radius + 5, min(bubble.y, height - 100))
         
         self.current_bubble = self.next_bubble
         self.next_bubble = Bubble(self.x, self.y - 20)
