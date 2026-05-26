@@ -1,5 +1,6 @@
 import pygame
 import math
+from bubble import Bubble
 
 class Cannon:
     """
