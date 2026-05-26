@@ -191,6 +191,9 @@ class PuzzleGame:
         
         self.game_logic.update_timer()
         
+        if self.game_logic.hint_piece is not None:
+            self.highlight_hint()
+        
         self.renderer.draw_puzzle_grid(
             self.game_logic.pieces,
             self.game_logic.grid_size,
@@ -214,9 +217,6 @@ class PuzzleGame:
         
         if self.show_preview and self.game_logic.original_image:
             self.draw_preview_window()
-        
-        if self.game_logic.hint_piece is not None:
-            self.highlight_hint()
         
         if self.victory:
             self.renderer.draw_victory_popup(
@@ -261,6 +261,8 @@ class PuzzleGame:
             self.victory = False
         
         elif hint_btn.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+            pygame.time.set_timer(pygame.USEREVENT + 1, 0)
+            self.game_logic.reset_hint()
             self.game_logic.get_hint()
         
         elif preview_btn.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
