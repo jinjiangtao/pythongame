@@ -433,6 +433,7 @@ class Game:
             self.ui_manager.draw(self.screen)
         
         else:
+            self.screen.fill(self.settings.get_theme()["bg_color"])
             self.ui_manager.draw(self.screen)
         
         pygame.display.flip()
