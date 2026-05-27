@@ -8,11 +8,23 @@ class MarkdownPreview(ctk.CTkFrame):
         self.create_widgets()
     
     def create_widgets(self):
-        self.text_widget = ctk.CTkTextbox(
+        if ctk.get_appearance_mode() == "light":
+            bg_color = "#F9F9F9"
+            fg_color = "#1A1A1A"
+        else:
+            bg_color = "#1F1F1F"
+            fg_color = "#FFFFFF"
+        
+        self.text_widget = tk.Text(
             self,
             wrap="word",
             font=("Arial", 14),
-            corner_radius=8,
+            bg=bg_color,
+            fg=fg_color,
+            borderwidth=0,
+            highlightthickness=0,
+            padx=10,
+            pady=10,
             state="disabled"
         )
         self.text_widget.pack(fill="both", expand=True, padx=10, pady=10)
@@ -43,9 +55,9 @@ class MarkdownPreview(ctk.CTkFrame):
         text = text.replace("<blockquote>", "\n> ").replace("</blockquote>", "\n")
         text = text.replace("<br>", "\n")
         text = text.replace("<br/>", "\n")
-        text = text.replace("<li>", "- ").replace("</li>", "\n")
         text = text.replace("<ul>", "\n").replace("</ul>", "\n")
         text = text.replace("<ol>", "\n").replace("</ol>", "\n")
+        text = text.replace("<li>", "- ").replace("</li>", "\n")
         text = text.replace("<hr>", "\n---\n")
         text = text.replace("</tr>", "\n")
         text = text.replace("</td>", " | ")
@@ -55,13 +67,12 @@ class MarkdownPreview(ctk.CTkFrame):
         text = text.replace("<th>", "")
         text = text.replace("<table>", "\n")
         text = text.replace("</table>", "\n")
-        
-        import re
-        text = re.sub(r'<[^>]+>', '', text)
-        
         text = text.replace("&nbsp;", " ")
         text = text.replace("&amp;", "&")
         text = text.replace("&lt;", "<")
         text = text.replace("&gt;", ">")
+        
+        import re
+        text = re.sub(r'<[^>]+>', '', text)
         
         return text.strip()

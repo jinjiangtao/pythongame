@@ -34,16 +34,28 @@ class TextEditor(ctk.CTkFrame):
         self.setup_fonts()
     
     def _get_bg_color(self):
-        return "#f5f5f5" if ctk.get_appearance_mode() == "light" else "#2a2a2a"
+        if ctk.get_appearance_mode() == "light":
+            return "#F9F9F9"
+        else:
+            return "#1F1F1F"
     
     def _get_fg_color(self):
-        return "#1a1a1a" if ctk.get_appearance_mode() == "light" else "#ffffff"
+        if ctk.get_appearance_mode() == "light":
+            return "#1A1A1A"
+        else:
+            return "#FFFFFF"
     
     def _get_insert_color(self):
-        return "#000000" if ctk.get_appearance_mode() == "light" else "#ffffff"
+        if ctk.get_appearance_mode() == "light":
+            return "#1A1A1A"
+        else:
+            return "#FFFFFF"
     
     def _get_select_color(self):
-        return "#80c0ff" if ctk.get_appearance_mode() == "light" else "#3a6ea5"
+        if ctk.get_appearance_mode() == "light":
+            return "#B4D5FF"
+        else:
+            return "#3B8ED0"
     
     def setup_fonts(self):
         self.font_heading1 = tkfont.Font(family="Arial", size=20, weight="bold")

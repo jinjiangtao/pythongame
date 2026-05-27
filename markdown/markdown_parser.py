@@ -56,9 +56,13 @@ class MarkdownParser:
             if line.startswith('> '):
                 line = f'<blockquote>{line[2:]}</blockquote>'
             elif line.startswith('- ') or line.startswith('* '):
-                line = f'<li>{line[2:]}</li>'
+                line = f'<ul><li>{line[2:]}</li></ul>'
             elif line.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '0.')):
-                line = f'<li>{line[2:].lstrip()}</li>'
+                num_match = re.match(r'^(\d+)\.\s*(.*)', line)
+                if num_match:
+                    line = f'<ol><li>{num_match.group(2)}</li></ol>'
+                else:
+                    line = f'<ol><li>{line[2:].lstrip()}</li></ol>'
             elif line.strip() == '':
                 line = '<br/>'
             else:
