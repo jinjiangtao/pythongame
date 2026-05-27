@@ -1,12 +1,40 @@
 import pygame
 import settings
+import os
 
 class UIManager:
     def __init__(self, screen):
         self.screen = screen
-        self.font = pygame.font.Font(None, 24)
-        self.small_font = pygame.font.Font(None, 20)
-        self.large_font = pygame.font.Font(None, 42)
+        self.font = self.get_chinese_font(24)
+        self.small_font = self.get_chinese_font(20)
+        self.large_font = self.get_chinese_font(42)
+    
+    def get_chinese_font(self, size):
+        fonts = [
+            "simhei.ttf",
+            "simkai.ttf", 
+            "simsun.ttc",
+            "msyh.ttc",
+            "msyhbd.ttc",
+            "mingliu.ttc",
+            "kaiu.ttf"
+        ]
+        
+        for font_name in fonts:
+            try:
+                font_path = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts", font_name)
+                if os.path.exists(font_path):
+                    return pygame.font.Font(font_path, size)
+            except:
+                continue
+        
+        try:
+            return pygame.font.SysFont("SimHei", size)
+        except:
+            try:
+                return pygame.font.SysFont("Microsoft YaHei", size)
+            except:
+                return pygame.font.Font(None, size)
 
     def draw_background(self):
         gradient_rect = pygame.Surface((settings.GAME_WIDTH, settings.SCREEN_HEIGHT))
