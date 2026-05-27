@@ -18,9 +18,7 @@ class MainController:
         self.view.exit_btn.config(command=self.view.on_exit)
         
     def show_employee_panel(self):
-        self.view.show_employee_panel()
-        self.view.add_emp_btn.config(command=self.add_employee)
-        self.view.del_emp_btn.config(command=self.delete_employee)
+        self.view.show_employee_panel(add_callback=self.add_employee, del_callback=self.delete_employee)
         self.load_employees()
         self.view.set_status("员工管理面板已打开")
         
@@ -38,26 +36,40 @@ class MainController:
         self.view.set_status("记录查询面板已打开")
         
     def add_employee(self):
-        emp_id = self.view.emp_id_entry.get().strip()
-        name = self.view.emp_name_entry.get().strip()
-        dept = self.view.emp_dept_entry.get().strip()
-        
-        if not emp_id or not name or not dept:
-            self.view.show_message("警告", "请填写完整信息", 'warning')
-            return
+        print("add_employee called")
+        try:
+            emp_id = self.view.emp_id_entry.get().strip()
+            name = self.view.emp_name_entry.get().strip()
+            dept = self.view.emp_dept_entry.get().strip()
             
-        employee = Employee(emp_id, name, dept)
-        
-        if self.emp_dao.add_employee(employee):
-            self.view.show_message("成功", "员工添加成功")
-            self.load_employees()
-            self.view.emp_id_entry.delete(0, 'end')
-            self.view.emp_name_entry.delete(0, 'end')
-            self.view.emp_dept_entry.delete(0, 'end')
-            self.view.set_status(f"员工 {name} 添加成功")
-        else:
-            self.view.show_message("错误", "工号已存在", 'error')
-            self.view.set_status("员工添加失败，工号重复")
+            print(f"Inputs: emp_id='{emp_id}', name='{name}', dept='{dept}'")
+            
+            if not emp_id or not name or not dept:
+                print("Empty input detected")
+                self.view.show_message("警告", "请填写完整信息", 'warning')
+                return
+                
+            employee = Employee(emp_id, name, dept)
+            print(f"Employee object created: {employee.to_dict()}")
+            
+            result = self.emp_dao.add_employee(employee)
+            print(f"DAO add result: {result}")
+            
+            if result:
+                self.view.show_message("成功", "员工添加成功")
+                self.load_employees()
+                self.view.emp_id_entry.delete(0, 'end')
+                self.view.emp_name_entry.delete(0, 'end')
+                self.view.emp_dept_entry.delete(0, 'end')
+                self.view.set_status(f"员工 {name} 添加成功")
+                print("Employee added successfully")
+            else:
+                self.view.show_message("错误", "工号已存在", 'error')
+                self.view.set_status("员工添加失败，工号重复")
+                print("Employee add failed - duplicate ID")
+        except Exception as e:
+            print(f"Exception in add_employee: {str(e)}")
+            self.view.show_message("错误", f"添加失败: {str(e)}", 'error')
             
     def delete_employee(self):
         selected = self.view.emp_tree.selection()

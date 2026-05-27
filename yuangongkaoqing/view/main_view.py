@@ -56,7 +56,7 @@ class MainView:
         self.status_bar = ttk.Label(self.root, text="就绪", relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
         
-    def show_employee_panel(self):
+    def show_employee_panel(self, add_callback=None, del_callback=None):
         self.clear_right_frame()
         
         panel = ttk.Frame(self.right_frame)
@@ -77,10 +77,10 @@ class MainView:
         self.emp_dept_entry = ttk.Entry(top_frame, width=15)
         self.emp_dept_entry.pack(side=tk.LEFT, padx=5)
         
-        self.add_emp_btn = ttk.Button(top_frame, text="新增员工")
+        self.add_emp_btn = ttk.Button(top_frame, text="新增员工", command=add_callback)
         self.add_emp_btn.pack(side=tk.LEFT, padx=10)
         
-        self.del_emp_btn = ttk.Button(top_frame, text="删除员工")
+        self.del_emp_btn = ttk.Button(top_frame, text="删除员工", command=del_callback)
         self.del_emp_btn.pack(side=tk.LEFT, padx=5)
         
         self.emp_tree = ttk.Treeview(panel, columns=('工号', '姓名', '部门'), show='headings')
