@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
+import customtkinter as ctk
 
 class FileManager:
     def __init__(self, parent):
@@ -61,25 +62,33 @@ class FileManager:
         return False
     
     def show_error(self, message):
-        dialog = tk.Toplevel(self.parent)
+        dialog = ctk.CTkToplevel(self.parent)
         dialog.title("错误")
-        dialog.geometry("300x120")
+        dialog.geometry("380x150")
+        dialog.resizable(False, False)
         dialog.transient(self.parent)
+        dialog.grab_set()
         
-        label = tk.Label(dialog, text=message, padx=20, pady=20)
-        label.pack()
+        frame = ctk.CTkFrame(dialog, corner_radius=10)
+        frame.pack(fill="both", expand=True, padx=15, pady=15)
         
-        button = tk.Button(dialog, text="确定", command=dialog.destroy)
-        button.pack(pady=10)
+        ctk.CTkLabel(frame, text="❌", font=("Microsoft YaHei", 24)).pack(pady=(5, 10))
+        ctk.CTkLabel(frame, text=message, font=("Microsoft YaHei", 13), wraplength=340).pack(pady=5)
+        
+        ctk.CTkButton(frame, text="确定", width=80, height=30, corner_radius=6, command=dialog.destroy).pack(pady=10)
     
     def show_info(self, title, message):
-        dialog = tk.Toplevel(self.parent)
+        dialog = ctk.CTkToplevel(self.parent)
         dialog.title(title)
-        dialog.geometry("300x120")
+        dialog.geometry("380x150")
+        dialog.resizable(False, False)
         dialog.transient(self.parent)
+        dialog.grab_set()
         
-        label = tk.Label(dialog, text=message, padx=20, pady=20)
-        label.pack()
+        frame = ctk.CTkFrame(dialog, corner_radius=10)
+        frame.pack(fill="both", expand=True, padx=15, pady=15)
         
-        button = tk.Button(dialog, text="确定", command=dialog.destroy)
-        button.pack(pady=10)
+        ctk.CTkLabel(frame, text="✅", font=("Microsoft YaHei", 24)).pack(pady=(5, 10))
+        ctk.CTkLabel(frame, text=message, font=("Microsoft YaHei", 13), wraplength=340).pack(pady=5)
+        
+        ctk.CTkButton(frame, text="确定", width=80, height=30, corner_radius=6, command=dialog.destroy).pack(pady=10)

@@ -9,85 +9,145 @@ class MarkdownPreview(ctk.CTkFrame):
         self.create_widgets()
     
     def create_widgets(self):
-        if ctk.get_appearance_mode() == "light":
-            bg_color = "#F9F9F9"
-            fg_color = "#1A1A1A"
-        else:
-            bg_color = "#1F1F1F"
-            fg_color = "#FFFFFF"
-        
         self.text_widget = tk.Text(
             self,
             wrap="word",
-            font=("Arial", 14),
-            bg=bg_color,
-            fg=fg_color,
+            font=("Microsoft YaHei", 14),
+            bg=self.get_bg_color(),
+            fg=self.get_fg_color(),
             borderwidth=0,
             highlightthickness=0,
-            padx=10,
-            pady=10,
-            state="disabled"
+            padx=15,
+            pady=15,
+            state="disabled",
+            spacing1=8,
+            spacing2=4,
+            spacing3=12
         )
-        self.text_widget.pack(fill="both", expand=True, padx=10, pady=10)
+        self.text_widget.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        self.setup_tags()
+    
+    def get_bg_color(self):
+        return "#252525" if ctk.get_appearance_mode() == "dark" else "#ffffff"
+    
+    def get_fg_color(self):
+        return "#e8e8e8" if ctk.get_appearance_mode() == "dark" else "#333333"
+    
+    def setup_tags(self):
+        self.text_widget.tag_config("h1", font=("Microsoft YaHei", 28, "bold"), foreground="#ff6b6b", spacing3=20)
+        self.text_widget.tag_config("h2", font=("Microsoft YaHei", 24, "bold"), foreground="#feca57", spacing3=16)
+        self.text_widget.tag_config("h3", font=("Microsoft YaHei", 20, "bold"), foreground="#48dbfb", spacing3=12)
+        self.text_widget.tag_config("h4", font=("Microsoft YaHei", 18, "bold"), foreground="#1dd1a1", spacing3=10)
+        self.text_widget.tag_config("h5", font=("Microsoft YaHei", 16, "bold"), foreground="#5f27cd")
+        self.text_widget.tag_config("h6", font=("Microsoft YaHei", 14, "bold"), foreground="#ff9ff3")
+        self.text_widget.tag_config("bold", font=("Microsoft YaHei", 14, "bold"))
+        self.text_widget.tag_config("italic", font=("Microsoft YaHei", 14, "italic"))
+        self.text_widget.tag_config("code", font=("Consolas", 13), foreground="#ff6b6b", background="#3d3d3d" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", borderwidth=1, relief="flat")
+        self.text_widget.tag_config("link", foreground="#48dbfb", underline=True)
+        self.text_widget.tag_config("quote", foreground="#a0a0a0", font=("Microsoft YaHei", 14, "italic"), lmargin1=20, lmargin2=20)
+        self.text_widget.tag_config("list", lmargin1=20, lmargin2=20)
+        self.text_widget.tag_config("codeblock", font=("Consolas", 13), background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", spacing1=8, spacing3=8, lmargin1=15)
     
     def set_content(self, html_content):
         self.text_widget.configure(state="normal")
         self.text_widget.delete("1.0", "end")
         
-        self.text_widget.insert("1.0", self.html_to_text(html_content))
+        parsed_content = self.parse_html(html_content)
+        self.insert_parsed_content(parsed_content)
         
         self.text_widget.configure(state="disabled")
     
-    def html_to_text(self, html):
-        text = html
+    def parse_html(self, html):
+        elements = []
+        lines = html.split('\n')
         
-        text = text.replace("<h1>", "\n").replace("</h1>", "\n\n")
-        text = text.replace("<h2>", "\n").replace("</h2>", "\n\n")
-        text = text.replace("<h3>", "\n").replace("</h3>", "\n\n")
-        text = text.replace("<h4>", "\n").replace("</h4>", "\n\n")
-        text = text.replace("<h5>", "\n").replace("</h5>", "\n\n")
-        text = text.replace("<h6>", "\n").replace("</h6>", "\n\n")
-        text = text.replace("<p>", "\n").replace("</p>", "\n\n")
-        text = text.replace("<strong>", "**").replace("</strong>", "**")
-        text = text.replace("<b>", "**").replace("</b>", "**")
-        text = text.replace("<em>", "*").replace("</em>", "*")
-        text = text.replace("<i>", "*").replace("</i>", "*")
-        text = text.replace("<code>", "`").replace("</code>", "`")
-        text = text.replace("<pre>", "\n```\n").replace("</pre>", "\n```\n")
-        text = text.replace("<blockquote>", "\n> ").replace("</blockquote>", "\n")
-        text = text.replace("<br>", "\n")
-        text = text.replace("<br/>", "\n")
-        text = text.replace("<hr>", "\n---\n")
-        text = text.replace("</tr>", "\n")
-        text = text.replace("</td>", " | ")
-        text = text.replace("</th>", " | ")
-        text = text.replace("<tr>", "")
-        text = text.replace("<td>", "")
-        text = text.replace("<th>", "")
-        text = text.replace("<table>", "\n")
-        text = text.replace("</table>", "\n")
-        text = text.replace("&nbsp;", " ")
-        text = text.replace("&amp;", "&")
-        text = text.replace("&lt;", "<")
-        text = text.replace("&gt;", ">")
+        in_code_block = False
+        code_content = []
         
-        text = self.process_lists(text)
+        for line in lines:
+            if line.startswith('<pre><code>'):
+                in_code_block = True
+                code_content = []
+                continue
+            
+            if line.startswith('</code></pre>'):
+                in_code_block = False
+                elements.append(('codeblock', '\n'.join(code_content)))
+                continue
+            
+            if in_code_block:
+                code_content.append(self.escape_text(line))
+                continue
+            
+            line = line.strip()
+            
+            if line.startswith('<h1>') and line.endswith('</h1>'):
+                elements.append(('h1', line[4:-5]))
+            elif line.startswith('<h2>') and line.endswith('</h2>'):
+                elements.append(('h2', line[4:-5]))
+            elif line.startswith('<h3>') and line.endswith('</h3>'):
+                elements.append(('h3', line[4:-5]))
+            elif line.startswith('<h4>') and line.endswith('</h4>'):
+                elements.append(('h4', line[4:-5]))
+            elif line.startswith('<h5>') and line.endswith('</h5>'):
+                elements.append(('h5', line[4:-5]))
+            elif line.startswith('<h6>') and line.endswith('</h6>'):
+                elements.append(('h6', line[4:-6]))
+            elif line.startswith('<blockquote>') and line.endswith('</blockquote>'):
+                elements.append(('quote', line[12:-13]))
+            elif line.startswith('<p>') and line.endswith('</p>'):
+                elements.append(('p', self.parse_inline_elements(line[3:-4])))
+            elif line.startswith('<ul><li>') and line.endswith('</li></ul>'):
+                elements.append(('list', '- ' + line[8:-11]))
+            elif line.startswith('<ol><li>') and line.endswith('</li></ol>'):
+                elements.append(('list', '1. ' + line[8:-11]))
+            elif line == '<br/>':
+                elements.append(('br', ''))
+            elif line == '<hr/>':
+                elements.append(('hr', '────────────────────────────────────────'))
         
-        text = re.sub(r'<[^>]+>', '', text)
-        
-        return text.strip()
+        return elements
     
-    def process_lists(self, html):
-        html = re.sub(r'<ul>\s*<li>([^<]+)</li>\s*</ul>', r'\n- \1', html)
+    def parse_inline_elements(self, text):
+        text = text.replace('&nbsp;', ' ')
+        text = text.replace('&amp;', '&')
+        text = text.replace('&lt;', '<')
+        text = text.replace('&gt;', '>')
         
-        def replace_ol(match):
-            content = match.group(1)
-            li_items = re.findall(r'<li>([^<]+)</li>', content)
-            result = ""
-            for i, item in enumerate(li_items, 1):
-                result += f"\n{i}. {item}"
-            return result
+        text = re.sub(r'<strong>([^<]+)</strong>', r'**\1**', text)
+        text = re.sub(r'<b>([^<]+)</b>', r'**\1**', text)
+        text = re.sub(r'<em>([^<]+)</em>', r'*\1*', text)
+        text = re.sub(r'<i>([^<]+)</i>', r'*\1*', text)
+        text = re.sub(r'<code>([^<]+)</code>', r'`\1`', text)
+        text = re.sub(r'<a href="([^"]+)">([^<]+)</a>', r'[\2](\1)', text)
+        text = re.sub(r'<img src="([^"]+)" alt="([^"]*)"/>', r'![\2](\1)', text)
         
-        html = re.sub(r'<ol>(.*?)</ol>', replace_ol, html, flags=re.DOTALL)
+        return text
+    
+    def insert_parsed_content(self, elements):
+        for element_type, content in elements:
+            if element_type == 'br':
+                self.text_widget.insert("end", "\n")
+            elif element_type == 'hr':
+                self.text_widget.insert("end", content + "\n\n")
+            elif element_type == 'codeblock':
+                self.text_widget.insert("end", content + "\n\n", "codeblock")
+            else:
+                self.text_widget.insert("end", content + "\n\n", element_type)
+    
+    def escape_text(self, text):
+        text = text.replace('&amp;', '&')
+        text = text.replace('&lt;', '<')
+        text = text.replace('&gt;', '>')
+        text = text.replace('&quot;', '"')
+        return text
+    
+    def refresh_theme(self):
+        bg_color = self.get_bg_color()
+        fg_color = self.get_fg_color()
         
-        return html
+        self.text_widget.config(bg=bg_color, fg=fg_color)
+        
+        self.text_widget.tag_config("code", background="#3d3d3d" if ctk.get_appearance_mode() == "dark" else "#f4f4f4")
+        self.text_widget.tag_config("codeblock", background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4")
