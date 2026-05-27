@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
+import re
 
 class MarkdownPreview(ctk.CTkFrame):
     def __init__(self, parent):
@@ -39,6 +40,7 @@ class MarkdownPreview(ctk.CTkFrame):
     
     def html_to_text(self, html):
         text = html
+        
         text = text.replace("<h1>", "\n").replace("</h1>", "\n\n")
         text = text.replace("<h2>", "\n").replace("</h2>", "\n\n")
         text = text.replace("<h3>", "\n").replace("</h3>", "\n\n")
@@ -55,9 +57,6 @@ class MarkdownPreview(ctk.CTkFrame):
         text = text.replace("<blockquote>", "\n> ").replace("</blockquote>", "\n")
         text = text.replace("<br>", "\n")
         text = text.replace("<br/>", "\n")
-        text = text.replace("<ul>", "\n").replace("</ul>", "\n")
-        text = text.replace("<ol>", "\n").replace("</ol>", "\n")
-        text = text.replace("<li>", "- ").replace("</li>", "\n")
         text = text.replace("<hr>", "\n---\n")
         text = text.replace("</tr>", "\n")
         text = text.replace("</td>", " | ")
@@ -72,7 +71,23 @@ class MarkdownPreview(ctk.CTkFrame):
         text = text.replace("&lt;", "<")
         text = text.replace("&gt;", ">")
         
-        import re
+        text = self.process_lists(text)
+        
         text = re.sub(r'<[^>]+>', '', text)
         
         return text.strip()
+    
+    def process_lists(self, html):
+        html = re.sub(r'<ul>\s*<li>([^<]+)</li>\s*</ul>', r'\n- \1', html)
+        
+        def replace_ol(match):
+            content = match.group(1)
+            li_items = re.findall(r'<li>([^<]+)</li>', content)
+            result = ""
+            for i, item in enumerate(li_items, 1):
+                result += f"\n{i}. {item}"
+            return result
+        
+        html = re.sub(r'<ol>(.*?)</ol>', replace_ol, html, flags=re.DOTALL)
+        
+        return html

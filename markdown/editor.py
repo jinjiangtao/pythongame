@@ -8,19 +8,31 @@ class TextEditor(ctk.CTkFrame):
         super().__init__(parent, corner_radius=8)
         
         self.on_change_callback = on_change_callback
+        self.highlight_delay = None
         
         self.create_widgets()
     
     def create_widgets(self):
+        if ctk.get_appearance_mode() == "light":
+            bg_color = "#F9F9F9"
+            fg_color = "#1A1A1A"
+            insert_color = "#1A1A1A"
+            select_color = "#B4D5FF"
+        else:
+            bg_color = "#1F1F1F"
+            fg_color = "#FFFFFF"
+            insert_color = "#FFFFFF"
+            select_color = "#3B8ED0"
+        
         self.text_widget = tk.Text(
             self,
             wrap="word",
             undo=True,
             font=("Consolas", 14),
-            bg=self._get_bg_color(),
-            fg=self._get_fg_color(),
-            insertbackground=self._get_insert_color(),
-            selectbackground=self._get_select_color(),
+            bg=bg_color,
+            fg=fg_color,
+            insertbackground=insert_color,
+            selectbackground=select_color,
             borderwidth=0,
             highlightthickness=0,
             padx=10,
@@ -32,30 +44,6 @@ class TextEditor(ctk.CTkFrame):
         self.text_widget.bind("<KeyRelease>", self.on_key_release)
         
         self.setup_fonts()
-    
-    def _get_bg_color(self):
-        if ctk.get_appearance_mode() == "light":
-            return "#F9F9F9"
-        else:
-            return "#1F1F1F"
-    
-    def _get_fg_color(self):
-        if ctk.get_appearance_mode() == "light":
-            return "#1A1A1A"
-        else:
-            return "#FFFFFF"
-    
-    def _get_insert_color(self):
-        if ctk.get_appearance_mode() == "light":
-            return "#1A1A1A"
-        else:
-            return "#FFFFFF"
-    
-    def _get_select_color(self):
-        if ctk.get_appearance_mode() == "light":
-            return "#B4D5FF"
-        else:
-            return "#3B8ED0"
     
     def setup_fonts(self):
         self.font_heading1 = tkfont.Font(family="Arial", size=20, weight="bold")
@@ -71,9 +59,17 @@ class TextEditor(ctk.CTkFrame):
     def on_modified(self, event):
         if self.text_widget.edit_modified():
             self.text_widget.edit_modified(False)
-            self.highlight_syntax()
+            if self.highlight_delay:
+                self.text_widget.after_cancel(self.highlight_delay)
+            self.highlight_delay = self.text_widget.after(100, self.highlight_syntax)
     
     def on_key_release(self, event):
+        if self.on_change_callback:
+            if self.highlight_delay:
+                self.text_widget.after_cancel(self.highlight_delay)
+            self.highlight_delay = self.text_widget.after(150, self.trigger_change)
+    
+    def trigger_change(self):
         if self.on_change_callback:
             self.on_change_callback()
     
