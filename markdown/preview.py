@@ -74,7 +74,7 @@ class MarkdownPreview(ctk.CTkFrame):
                 code_content = []
                 continue
             
-            if line.startswith('</code></pre>'):
+            if line.startswith('</pre></code>'):
                 in_code_block = False
                 elements.append(('codeblock', '\n'.join(code_content)))
                 continue
