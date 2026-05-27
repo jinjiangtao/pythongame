@@ -61,8 +61,8 @@ class ListPanel(ctk.CTkFrame):
         self.list_container.grid_rowconfigure(0, weight=1)
         self.list_container.grid_columnconfigure(0, weight=1)
 
-        self.header_frame = ctk.CTkFrame(self.list_container, corner_radius=0, height=40, fg_color="#1e3a5f")
-        self.header_frame.grid(row=0, column=0, padx=5, pady=(5, 0), sticky="ew")
+        self.header_frame = ctk.CTkFrame(self.list_container, corner_radius=0, height=32, fg_color="#1e3a5f")
+        self.header_frame.grid(row=0, column=0, padx=3, pady=(3, 0), sticky="ew")
         self.header_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
         self.header_frame.grid_columnconfigure(7, weight=0)
         self.header_frame.pack_propagate(False)
@@ -106,9 +106,9 @@ class ListPanel(ctk.CTkFrame):
         self.scroll_frame = ctk.CTkFrame(self.canvas_frame, corner_radius=0, fg_color="transparent")
 
         self.canvas_frame.configure(yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
-        self.scrollbar_y.grid(row=0, column=1, sticky="ns", padx=(0, 5), pady=(45, 5))
-        self.scrollbar_x.grid(row=1, column=0, sticky="ew", padx=5, pady=(0, 5))
-        self.canvas_frame.grid(row=0, column=0, sticky="nsew", padx=(5, 0), pady=(45, 0))
+        self.scrollbar_y.grid(row=0, column=1, sticky="ns", padx=(0, 3), pady=(35, 3))
+        self.scrollbar_x.grid(row=1, column=0, sticky="ew", padx=3, pady=(0, 3))
+        self.canvas_frame.grid(row=0, column=0, sticky="nsew", padx=(3, 0), pady=(35, 0))
 
         self.scroll_window = self.canvas_frame.create_window((0, 0), window=self.scroll_frame, anchor="nw")
 
@@ -237,11 +237,12 @@ class ListPanel(ctk.CTkFrame):
             return
 
         for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
+            if widget != self.empty_label:
+                widget.destroy()
 
         if not self.registrations:
             self.empty_label.configure(text="未找到匹配的挂号记录\n请尝试调整搜索条件")
-            self.empty_label.pack(pady=50)
+            self.empty_label.pack(pady=20)
             return
 
         self.empty_label.pack_forget()
@@ -249,8 +250,8 @@ class ListPanel(ctk.CTkFrame):
         for i, reg in enumerate(self.registrations):
             bg_color = "#f8f9fa" if i % 2 == 0 else "#ffffff"
 
-            row_frame = ctk.CTkFrame(self.scroll_frame, corner_radius=0, height=42, fg_color=bg_color)
-            row_frame.grid(row=i, column=0, sticky="ew")
+            row_frame = ctk.CTkFrame(self.scroll_frame, corner_radius=0, height=32, fg_color=bg_color)
+            row_frame.grid(row=i, column=0, sticky="ew", pady=0)
             row_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
             row_frame.grid_columnconfigure(7, weight=0)
             row_frame.grid_columnconfigure(0, minsize=60)
@@ -278,11 +279,11 @@ class ListPanel(ctk.CTkFrame):
                     row_frame,
                     text=text,
                     anchor="center",
-                    font=ctk.CTkFont(size=12),
+                    font=ctk.CTkFont(size=11),
                     text_color="#374151",
                     wraplength=0
                 )
-                label.grid(row=0, column=j, padx=2, pady=8, sticky="nsew")
+                label.grid(row=0, column=j, padx=2, pady=4, sticky="nsew")
 
             action_frame = ctk.CTkFrame(row_frame, fg_color=bg_color)
             action_frame.grid(row=0, column=7, padx=2, pady=4, sticky="nsew")
