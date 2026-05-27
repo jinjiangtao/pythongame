@@ -21,10 +21,22 @@ class MarkdownParser:
         lines = markdown.split('\n')
         html_lines = []
         in_code_block = False
+        in_ul = False
+        in_ol = False
+        ol_counter = 1
         code_language = ""
         
-        for line in lines:
+        for i, line in enumerate(lines):
             if line.startswith('```'):
+                # Close any open lists first
+                if in_ul:
+                    html_lines.append('</ul>')
+                    in_ul = False
+                if in_ol:
+                    html_lines.append('</ol>')
+                    in_ol = False
+                    ol_counter = 1
+                
                 if in_code_block:
                     html_lines.append('</pre></code>')
                     in_code_block = False
@@ -39,12 +51,54 @@ class MarkdownParser:
                 html_lines.append(self.escape_html(line))
                 continue
             
-            processed_line = self.process_line(line)
-            html_lines.append(processed_line)
+            # Check if it's a list item
+            is_ul_item = line.startswith('- ') or line.startswith('* ')
+            is_ol_item = False
+            if not is_ul_item:
+                is_ol_item = re.match(r'^\d+\.\s', line) is not None
+            
+            # Close lists if not continuing a list
+            if in_ul and not is_ul_item:
+                html_lines.append('</ul>')
+                in_ul = False
+            if in_ol and not is_ol_item:
+                html_lines.append('</ol>')
+                in_ol = False
+                ol_counter = 1
+            
+            if is_ul_item:
+                if not in_ul:
+                    html_lines.append('<ul>')
+                    in_ul = True
+                # Just add the li without wrapping
+                processed_line = self.process_line(line[2:], is_list_item=True)
+                html_lines.append(f'<li>{processed_line}</li>')
+            elif is_ol_item:
+                if not in_ol:
+                    html_lines.append('<ol>')
+                    in_ol = True
+                # Extract the number and content
+                num_match = re.match(r'^(\d+)\.\s*(.*)', line)
+                if num_match:
+                    content = num_match.group(2)
+                    processed_line = self.process_line(content, is_list_item=True)
+                    html_lines.append(f'<li>{processed_line}</li>')
+                    ol_counter += 1
+                else:
+                    html_lines.append(f'<li>{line}</li>')
+            else:
+                processed_line = self.process_line(line)
+                html_lines.append(processed_line)
+        
+        # Close any remaining open tags
+        if in_ul:
+            html_lines.append('</ul>')
+        if in_ol:
+            html_lines.append('</ol>')
         
         return '\n'.join(html_lines)
     
-    def process_line(self, line):
+    def process_line(self, line, is_list_item=False):
         original_line = line
         
         for pattern, replacement in self.rules:
@@ -52,17 +106,9 @@ class MarkdownParser:
                 line = re.sub(pattern, replacement, line)
                 break
         
-        if line == original_line:
+        if line == original_line and not is_list_item:
             if line.startswith('> '):
                 line = f'<blockquote>{line[2:]}</blockquote>'
-            elif line.startswith('- ') or line.startswith('* '):
-                line = f'<ul><li>{line[2:]}</li></ul>'
-            elif line.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '0.')):
-                num_match = re.match(r'^(\d+)\.\s*(.*)', line)
-                if num_match:
-                    line = f'<ol><li>{num_match.group(2)}</li></ol>'
-                else:
-                    line = f'<ol><li>{line[2:].lstrip()}</li></ol>'
             elif line.strip() == '':
                 line = '<br/>'
             else:

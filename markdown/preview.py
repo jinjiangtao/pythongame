@@ -17,12 +17,12 @@ class MarkdownPreview(ctk.CTkFrame):
             fg=self.get_fg_color(),
             borderwidth=0,
             highlightthickness=0,
-            padx=15,
-            pady=15,
+            padx=12,
+            pady=12,
             state="disabled",
-            spacing1=8,
-            spacing2=4,
-            spacing3=12
+            spacing1=5,
+            spacing2=3,
+            spacing3=8
         )
         self.text_widget.pack(fill="both", expand=True, padx=5, pady=5)
         
@@ -35,19 +35,19 @@ class MarkdownPreview(ctk.CTkFrame):
         return "#e8e8e8" if ctk.get_appearance_mode() == "dark" else "#333333"
     
     def setup_tags(self):
-        self.text_widget.tag_config("h1", font=("Microsoft YaHei", 28, "bold"), foreground="#ff6b6b", spacing3=20)
-        self.text_widget.tag_config("h2", font=("Microsoft YaHei", 24, "bold"), foreground="#feca57", spacing3=16)
-        self.text_widget.tag_config("h3", font=("Microsoft YaHei", 20, "bold"), foreground="#48dbfb", spacing3=12)
-        self.text_widget.tag_config("h4", font=("Microsoft YaHei", 18, "bold"), foreground="#1dd1a1", spacing3=10)
-        self.text_widget.tag_config("h5", font=("Microsoft YaHei", 16, "bold"), foreground="#5f27cd")
-        self.text_widget.tag_config("h6", font=("Microsoft YaHei", 14, "bold"), foreground="#ff9ff3")
+        self.text_widget.tag_config("h1", font=("Microsoft YaHei", 26, "bold"), foreground="#ff6b6b", spacing3=12)
+        self.text_widget.tag_config("h2", font=("Microsoft YaHei", 22, "bold"), foreground="#feca57", spacing3=10)
+        self.text_widget.tag_config("h3", font=("Microsoft YaHei", 18, "bold"), foreground="#48dbfb", spacing3=8)
+        self.text_widget.tag_config("h4", font=("Microsoft YaHei", 16, "bold"), foreground="#1dd1a1", spacing3=6)
+        self.text_widget.tag_config("h5", font=("Microsoft YaHei", 14, "bold"), foreground="#5f27cd")
+        self.text_widget.tag_config("h6", font=("Microsoft YaHei", 13, "bold"), foreground="#ff9ff3")
         self.text_widget.tag_config("bold", font=("Microsoft YaHei", 14, "bold"))
         self.text_widget.tag_config("italic", font=("Microsoft YaHei", 14, "italic"))
         self.text_widget.tag_config("code", font=("Consolas", 13), foreground="#ff6b6b", background="#3d3d3d" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", borderwidth=1, relief="flat")
         self.text_widget.tag_config("link", foreground="#48dbfb", underline=True)
         self.text_widget.tag_config("quote", foreground="#a0a0a0", font=("Microsoft YaHei", 14, "italic"), lmargin1=20, lmargin2=20)
         self.text_widget.tag_config("list", lmargin1=20, lmargin2=20)
-        self.text_widget.tag_config("codeblock", font=("Consolas", 13), background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", spacing1=8, spacing3=8, lmargin1=15)
+        self.text_widget.tag_config("codeblock", font=("Consolas", 13), background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", spacing1=6, spacing3=6, lmargin1=15)
     
     def set_content(self, html_content):
         self.text_widget.configure(state="normal")
@@ -64,6 +64,9 @@ class MarkdownPreview(ctk.CTkFrame):
         
         in_code_block = False
         code_content = []
+        in_ul = False
+        in_ol = False
+        ol_counter = 1
         
         for line in lines:
             if line.startswith('<pre><code>'):
@@ -82,7 +85,28 @@ class MarkdownPreview(ctk.CTkFrame):
             
             line = line.strip()
             
-            if line.startswith('<h1>') and line.endswith('</h1>'):
+            if line == '<ul>':
+                in_ul = True
+                continue
+            elif line == '</ul>':
+                in_ul = False
+                continue
+            elif line == '<ol>':
+                in_ol = True
+                ol_counter = 1
+                continue
+            elif line == '</ol>':
+                in_ol = False
+                continue
+            elif line.startswith('<li>') and line.endswith('</li>'):
+                content = self.parse_inline_elements(line[4:-5])
+                if in_ul:
+                    elements.append(('list', '- ' + content))
+                elif in_ol:
+                    elements.append(('list', f'{ol_counter}. ' + content))
+                    ol_counter += 1
+                continue
+            elif line.startswith('<h1>') and line.endswith('</h1>'):
                 elements.append(('h1', line[4:-5]))
             elif line.startswith('<h2>') and line.endswith('</h2>'):
                 elements.append(('h2', line[4:-5]))
@@ -98,10 +122,6 @@ class MarkdownPreview(ctk.CTkFrame):
                 elements.append(('quote', line[12:-13]))
             elif line.startswith('<p>') and line.endswith('</p>'):
                 elements.append(('p', self.parse_inline_elements(line[3:-4])))
-            elif line.startswith('<ul><li>') and line.endswith('</li></ul>'):
-                elements.append(('list', '- ' + line[8:-11]))
-            elif line.startswith('<ol><li>') and line.endswith('</li></ol>'):
-                elements.append(('list', '1. ' + line[8:-11]))
             elif line == '<br/>':
                 elements.append(('br', ''))
             elif line == '<hr/>':
@@ -126,7 +146,7 @@ class MarkdownPreview(ctk.CTkFrame):
         return text
     
     def insert_parsed_content(self, elements):
-        for element_type, content in elements:
+        for i, (element_type, content) in enumerate(elements):
             if element_type == 'br':
                 self.text_widget.insert("end", "\n")
             elif element_type == 'hr':
