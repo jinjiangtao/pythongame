@@ -170,5 +170,5 @@ class MarkdownPreview(ctk.CTkFrame):
         
         self.text_widget.config(bg=bg_color, fg=fg_color)
         
-        self.text_widget.tag_config("code", background="#3d3d3d" if ctk.get_appearance_mode() == "dark" else "#f4f4f4")
-        self.text_widget.tag_config("codeblock", background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4")
+        self.text_widget.tag_config("code", foreground="#ff6b6b", background="#3d3d3d" if ctk.get_appearance_mode() == "dark" else "#f4f4f4")
+        self.text_widget.tag_config("codeblock", foreground="#e8e8e8" if ctk.get_appearance_mode() == "dark" else "#333333", background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4")
