@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import tkinter as tk
 import tkinter.font as tkfont
 import re
 
@@ -11,12 +12,19 @@ class TextEditor(ctk.CTkFrame):
         self.create_widgets()
     
     def create_widgets(self):
-        self.text_widget = ctk.CTkTextbox(
+        self.text_widget = tk.Text(
             self,
             wrap="word",
             undo=True,
             font=("Consolas", 14),
-            corner_radius=8
+            bg=self._get_bg_color(),
+            fg=self._get_fg_color(),
+            insertbackground=self._get_insert_color(),
+            selectbackground=self._get_select_color(),
+            borderwidth=0,
+            highlightthickness=0,
+            padx=10,
+            pady=10
         )
         self.text_widget.pack(fill="both", expand=True, padx=10, pady=10)
         
@@ -24,6 +32,18 @@ class TextEditor(ctk.CTkFrame):
         self.text_widget.bind("<KeyRelease>", self.on_key_release)
         
         self.setup_fonts()
+    
+    def _get_bg_color(self):
+        return "#f5f5f5" if ctk.get_appearance_mode() == "light" else "#2a2a2a"
+    
+    def _get_fg_color(self):
+        return "#1a1a1a" if ctk.get_appearance_mode() == "light" else "#ffffff"
+    
+    def _get_insert_color(self):
+        return "#000000" if ctk.get_appearance_mode() == "light" else "#ffffff"
+    
+    def _get_select_color(self):
+        return "#80c0ff" if ctk.get_appearance_mode() == "light" else "#3a6ea5"
     
     def setup_fonts(self):
         self.font_heading1 = tkfont.Font(family="Arial", size=20, weight="bold")
@@ -73,18 +93,18 @@ class TextEditor(ctk.CTkFrame):
             elif line.startswith("> "):
                 self.text_widget.tag_add("quote", f"{i}.0", f"{i}.{line_len}")
         
-        self.text_widget.tag_config("heading1", font=self.font_heading1, foreground="#1a1a1a")
-        self.text_widget.tag_config("heading2", font=self.font_heading2, foreground="#2a2a2a")
-        self.text_widget.tag_config("heading3", font=self.font_heading3, foreground="#3a3a3a")
-        self.text_widget.tag_config("heading4", font=self.font_heading4, foreground="#4a4a4a")
-        self.text_widget.tag_config("heading5", font=self.font_heading5, foreground="#5a5a5a")
-        self.text_widget.tag_config("heading6", font=self.font_heading6, foreground="#6a6a6a")
+        self.text_widget.tag_config("heading1", font=self.font_heading1, foreground="#e74c3c")
+        self.text_widget.tag_config("heading2", font=self.font_heading2, foreground="#e67e22")
+        self.text_widget.tag_config("heading3", font=self.font_heading3, foreground="#f39c12")
+        self.text_widget.tag_config("heading4", font=self.font_heading4, foreground="#3498db")
+        self.text_widget.tag_config("heading5", font=self.font_heading5, foreground="#9b59b6")
+        self.text_widget.tag_config("heading6", font=self.font_heading6, foreground="#1abc9c")
         self.text_widget.tag_config("bold", font=self.font_bold)
         self.text_widget.tag_config("italic", font=self.font_italic)
-        self.text_widget.tag_config("code", font=self.font_code, foreground="#0066cc")
-        self.text_widget.tag_config("link", foreground="#0066cc", underline=True)
-        self.text_widget.tag_config("list", foreground="#0088cc")
-        self.text_widget.tag_config("quote", foreground="#666666", font=self.font_italic)
+        self.text_widget.tag_config("code", font=self.font_code, foreground="#e74c3c", background="#f8f9fa")
+        self.text_widget.tag_config("link", foreground="#3498db", underline=True)
+        self.text_widget.tag_config("list", foreground="#27ae60")
+        self.text_widget.tag_config("quote", foreground="#7f8c8d", font=self.font_italic)
         
         self.highlight_inline_syntax("**", "**", "bold")
         self.highlight_inline_syntax("*", "*", "italic")
@@ -145,7 +165,10 @@ class TextEditor(ctk.CTkFrame):
         self.text_widget.insert("insert", text)
     
     def insert_syntax(self, prefix, suffix=""):
-        selected_text = self.text_widget.get("sel.first", "sel.last")
+        try:
+            selected_text = self.text_widget.get("sel.first", "sel.last")
+        except:
+            selected_text = ""
         
         if selected_text:
             self.text_widget.delete("sel.first", "sel.last")
