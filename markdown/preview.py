@@ -47,7 +47,7 @@ class MarkdownPreview(ctk.CTkFrame):
         self.text_widget.tag_config("link", foreground="#48dbfb", underline=True)
         self.text_widget.tag_config("quote", foreground="#a0a0a0", font=("Microsoft YaHei", 14, "italic"), lmargin1=20, lmargin2=20)
         self.text_widget.tag_config("list", lmargin1=20, lmargin2=20)
-        self.text_widget.tag_config("codeblock", font=("Consolas", 13), background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", spacing1=6, spacing3=6, lmargin1=15)
+        self.text_widget.tag_config("codeblock", font=("Consolas", 13), foreground="#e8e8e8" if ctk.get_appearance_mode() == "dark" else "#333333", background="#1e1e1e" if ctk.get_appearance_mode() == "dark" else "#f4f4f4", spacing1=6, spacing3=6, lmargin1=15)
     
     def set_content(self, html_content):
         self.text_widget.configure(state="normal")
@@ -161,6 +161,7 @@ class MarkdownPreview(ctk.CTkFrame):
         text = text.replace('&lt;', '<')
         text = text.replace('&gt;', '>')
         text = text.replace('&quot;', '"')
+        text = text.replace('&#39;', "'")
         return text
     
     def refresh_theme(self):
