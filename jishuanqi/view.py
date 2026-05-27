@@ -10,7 +10,6 @@ class CalculatorDisplay(ctk.CTkFrame):
             self,
             text="",
             font=ctk.CTkFont(size=16, weight="normal"),
-            text_color="#8b8b8b",
             anchor="e"
         )
         self.history_label.pack(side="top", fill="x", padx=20, pady=(10, 0), anchor="e")
@@ -19,7 +18,6 @@ class CalculatorDisplay(ctk.CTkFrame):
             self,
             text="0",
             font=ctk.CTkFont(size=42, weight="bold"),
-            text_color="#ffffff",
             anchor="e"
         )
         self.result_label.pack(side="bottom", fill="x", padx=20, pady=(5, 15), anchor="e")
@@ -30,44 +28,78 @@ class CalculatorDisplay(ctk.CTkFrame):
     def update_result(self, text):
         self.result_label.configure(text=text)
 
+    def update_colors(self, is_dark):
+        if is_dark:
+            self.history_label.configure(text_color="#8b8b8b")
+            self.result_label.configure(text_color="#ffffff")
+        else:
+            self.history_label.configure(text_color="#6b6b6b")
+            self.result_label.configure(text_color="#1a1a1a")
+
 
 class CalculatorButton(ctk.CTkButton):
     def __init__(self, parent, text, command, button_type="number"):
         super().__init__(parent, text=text, command=command)
-
+        self.button_type = button_type
+        
         self.configure(
             corner_radius=12,
             font=ctk.CTkFont(size=20, weight="bold"),
             border_width=0,
-            fg_color=self._get_fg_color(button_type),
-            hover_color=self._get_hover_color(button_type),
-            text_color=self._get_text_color(button_type),
             height=60,
             width=70
         )
+        self.update_colors(is_dark=True)
 
-    def _get_fg_color(self, button_type):
-        colors = {
-            "number": ("#3a3a3a", "#2a2a2a"),
-            "operator": ("#ff9500", "#e68600"),
-            "function": ("#6b6b6b", "#5a5a5a"),
-            "equals": ("#ff6b35", "#e65a2b")
-        }
-        return colors.get(button_type, colors["number"])
+    def update_colors(self, is_dark):
+        fg_color = self._get_fg_color(is_dark)
+        hover_color = self._get_hover_color(is_dark)
+        text_color = self._get_text_color(is_dark)
+        
+        self.configure(
+            fg_color=fg_color,
+            hover_color=hover_color,
+            text_color=text_color
+        )
 
-    def _get_hover_color(self, button_type):
-        colors = {
-            "number": "#4a4a4a",
-            "operator": "#ffad40",
-            "function": "#7b7b7b",
-            "equals": "#ff8a5c"
-        }
-        return colors.get(button_type, colors["number"])
+    def _get_fg_color(self, is_dark):
+        if is_dark:
+            colors = {
+                "number": "#3a3a3a",
+                "operator": "#ff9500",
+                "function": "#6b6b6b",
+                "equals": "#ff6b35"
+            }
+        else:
+            colors = {
+                "number": "#e0e0e0",
+                "operator": "#ffb347",
+                "function": "#d0d0d0",
+                "equals": "#ff8a5c"
+            }
+        return colors.get(self.button_type, colors["number"])
 
-    def _get_text_color(self, button_type):
-        if button_type == "equals":
+    def _get_hover_color(self, is_dark):
+        if is_dark:
+            colors = {
+                "number": "#4a4a4a",
+                "operator": "#ffad40",
+                "function": "#7b7b7b",
+                "equals": "#ff8a5c"
+            }
+        else:
+            colors = {
+                "number": "#c0c0c0",
+                "operator": "#ffc069",
+                "function": "#b8b8b8",
+                "equals": "#ffa07a"
+            }
+        return colors.get(self.button_type, colors["number"])
+
+    def _get_text_color(self, is_dark):
+        if self.button_type == "equals":
             return "#ffffff"
-        return "#ffffff"
+        return "#ffffff" if is_dark else "#333333"
 
 
 class CalculatorButtons(ctk.CTkFrame):
@@ -75,6 +107,7 @@ class CalculatorButtons(ctk.CTkFrame):
         super().__init__(parent, corner_radius=12)
         self.configure(fg_color="transparent")
         self.controller = controller
+        self.button_list = []
 
         self.create_buttons()
 
@@ -95,18 +128,25 @@ class CalculatorButtons(ctk.CTkFrame):
                 btn = CalculatorButton(self, text, self.make_command(text), button_type)
                 btn.grid(row=row, column=col, columnspan=2, padx=5, pady=5, sticky="nsew")
                 btn.configure(width=150)
+                self.button_list.append(btn)
             elif text == "=":
                 btn = CalculatorButton(self, text, self.make_command(text), button_type)
                 btn.grid(row=row, column=col, rowspan=2, padx=5, pady=5, sticky="nsew")
                 btn.configure(height=130)
+                self.button_list.append(btn)
             else:
                 btn = CalculatorButton(self, text, self.make_command(text), button_type)
                 btn.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+                self.button_list.append(btn)
 
         for i in range(4):
             self.grid_columnconfigure(i, weight=1)
         for i in range(5):
             self.grid_rowconfigure(i, weight=1)
+
+    def update_colors(self, is_dark):
+        for btn in self.button_list:
+            btn.update_colors(is_dark)
 
     def make_command(self, text):
         if text == "C":
@@ -131,7 +171,6 @@ class CalculatorView(ctk.CTk):
         self.title("计算器")
         self.geometry("320x480")
         self.resizable(False, False)
-        self.configure(fg_color="#1a1a1a")
 
         self.center_window()
 
@@ -144,8 +183,7 @@ class CalculatorView(ctk.CTk):
         self.title_label = ctk.CTkLabel(
             self.title_frame,
             text="计算器",
-            font=ctk.CTkFont(size=20, weight="bold"),
-            text_color="#ffffff"
+            font=ctk.CTkFont(size=20, weight="bold")
         )
         self.title_label.pack(side="left")
 
@@ -153,18 +191,19 @@ class CalculatorView(ctk.CTk):
             self.title_frame,
             text="深色模式",
             font=ctk.CTkFont(size=12),
-            text_color="#ffffff",
             command=self.toggle_theme
         )
         self.theme_switch.pack(side="right")
         self.theme_switch.select()
 
-        self.buttons_frame = ctk.CTkFrame(self, fg_color="#1a1a1a")
+        self.buttons_frame = ctk.CTkFrame(self)
         self.buttons_frame.pack(fill="both", expand=True, padx=15, pady=10)
 
         self.buttons = None
 
         self.bind('<Key>', self.handle_key_press)
+
+        self.update_ui_colors(is_dark=True)
 
     def center_window(self):
         self.update_idletasks()
@@ -183,9 +222,27 @@ class CalculatorView(ctk.CTk):
         if self.theme_switch.get() == 1:
             ctk.set_appearance_mode("dark")
             self.theme_switch.configure(text="深色模式")
+            self.update_ui_colors(is_dark=True)
         else:
             ctk.set_appearance_mode("light")
             self.theme_switch.configure(text="浅色模式")
+            self.update_ui_colors(is_dark=False)
+
+    def update_ui_colors(self, is_dark):
+        if is_dark:
+            self.configure(fg_color="#1a1a1a")
+            self.title_label.configure(text_color="#ffffff")
+            self.theme_switch.configure(text_color="#ffffff")
+            self.buttons_frame.configure(fg_color="#1a1a1a")
+        else:
+            self.configure(fg_color="#f5f5f5")
+            self.title_label.configure(text_color="#1a1a1a")
+            self.theme_switch.configure(text_color="#1a1a1a")
+            self.buttons_frame.configure(fg_color="#f5f5f5")
+        
+        self.display.update_colors(is_dark)
+        if self.buttons:
+            self.buttons.update_colors(is_dark)
 
     def update_display(self, history_text, result_text):
         self.display.update_history(history_text)
