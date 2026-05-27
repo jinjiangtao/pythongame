@@ -95,6 +95,7 @@ class EmployeeDAO:
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
+            cursor.execute('DELETE FROM attendance WHERE employee_id = ?', (employee_id,))
             cursor.execute('DELETE FROM employees WHERE employee_id = ?', (employee_id,))
             conn.commit()
             return cursor.rowcount > 0
