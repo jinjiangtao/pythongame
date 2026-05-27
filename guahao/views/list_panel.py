@@ -18,7 +18,7 @@ class ListPanel(ctk.CTkFrame):
 
     def create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(1, weight=1)
 
         self.search_frame = ctk.CTkFrame(self, corner_radius=10, fg_color="#f8f9fa")
         self.search_frame.grid(row=0, column=0, padx=15, pady=10, sticky="ew")
@@ -53,11 +53,8 @@ class ListPanel(ctk.CTkFrame):
                                               command=self.clear_search)
         self.clear_search_btn.grid(row=1, column=4, padx=8, pady=8)
 
-        self.list_title_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.list_title_frame.grid(row=1, column=0, padx=15, pady=(5, 0), sticky="ew")
-
         self.list_container = ctk.CTkFrame(self, corner_radius=10, fg_color="#ffffff")
-        self.list_container.grid(row=2, column=0, padx=15, pady=5, sticky="nsew")
+        self.list_container.grid(row=1, column=0, padx=15, pady=5, sticky="nsew")
         self.list_container.grid_rowconfigure(0, weight=1)
         self.list_container.grid_columnconfigure(0, weight=1)
 
