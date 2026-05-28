@@ -1,7 +1,7 @@
 import pygame
 import random
 from config import *
-from characters import Pet, Prop
+from characters import Pet, Prop, Effect
 
 
 class GameArea:
