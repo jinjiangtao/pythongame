@@ -23,7 +23,26 @@ GREEN = (34, 139, 34)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 ORANGE = (255, 165, 0)
+BLUE = (0, 0, 255)
+PURPLE = (128, 0, 128)
+GOLD = (255, 215, 0)
 
 FONT_SIZE = 24
 TITLE_FONT_SIZE = 36
 CHINESE_FONT = "SimHei"
+
+MOLE_TYPES = {
+    'normal': {'color': BROWN, 'points': 10, 'probability': 0.6},
+    'golden': {'color': GOLD, 'points': 30, 'probability': 0.2},
+    'red': {'color': RED, 'points': -20, 'probability': 0.2}
+}
+
+COMBO_MULTIPLIER = 0.5
+MAX_MOLE_INTERVAL = 1500
+MIN_MOLE_INTERVAL = 300
+BASE_MOLE_DURATION = 2000
+MIN_MOLE_DURATION = 800
+
+LEVEL_SCORE_THRESHOLD = 100
+LEVEL_BONUS_TIME = 10
+MAX_LEVEL = 10

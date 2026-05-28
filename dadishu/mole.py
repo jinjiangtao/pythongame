@@ -1,4 +1,5 @@
 import pygame
+import random
 from constants import *
 
 class Mole:
@@ -10,6 +11,23 @@ class Mole:
         self.state = 'hidden'
         self.hit_time = 0
         self.show_time = 0
+        self.type = 'normal'
+        self.type_config = MOLE_TYPES['normal']
+    
+    def set_type(self, mole_type=None):
+        if mole_type is None:
+            rand = random.random()
+            cumulative = 0
+            for m_type, config in MOLE_TYPES.items():
+                cumulative += config['probability']
+                if rand < cumulative:
+                    mole_type = m_type
+                    break
+        self.type = mole_type
+        self.type_config = MOLE_TYPES[mole_type]
+    
+    def get_points(self):
+        return self.type_config['points']
     
     def update(self, current_time):
         if self.state == 'showing':
@@ -27,6 +45,7 @@ class Mole:
             else:
                 self.current_y = self.center_y + HOLE_HEIGHT // 2
                 self.state = 'hidden'
+                self.set_type()
         elif self.state == 'hit':
             if current_time - self.hit_time > 500:
                 self.state = 'hiding'
@@ -69,7 +88,7 @@ class Mole:
         if self.state == 'hit':
             color = RED
         else:
-            color = BROWN
+            color = self.type_config['color']
         
         pygame.draw.ellipse(screen, color,
                           (body_x - MOLE_WIDTH // 2, body_y - MOLE_HEIGHT // 2,
@@ -97,3 +116,12 @@ class Mole:
             (body_x + 35, body_y - 15),
             (body_x + 20, body_y - 10)
         ])
+        
+        if self.type == 'golden':
+            pygame.draw.circle(screen, YELLOW, (body_x, body_y - MOLE_HEIGHT // 2 - 5), 5)
+        elif self.type == 'red':
+            pygame.draw.polygon(screen, BLACK, [
+                (body_x - 10, body_y - MOLE_HEIGHT // 2 - 5),
+                (body_x + 10, body_y - MOLE_HEIGHT // 2 - 5),
+                (body_x, body_y - MOLE_HEIGHT // 2 - 15)
+            ])
