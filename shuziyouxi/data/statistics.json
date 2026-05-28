@@ -1,0 +1,38 @@
+{
+  "total_questions": 0,
+  "correct_answers": 0,
+  "wrong_attempts": 0,
+  "total_time": 0,
+  "by_type": {
+    "counting": {
+      "total": 0,
+      "correct": 0
+    },
+    "addition": {
+      "total": 0,
+      "correct": 0
+    },
+    "subtraction": {
+      "total": 0,
+      "correct": 0
+    },
+    "multiplication": {
+      "total": 0,
+      "correct": 0
+    },
+    "division": {
+      "total": 0,
+      "correct": 0
+    },
+    "compare": {
+      "total": 0,
+      "correct": 0
+    },
+    "mixed": {
+      "total": 0,
+      "correct": 0
+    }
+  },
+  "by_level": {},
+  "saved_at": "2026-05-28T11:15:24.407752"
+}
