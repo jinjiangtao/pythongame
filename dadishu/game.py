@@ -18,7 +18,10 @@ class Game:
         self.running = True
         self.game_state = 'playing'
         self.score_board = ScoreBoard()
-        self.sound_manager = SoundManager()
+        try:
+            self.sound_manager = SoundManager()
+        except:
+            self.sound_manager = None
         
         self.holes = []
         self.moles = []
@@ -32,7 +35,11 @@ class Game:
         self.last_click_time = 0
         
         self.last_level_score = 0
-        self.sound_manager.play('game_start')
+        self._play_sound('game_start')
+    
+    def _play_sound(self, sound_name):
+        if self.sound_manager:
+            self.sound_manager.play(sound_name)
         
     def init_holes(self):
         total_width = HOLE_COLS * HOLE_WIDTH + (HOLE_COLS - 1) * HOLE_GAP_X
@@ -63,7 +70,7 @@ class Game:
             if self.score_board.level_up():
                 self.last_level_score = current_score
                 self.score_board.add_time(LEVEL_BONUS_TIME)
-                self.sound_manager.play('level_up')
+                self._play_sound('level_up')
                 self.update_difficulty()
     
     def handle_events(self):
@@ -97,12 +104,12 @@ class Game:
         
         if clicked:
             self.click_effect = ('hit', pos)
-            self.sound_manager.play('hit')
+            self._play_sound('hit')
             if hit_mole_type == 'red':
                 self.score_board.reset_combo()
         else:
             self.click_effect = ('miss', pos)
-            self.sound_manager.play('miss')
+            self._play_sound('miss')
             self.score_board.reset_combo()
         
         self.last_click_time = pygame.time.get_ticks()
@@ -116,7 +123,7 @@ class Game:
             if hidden_moles:
                 mole = random.choice(hidden_moles)
                 mole.show()
-                self.sound_manager.play('mole_appear')
+                self._play_sound('mole_appear')
                 self.last_mole_time = current_time
         
         for mole in self.moles:
@@ -131,7 +138,7 @@ class Game:
             self.score_board.set_time(max(0, self.score_board.get_time() - 1))
             if self.score_board.get_time() <= 0:
                 self.game_state = 'game_over'
-                self.sound_manager.play('game_over')
+                self._play_sound('game_over')
     
     def draw_background(self):
         self.screen.fill(GREEN)
@@ -196,7 +203,7 @@ class Game:
             mole.current_y = mole.center_y + HOLE_HEIGHT // 2
             mole.set_type()
         
-        self.sound_manager.play('game_start')
+        self._play_sound('game_start')
     
     def run(self):
         timer_event = pygame.USEREVENT + 1
