@@ -6,8 +6,7 @@ class GravityScene:
     def __init__(self, canvas, colors):
         self.canvas = canvas
         self.colors = colors
-        self.ball = None
-        self.start_y = 50
+        self.ball = Ball(375, 50, 30, mass=2.0)
         self.ground_y = 420
         self.is_dropped = False
         self.drop_time = 0
@@ -21,16 +20,20 @@ class GravityScene:
         self.drop_time = 0
 
     def draw_ground(self):
-        self.canvas.create_rectangle(0, self.ground_y, 800, 480, fill=self.colors["accent"], outline="")
-        self.canvas.create_text(400, 450, text="地面", fill=self.colors["text"], font=("Arial", 12))
+        self.canvas.create_rectangle(0, self.ground_y, 800, 500, fill=self.colors["accent"], outline="")
+        self.canvas.create_text(400, 465, text="地面", fill=self.colors["text"], font=("Arial", 12))
 
     def draw_ball(self):
         if self.ball:
-            self.ball.y = self.start_y
+            self.ball.x = 375
+            self.ball.y = 50
             self.ball.vy = 0
-        else:
-            self.ball = Ball(375, self.start_y, 25, mass=2.0)
-        self.update_display()
+            self.canvas.create_oval(
+                self.ball.x, self.ball.y,
+                self.ball.x + self.ball.radius * 2,
+                self.ball.y + self.ball.radius * 2,
+                fill="#ff4444", outline="#cc0000", width=3, tags="ball"
+            )
 
     def drop(self):
         if not self.is_dropped:
@@ -47,16 +50,13 @@ class GravityScene:
                 self.ball.vy = 0
                 self.is_dropped = False
             
-            self.update_display()
-
-    def update_display(self):
-        self.canvas.delete("ball")
-        self.canvas.create_oval(
-            self.ball.x, self.ball.y,
-            self.ball.x + self.ball.radius * 2,
-            self.ball.y + self.ball.radius * 2,
-            fill="#e74c3c", outline="#c0392b", width=2, tags="ball"
-        )
+            self.canvas.delete("ball")
+            self.canvas.create_oval(
+                self.ball.x, self.ball.y,
+                self.ball.x + self.ball.radius * 2,
+                self.ball.y + self.ball.radius * 2,
+                fill="#ff4444", outline="#cc0000", width=3, tags="ball"
+            )
 
     def get_data(self):
         return {
@@ -72,7 +72,7 @@ class FrictionScene:
     def __init__(self, canvas, colors):
         self.canvas = canvas
         self.colors = colors
-        self.block = None
+        self.block = Block(50, 310, 60, 60, mass=3.0)
         self.friction = 0.5
         self.surface_type = "rough"
         self.start_x = 50
@@ -98,21 +98,23 @@ class FrictionScene:
         self.canvas.create_rectangle(0, 380, 800, 460, fill=color, outline="")
         for i in range(0, 800, 30):
             self.canvas.create_text(i + 15, 420, text=pattern[:5], fill="white", font=("Arial", 8))
-        self.canvas.create_text(400, 445, text=f"接触面: {self.surface_type == 'rough' and '粗糙' or '光滑'}", fill=self.colors["text"], font=("Arial", 12))
+        self.canvas.create_text(400, 445, text=f"接触面: {self.surface_type == '粗糙' and '粗糙' or '光滑'}", fill=self.colors["text"], font=("Arial", 12))
 
     def draw_block(self):
         if self.block:
             self.block.x = self.start_x
             self.block.vx = 0
-        else:
-            self.block = Block(self.start_x, 310, 60, 60, mass=3.0)
-        self.update_display()
+            self.canvas.create_rectangle(
+                self.block.x, self.block.y,
+                self.block.x + self.block.width,
+                self.block.y + self.block.height,
+                fill="#3498db", outline="#2980b9", width=2, tags="block"
+            )
 
     def set_friction(self, value):
         self.friction = value
         self.surface_type = "rough" if value > 0.3 else "smooth"
-        self.draw_surface()
-        self.draw_block()
+        self.init_scene()
 
     def push(self):
         if not self.is_sliding:
@@ -131,16 +133,13 @@ class FrictionScene:
                 self.block.vx = 0
                 self.is_sliding = False
             
-            self.update_display()
-
-    def update_display(self):
-        self.canvas.delete("block")
-        self.canvas.create_rectangle(
-            self.block.x, self.block.y,
-            self.block.x + self.block.width,
-            self.block.y + self.block.height,
-            fill="#3498db", outline="#2980b9", width=2, tags="block"
-        )
+            self.canvas.delete("block")
+            self.canvas.create_rectangle(
+                self.block.x, self.block.y,
+                self.block.x + self.block.width,
+                self.block.y + self.block.height,
+                fill="#3498db", outline="#2980b9", width=2, tags="block"
+            )
 
     def get_data(self):
         return {
@@ -157,11 +156,12 @@ class InclineScene:
     def __init__(self, canvas, colors):
         self.canvas = canvas
         self.colors = colors
-        self.block = None
         self.angle = 30
         self.incline_length = 300
         self.is_sliding = False
         self.slide_distance = 0
+        self.incline_start = None
+        self.incline_end = None
         self.init_scene()
 
     def init_scene(self):
@@ -182,17 +182,21 @@ class InclineScene:
 
         self.incline_start = (x2, y2)
         self.incline_end = (x1, y1)
+        self.block = Block(x2 - 20, y2 - 30, 40, 30, mass=2.0)
 
     def draw_block(self):
-        x, y = self.incline_start
-        if self.block:
+        if self.block and self.incline_start:
+            x, y = self.incline_start
             self.block.x = x - 20
             self.block.y = y - 30
             self.block.vx = 0
             self.block.vy = 0
-        else:
-            self.block = Block(x - 20, y - 30, 40, 30, mass=2.0)
-        self.update_display()
+            self.canvas.create_rectangle(
+                self.block.x, self.block.y,
+                self.block.x + self.block.width,
+                self.block.y + self.block.height,
+                fill="#9b59b6", outline="#8e44ad", width=2, tags="block"
+            )
 
     def set_angle(self, angle):
         self.angle = angle
@@ -219,16 +223,13 @@ class InclineScene:
                 self.block.vx = 0
                 self.is_sliding = False
             
-            self.update_display()
-
-    def update_display(self):
-        self.canvas.delete("block")
-        self.canvas.create_rectangle(
-            self.block.x, self.block.y,
-            self.block.x + self.block.width,
-            self.block.y + self.block.height,
-            fill="#9b59b6", outline="#8e44ad", width=2, tags="block"
-        )
+            self.canvas.delete("block")
+            self.canvas.create_rectangle(
+                self.block.x, self.block.y,
+                self.block.x + self.block.width,
+                self.block.y + self.block.height,
+                fill="#9b59b6", outline="#8e44ad", width=2, tags="block"
+            )
 
     def get_data(self):
         return {
@@ -339,8 +340,9 @@ class SpringScene:
     def __init__(self, canvas, colors):
         self.canvas = canvas
         self.colors = colors
-        self.spring = None
-        self.block = None
+        self.block = Block(250, 270, 60, 60, mass=2.0)
+        self.spring = Spring(90, 300, 250, 300, k=50, rest_length=160)
+        self.spring.connected_object = self.block
         self.is_released = False
         self.max_compression = 0
         self.init_scene()
@@ -357,52 +359,6 @@ class SpringScene:
         self.canvas.create_rectangle(50, 150, 90, 450, fill="#7f8c8d", outline="#7f8c8d")
 
     def draw_spring(self):
-        self.spring = Spring(90, 300, 250, 300, k=50, rest_length=160)
-        
-        if self.block:
-            self.spring.x2 = self.block.x
-            self.spring.y2 = self.block.y + self.block.height / 2
-        else:
-            self.block = Block(250, 270, 60, 60, mass=2.0)
-            self.spring.connected_object = self.block
-        
-        self.update_display()
-
-    def draw_block(self):
-        if not self.block:
-            self.block = Block(250, 270, 60, 60, mass=2.0)
-            self.spring.connected_object = self.block
-        self.update_display()
-
-    def compress(self, distance):
-        target_x = 250 - distance
-        if target_x > 120:
-            self.block.x = target_x
-            self.max_compression = max(self.max_compression, distance)
-            self.spring.x2 = self.block.x
-            self.update_display()
-
-    def release(self):
-        if not self.is_released:
-            self.is_released = True
-
-    def update(self):
-        if self.is_released and self.spring and self.block:
-            self.spring.update()
-            self.block.update()
-            
-            if self.block.x > 550:
-                self.block.x = 550
-                self.block.vx = 0
-                self.is_released = False
-            
-            self.spring.x2 = self.block.x
-            self.spring.y2 = self.block.y + self.block.height / 2
-            self.update_display()
-
-    def update_display(self):
-        self.canvas.delete("spring", "block")
-        
         self.canvas.create_line(self.spring.x1, self.spring.y1,
                                self.spring.x2, self.spring.y2,
                                fill="#f1c40f", width=4, tags="spring")
@@ -420,13 +376,43 @@ class SpringScene:
                 ny = py + dy * step / length
                 self.canvas.create_line(px, py, nx, ny, fill="#f1c40f", width=4)
                 px, py = nx, ny
-        
+
+    def draw_block(self):
         self.canvas.create_rectangle(
             self.block.x, self.block.y,
             self.block.x + self.block.width,
             self.block.y + self.block.height,
             fill="#1abc9c", outline="#16a085", width=2, tags="block"
         )
+
+    def compress(self, distance):
+        target_x = 250 - distance
+        if target_x > 120:
+            self.block.x = target_x
+            self.max_compression = max(self.max_compression, distance)
+            self.spring.x2 = self.block.x
+            self.init_scene()
+
+    def release(self):
+        if not self.is_released:
+            self.is_released = True
+
+    def update(self):
+        if self.is_released and self.spring and self.block:
+            self.spring.update()
+            self.block.update()
+            
+            if self.block.x > 550:
+                self.block.x = 550
+                self.block.vx = 0
+                self.is_released = False
+            
+            self.spring.x2 = self.block.x
+            self.spring.y2 = self.block.y + self.block.height / 2
+            
+            self.canvas.delete("spring", "block")
+            self.draw_spring()
+            self.draw_block()
 
     def get_data(self):
         compression = 120 - self.spring.get_length() if self.spring else 0
