@@ -16,10 +16,23 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         
-        self.font_large = pygame.font.Font(None, 48)
-        self.font_medium = pygame.font.Font(None, 32)
+        self.font_large = self.get_chinese_font(48)
+        self.font_medium = self.get_chinese_font(32)
         
         self.click_effect = None
+    
+    def get_chinese_font(self, size):
+        font_paths = [
+            'C:/Windows/Fonts/simhei.ttf',
+            'C:/Windows/Fonts/msyh.ttc',
+            'C:/Windows/Fonts/simsun.ttc',
+        ]
+        for path in font_paths:
+            try:
+                return pygame.font.Font(path, size)
+            except:
+                continue
+        return pygame.font.Font(None, size)
     
     def handle_events(self):
         for event in pygame.event.get():

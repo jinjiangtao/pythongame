@@ -33,9 +33,22 @@ class ScoreTimer:
         self.start_time = pygame.time.get_ticks()
         self.game_over = False
     
+    def get_chinese_font(self, size):
+        font_paths = [
+            'C:/Windows/Fonts/simhei.ttf',
+            'C:/Windows/Fonts/msyh.ttc',
+            'C:/Windows/Fonts/simsun.ttc',
+        ]
+        for path in font_paths:
+            try:
+                return pygame.font.Font(path, size)
+            except:
+                continue
+        return pygame.font.Font(None, size)
+    
     def draw(self, screen):
-        font_large = pygame.font.Font(None, FONT_SIZE_LARGE)
-        font_medium = pygame.font.Font(None, FONT_SIZE_MEDIUM)
+        font_large = self.get_chinese_font(FONT_SIZE_LARGE)
+        font_medium = self.get_chinese_font(FONT_SIZE_MEDIUM)
         
         pygame.draw.rect(screen, TOP_BAR_COLOR, (0, 0, SCREEN_WIDTH, TOP_BAR_HEIGHT))
         

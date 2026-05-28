@@ -132,11 +132,24 @@ class Pet:
             pygame.draw.line(screen, color, (self.x - self.size//2, self.y), (self.x - self.size//1.5, self.y - self.size//4), 3)
             pygame.draw.line(screen, color, (self.x + self.size//2, self.y), (self.x + self.size//1.5, self.y - self.size//4), 3)
     
+    def get_chinese_font(self, size):
+        font_paths = [
+            'C:/Windows/Fonts/simhei.ttf',
+            'C:/Windows/Fonts/msyh.ttc',
+            'C:/Windows/Fonts/simsun.ttc',
+        ]
+        for path in font_paths:
+            try:
+                return pygame.font.Font(path, size)
+            except:
+                continue
+        return pygame.font.Font(None, size)
+    
     def draw_caught(self, screen):
         alpha = int(255 * (1 - self.caught_animation / 3))
         color = (50, 205, 50)
         pygame.draw.circle(screen, color + (alpha,), (self.x, self.y), int(self.size * (1 + self.caught_animation)), 3)
-        font = pygame.font.Font(None, 32)
+        font = self.get_chinese_font(32)
         text = font.render('+10', True, SUCCESS_COLOR)
         text_rect = text.get_rect(center=(self.x, self.y - self.size))
         screen.blit(text, text_rect)
