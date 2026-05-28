@@ -122,11 +122,11 @@ class GameWindow(ctk.CTk):
         elif self.current_level == 5:
             self.create_slider("压缩距离", 0, 80, 0, self.on_compression_change)
 
-    def create_slider(self, label, min_val, max_val, default, command):
+    def create_slider(self, slider_label, min_val, max_val, default, command):
         frame = ctk.CTkFrame(self.slider_frame)
         frame.pack(side="left", padx=10)
         
-        label = ctk.CTkLabel(frame, text=label, font=("Arial", 10))
+        label = ctk.CTkLabel(frame, text=slider_label, font=("Arial", 10))
         label.pack(pady=1)
         
         slider = ctk.CTkSlider(frame, from_=min_val, to=max_val, 
@@ -137,7 +137,7 @@ class GameWindow(ctk.CTk):
         value_label = ctk.CTkLabel(frame, text=f"{default:.1f}", font=("Arial", 10))
         value_label.pack(pady=1)
         
-        self.sliders[label] = {"slider": slider, "label": value_label}
+        self.sliders[slider_label] = {"slider": slider, "label": value_label}
 
     def create_status_bar(self):
         self.status_frame = ctk.CTkFrame(self, height=45, corner_radius=10)

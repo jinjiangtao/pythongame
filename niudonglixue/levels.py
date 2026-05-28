@@ -6,7 +6,6 @@ class GravityScene:
     def __init__(self, canvas, colors):
         self.canvas = canvas
         self.colors = colors
-        self.ball = Ball(375, 50, 30, mass=2.0)
         self.ground_y = 420
         self.is_dropped = False
         self.drop_time = 0
@@ -24,16 +23,17 @@ class GravityScene:
         self.canvas.create_text(400, 465, text="地面", fill=self.colors["text"], font=("Arial", 12))
 
     def draw_ball(self):
-        if self.ball:
-            self.ball.x = 375
-            self.ball.y = 50
-            self.ball.vy = 0
-            self.canvas.create_oval(
-                self.ball.x, self.ball.y,
-                self.ball.x + self.ball.radius * 2,
-                self.ball.y + self.ball.radius * 2,
-                fill="#ff4444", outline="#cc0000", width=3, tags="ball"
-            )
+        if not hasattr(self, 'ball') or self.ball is None:
+            self.ball = Ball(375, 50, 30, mass=2.0)
+        self.ball.x = 375
+        self.ball.y = 50
+        self.ball.vy = 0
+        self.canvas.create_oval(
+            self.ball.x, self.ball.y,
+            self.ball.x + self.ball.radius * 2,
+            self.ball.y + self.ball.radius * 2,
+            fill="#ff4444", outline="#cc0000", width=3, tags="ball"
+        )
 
     def drop(self):
         if not self.is_dropped:
