@@ -105,7 +105,10 @@ class Game:
         for i in range(0, SCREEN_WIDTH, 40):
             pygame.draw.line(self.screen, DARK_BROWN, (i, ground_y), (i + 20, ground_y + 10), 2)
         
-        title_font = pygame.font.Font(None, TITLE_FONT_SIZE)
+        try:
+            title_font = pygame.font.Font(pygame.font.match_font(CHINESE_FONT), TITLE_FONT_SIZE)
+        except:
+            title_font = pygame.font.Font(None, TITLE_FONT_SIZE)
         title_text = title_font.render("打地鼠", True, BLACK)
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 40))
         self.screen.blit(title_text, title_rect)
@@ -124,7 +127,10 @@ class Game:
         overlay.fill(BLACK)
         self.screen.blit(overlay, (0, 0))
         
-        font = pygame.font.Font(None, 48)
+        try:
+            font = pygame.font.Font(pygame.font.match_font(CHINESE_FONT), 48)
+        except:
+            font = pygame.font.Font(None, 48)
         title_text = font.render("游戏结束", True, WHITE)
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 60))
         self.screen.blit(title_text, title_rect)
@@ -133,7 +139,10 @@ class Game:
         score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         self.screen.blit(score_text, score_rect)
         
-        hint_font = pygame.font.Font(None, FONT_SIZE)
+        try:
+            hint_font = pygame.font.Font(pygame.font.match_font(CHINESE_FONT), FONT_SIZE)
+        except:
+            hint_font = pygame.font.Font(None, FONT_SIZE)
         hint_text = hint_font.render("按 R 键重新开始 | 按 ESC 退出", True, WHITE)
         hint_rect = hint_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
         self.screen.blit(hint_text, hint_rect)

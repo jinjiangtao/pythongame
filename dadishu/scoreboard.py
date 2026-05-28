@@ -5,7 +5,10 @@ class ScoreBoard:
     def __init__(self):
         self.score = 0
         self.time_left = GAME_DURATION
-        self.font = pygame.font.Font(None, FONT_SIZE)
+        try:
+            self.font = pygame.font.Font(pygame.font.match_font(CHINESE_FONT), FONT_SIZE)
+        except:
+            self.font = pygame.font.Font(None, FONT_SIZE)
     
     def add_score(self, points=10):
         self.score += points
