@@ -38,6 +38,8 @@ class GameWindow(ctk.CTk):
         self.create_canvas_area()
         self.create_control_panel()
         self.create_status_bar()
+        
+        self.load_scene()
 
     def create_top_bar(self):
         self.top_bar = ctk.CTkFrame(self, height=60, corner_radius=10)
@@ -162,9 +164,6 @@ class GameWindow(ctk.CTk):
         self.load_scene()
 
     def load_scene(self):
-        if self.current_scene:
-            self.current_scene.reset()
-        
         colors = COLORS[self.current_theme]
         
         if self.current_level == 1:
@@ -185,8 +184,13 @@ class GameWindow(ctk.CTk):
         self.instruction_label.configure(text=self.get_instruction())
         self.action_button.configure(text=self.get_action_button_text())
         
-        self.slider_frame.destroy()
+        try:
+            self.slider_frame.destroy()
+        except:
+            pass
         self.create_parameter_sliders()
+        
+        self.canvas.update_idletasks()
 
     def get_instruction(self):
         instructions = {

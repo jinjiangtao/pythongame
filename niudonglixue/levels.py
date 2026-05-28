@@ -9,6 +9,10 @@ class GravityScene:
         self.ground_y = 420
         self.is_dropped = False
         self.drop_time = 0
+        self.ball_x = 375
+        self.ball_y = 50
+        self.ball_radius = 30
+        self.ball_vy = 0
         self.init_scene()
 
     def init_scene(self):
@@ -17,21 +21,18 @@ class GravityScene:
         self.draw_ball()
         self.is_dropped = False
         self.drop_time = 0
+        self.ball_y = 50
+        self.ball_vy = 0
 
     def draw_ground(self):
         self.canvas.create_rectangle(0, self.ground_y, 800, 500, fill=self.colors["accent"], outline="")
         self.canvas.create_text(400, 465, text="地面", fill=self.colors["text"], font=("Arial", 12))
 
     def draw_ball(self):
-        if not hasattr(self, 'ball') or self.ball is None:
-            self.ball = Ball(375, 50, 30, mass=2.0)
-        self.ball.x = 375
-        self.ball.y = 50
-        self.ball.vy = 0
         self.canvas.create_oval(
-            self.ball.x, self.ball.y,
-            self.ball.x + self.ball.radius * 2,
-            self.ball.y + self.ball.radius * 2,
+            self.ball_x, self.ball_y,
+            self.ball_x + self.ball_radius * 2,
+            self.ball_y + self.ball_radius * 2,
             fill="#ff4444", outline="#cc0000", width=3, tags="ball"
         )
 
@@ -40,27 +41,26 @@ class GravityScene:
             self.is_dropped = True
 
     def update(self):
-        if self.is_dropped and self.ball:
-            self.ball.apply_force(0, self.ball.mass * 9.8)
-            self.ball.update()
-            self.drop_time += 0.016
+        if self.is_dropped:
+            self.ball_vy += 9.8 * 0.016 * 10
+            self.ball_y += self.ball_vy * 0.016 * 60
             
-            if self.ball.y + self.ball.radius * 2 >= self.ground_y:
-                self.ball.y = self.ground_y - self.ball.radius * 2
-                self.ball.vy = 0
+            if self.ball_y + self.ball_radius * 2 >= self.ground_y:
+                self.ball_y = self.ground_y - self.ball_radius * 2
+                self.ball_vy = 0
                 self.is_dropped = False
             
             self.canvas.delete("ball")
             self.canvas.create_oval(
-                self.ball.x, self.ball.y,
-                self.ball.x + self.ball.radius * 2,
-                self.ball.y + self.ball.radius * 2,
+                self.ball_x, self.ball_y,
+                self.ball_x + self.ball_radius * 2,
+                self.ball_y + self.ball_radius * 2,
                 fill="#ff4444", outline="#cc0000", width=3, tags="ball"
             )
 
     def get_data(self):
         return {
-            "速度": f"{abs(self.ball.vy):.2f} m/s",
+            "速度": f"{abs(self.ball_vy):.2f} m/s",
             "下落时间": f"{self.drop_time:.2f} s",
             "状态": "下落中" if self.is_dropped else "静止"
         }
