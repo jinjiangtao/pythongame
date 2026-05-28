@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
-from config import APP_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, COLORS, LEVELS, QUESTIONS, KNOWLEDGE_EXPLANATIONS
+from config import APP_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, COLORS, LEVELS, QUESTIONS, KNOWLEDGE_EXPLANATIONS, MIN_SPEED, MAX_SPEED, DEFAULT_SPEED
 from progress import ProgressManager
 from levels import GravityScene, FrictionScene, InclineScene, LeverScene, SpringScene, InertiaScene
 
@@ -18,6 +18,8 @@ class GameWindow(ctk.CTk):
         self.current_scene = None
         self.question_index = 0
         self.showing_question = False
+        self.speed = DEFAULT_SPEED
+        self.experiment_records = []
         
         self.setup_ui()
         self.update_data_display()
@@ -105,7 +107,13 @@ class GameWindow(ctk.CTk):
                                              command=self.show_knowledge, width=100, height=35)
         self.knowledge_button.grid(row=0, column=4, padx=8)
         
+        self.records_button = ctk.CTkButton(self.operation_buttons, text="实验记录",
+                                           command=self.show_records, width=100, height=35,
+                                           text_color="#f39c12")
+        self.records_button.grid(row=0, column=5, padx=8)
+        
         self.create_parameter_sliders()
+        self.create_speed_control()
 
     def create_parameter_sliders(self):
         self.slider_frame = ctk.CTkFrame(self.control_frame)
@@ -140,6 +148,28 @@ class GameWindow(ctk.CTk):
         value_label.pack(pady=1)
         
         self.sliders[slider_label] = {"slider": slider, "label": value_label}
+    
+    def create_speed_control(self):
+        self.speed_frame = ctk.CTkFrame(self.control_frame)
+        self.speed_frame.grid(row=2, column=0, padx=10, pady=5)
+        
+        speed_label = ctk.CTkLabel(self.speed_frame, text="播放倍速", font=("Arial", 10))
+        speed_label.pack(side="left", padx=5)
+        
+        self.speed_slider = ctk.CTkSlider(self.speed_frame, from_=MIN_SPEED, to=MAX_SPEED, 
+                                          command=self.on_speed_change, width=150, height=20)
+        self.speed_slider.set(DEFAULT_SPEED)
+        self.speed_slider.pack(side="left", padx=5)
+        
+        self.speed_value_label = ctk.CTkLabel(self.speed_frame, text=f"{DEFAULT_SPEED:.1f}x", font=("Arial", 10))
+        self.speed_value_label.pack(side="left", padx=5)
+        
+        preset_buttons = [0.5, 1.0, 1.5, 2.0]
+        for speed in preset_buttons:
+            btn = ctk.CTkButton(self.speed_frame, text=f"{speed}x", 
+                               command=lambda s=speed: self.set_speed(s),
+                               width=40, height=20, font=("Arial", 9))
+            btn.pack(side="left", padx=3)
 
     def create_status_bar(self):
         self.status_frame = ctk.CTkFrame(self, height=45, corner_radius=10)
@@ -188,7 +218,12 @@ class GameWindow(ctk.CTk):
             self.slider_frame.destroy()
         except:
             pass
+        try:
+            self.speed_frame.destroy()
+        except:
+            pass
         self.create_parameter_sliders()
+        self.create_speed_control()
         
         self.canvas.update_idletasks()
 
@@ -228,6 +263,7 @@ class GameWindow(ctk.CTk):
                 self.current_scene.release()
             elif self.current_level == 6:
                 self.current_scene.pull()
+            self.record_experiment()
 
     def reset_scene(self):
         if self.current_scene:
@@ -374,6 +410,15 @@ class GameWindow(ctk.CTk):
         if self.current_scene:
             self.current_scene.compress(value)
             self.sliders["压缩距离"]["label"].configure(text=f"{int(value)}px")
+    
+    def on_speed_change(self, value):
+        self.speed = value
+        self.speed_value_label.configure(text=f"{value:.1f}x")
+    
+    def set_speed(self, value):
+        self.speed = value
+        self.speed_slider.set(value)
+        self.speed_value_label.configure(text=f"{value:.1f}x")
 
     def update_data_display(self):
         if self.current_scene:
@@ -383,9 +428,130 @@ class GameWindow(ctk.CTk):
 
     def start_animation(self):
         if self.current_scene:
-            self.current_scene.update()
+            for _ in range(int(self.speed * 2)):
+                self.current_scene.update()
             self.update_data_display()
-        self.after(16, self.start_animation)
+        delay = max(1, int(16 / self.speed))
+        self.after(delay, self.start_animation)
+    
+    def record_experiment(self):
+        import time
+        data = self.current_scene.get_data() if self.current_scene else {}
+        record = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "level": self.current_level,
+            "level_name": LEVELS[self.current_level-1]["name"],
+            "parameters": self.get_current_parameters(),
+            "results": data,
+            "speed": self.speed
+        }
+        self.experiment_records.append(record)
+    
+    def get_current_parameters(self):
+        params = {}
+        if hasattr(self, 'sliders'):
+            for name, slider_data in self.sliders.items():
+                params[name] = slider_data["slider"].get()
+        return params
+    
+    def show_records(self):
+        records_dialog = ctk.CTkToplevel(self)
+        records_dialog.title("实验数据记录表")
+        records_dialog.geometry("800x500")
+        records_dialog.transient(self)
+        records_dialog.grab_set()
+        
+        header_frame = ctk.CTkFrame(records_dialog)
+        header_frame.pack(fill="x", padx=10, pady=5)
+        
+        ctk.CTkLabel(header_frame, text=f"共 {len(self.experiment_records)} 条记录", 
+                     font=("Arial", 12)).pack(side="left", padx=10)
+        
+        clear_btn = ctk.CTkButton(header_frame, text="清空记录", 
+                                  command=lambda: self.clear_records(records_dialog),
+                                  text_color="#d9534f")
+        clear_btn.pack(side="right", padx=10)
+        
+        save_btn = ctk.CTkButton(header_frame, text="保存记录", 
+                                  command=self.save_records)
+        save_btn.pack(side="right", padx=10)
+        
+        record_btn = ctk.CTkButton(header_frame, text="记录当前实验", 
+                                    command=self.record_experiment)
+        record_btn.pack(side="right", padx=10)
+        
+        scroll_frame = ctk.CTkScrollableFrame(records_dialog, width=780, height=400)
+        scroll_frame.pack(padx=10, pady=5, fill="both", expand=True)
+        
+        if not self.experiment_records:
+            ctk.CTkLabel(scroll_frame, text="暂无实验记录", 
+                         font=("Arial", 14), text_color="#7f8c8d").pack(pady=50)
+        else:
+            for i, record in enumerate(self.experiment_records, 1):
+                record_frame = ctk.CTkFrame(scroll_frame, corner_radius=8)
+                record_frame.pack(fill="x", padx=5, pady=5)
+                
+                title_label = ctk.CTkLabel(record_frame, 
+                                          text=f"实验 {i}: {record['level_name']} | {record['timestamp']}",
+                                          font=("Arial", 12, "bold"))
+                title_label.pack(anchor="w", padx=10, pady=5)
+                
+                if record['parameters']:
+                    params_text = "参数: " + ", ".join([f"{k}: {v:.2f}" for k, v in record['parameters'].items()])
+                    params_label = ctk.CTkLabel(record_frame, text=params_text, font=("Arial", 11))
+                    params_label.pack(anchor="w", padx=10, pady=2)
+                
+                results_text = "结果: " + ", ".join([f"{k}: {v}" for k, v in record['results'].items()])
+                results_label = ctk.CTkLabel(record_frame, text=results_text, font=("Arial", 11))
+                results_label.pack(anchor="w", padx=10, pady=2)
+                
+                speed_label = ctk.CTkLabel(record_frame, text=f"播放倍速: {record['speed']:.1f}x", 
+                                           font=("Arial", 10), text_color="#7f8c8d")
+                speed_label.pack(anchor="w", padx=10, pady=2)
+    
+    def clear_records(self, dialog):
+        confirm_dialog = ctk.CTkToplevel(self)
+        confirm_dialog.title("确认清空")
+        confirm_dialog.geometry("300x150")
+        confirm_dialog.transient(dialog)
+        confirm_dialog.grab_set()
+        
+        ctk.CTkLabel(confirm_dialog, text="确定要清空所有记录吗？", 
+                     font=("Arial", 12)).pack(pady=20)
+        
+        btn_frame = ctk.CTkFrame(confirm_dialog)
+        btn_frame.pack(pady=10)
+        
+        ctk.CTkButton(btn_frame, text="确定", 
+                      command=lambda: self.do_clear_records(confirm_dialog, dialog)).pack(side="left", padx=10)
+        ctk.CTkButton(btn_frame, text="取消", 
+                      command=confirm_dialog.destroy).pack(side="left", padx=10)
+    
+    def do_clear_records(self, confirm_dialog, records_dialog):
+        self.experiment_records = []
+        confirm_dialog.destroy()
+        records_dialog.destroy()
+        self.show_records()
+    
+    def save_records(self):
+        import json
+        import os
+        filename = f"experiment_records_{time.strftime('%Y%m%d_%H%M%S')}.json"
+        filepath = os.path.join(os.path.dirname(__file__), filename)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(self.experiment_records, f, ensure_ascii=False, indent=2)
+        
+        save_dialog = ctk.CTkToplevel(self)
+        save_dialog.title("保存成功")
+        save_dialog.geometry("300x120")
+        save_dialog.transient(self)
+        save_dialog.grab_set()
+        
+        ctk.CTkLabel(save_dialog, text=f"记录已保存到:\n{filepath}", 
+                     font=("Arial", 12), wraplength=250).pack(pady=20)
+        ctk.CTkButton(save_dialog, text="知道了", command=save_dialog.destroy).pack(pady=10)
+
+import time
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("light")

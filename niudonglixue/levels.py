@@ -13,6 +13,7 @@ class GravityScene:
         self.ball_y = 50
         self.ball_radius = 30
         self.ball_vy = 0
+        self.trajectory = []
         self.init_scene()
 
     def init_scene(self):
@@ -23,6 +24,7 @@ class GravityScene:
         self.drop_time = 0
         self.ball_y = 50
         self.ball_vy = 0
+        self.trajectory = []
 
     def draw_ground(self):
         self.canvas.create_rectangle(0, self.ground_y, 800, 500, fill=self.colors["accent"], outline="")
@@ -45,11 +47,16 @@ class GravityScene:
             self.ball_vy += 9.8 * 0.016 * 10
             self.ball_y += self.ball_vy * 0.016 * 60
             
+            center_x = self.ball_x + self.ball_radius
+            center_y = self.ball_y + self.ball_radius
+            self.trajectory.append((center_x, center_y))
+            
             if self.ball_y + self.ball_radius * 2 >= self.ground_y:
                 self.ball_y = self.ground_y - self.ball_radius * 2
                 self.ball_vy = 0
                 self.is_dropped = False
             
+            self.draw_trajectory()
             self.canvas.delete("ball")
             self.canvas.create_oval(
                 self.ball_x, self.ball_y,
@@ -57,6 +64,15 @@ class GravityScene:
                 self.ball_y + self.ball_radius * 2,
                 fill="#ff4444", outline="#cc0000", width=3, tags="ball"
             )
+    
+    def draw_trajectory(self):
+        if len(self.trajectory) > 1:
+            for i in range(1, len(self.trajectory)):
+                x1, y1 = self.trajectory[i-1]
+                x2, y2 = self.trajectory[i]
+                alpha = i / len(self.trajectory)
+                color = f"#{int(255 * (1 - alpha)):02x}44ff"
+                self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, tags="trajectory")
 
     def get_data(self):
         return {
@@ -78,6 +94,7 @@ class FrictionScene:
         self.start_x = 50
         self.total_distance = 0
         self.is_sliding = False
+        self.trajectory = []
         self.init_scene()
 
     def init_scene(self):
@@ -86,6 +103,7 @@ class FrictionScene:
         self.draw_block()
         self.is_sliding = False
         self.total_distance = 0
+        self.trajectory = []
 
     def draw_surface(self):
         if self.surface_type == "rough":
@@ -129,10 +147,15 @@ class FrictionScene:
             self.block.update()
             self.total_distance += abs(self.block.vx * 0.016)
             
+            center_x = self.block.x + self.block.width / 2
+            center_y = self.block.y + self.block.height / 2
+            self.trajectory.append((center_x, center_y))
+            
             if abs(self.block.vx) < 0.1:
                 self.block.vx = 0
                 self.is_sliding = False
             
+            self.draw_trajectory()
             self.canvas.delete("block")
             self.canvas.create_rectangle(
                 self.block.x, self.block.y,
@@ -140,6 +163,15 @@ class FrictionScene:
                 self.block.y + self.block.height,
                 fill="#3498db", outline="#2980b9", width=2, tags="block"
             )
+    
+    def draw_trajectory(self):
+        if len(self.trajectory) > 1:
+            for i in range(1, len(self.trajectory)):
+                x1, y1 = self.trajectory[i-1]
+                x2, y2 = self.trajectory[i]
+                alpha = i / len(self.trajectory)
+                color = f"#44{int(255 * (1 - alpha)):02x}ff"
+                self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, tags="trajectory")
 
     def get_data(self):
         return {
@@ -162,6 +194,7 @@ class InclineScene:
         self.slide_distance = 0
         self.incline_start = None
         self.incline_end = None
+        self.trajectory = []
         self.init_scene()
 
     def init_scene(self):
@@ -170,6 +203,7 @@ class InclineScene:
         self.draw_block()
         self.is_sliding = False
         self.slide_distance = 0
+        self.trajectory = []
 
     def draw_incline(self):
         angle_rad = math.radians(self.angle)
@@ -218,11 +252,16 @@ class InclineScene:
             
             self.slide_distance += abs(self.block.vx * 0.016)
             
+            center_x = self.block.x + self.block.width / 2
+            center_y = self.block.y + self.block.height / 2
+            self.trajectory.append((center_x, center_y))
+            
             if self.block.x <= self.incline_end[0]:
                 self.block.x = self.incline_end[0]
                 self.block.vx = 0
                 self.is_sliding = False
             
+            self.draw_trajectory()
             self.canvas.delete("block")
             self.canvas.create_rectangle(
                 self.block.x, self.block.y,
@@ -230,6 +269,15 @@ class InclineScene:
                 self.block.y + self.block.height,
                 fill="#9b59b6", outline="#8e44ad", width=2, tags="block"
             )
+    
+    def draw_trajectory(self):
+        if len(self.trajectory) > 1:
+            for i in range(1, len(self.trajectory)):
+                x1, y1 = self.trajectory[i-1]
+                x2, y2 = self.trajectory[i]
+                alpha = i / len(self.trajectory)
+                color = f"#9b{int(255 * (1 - alpha)):02x}59"
+                self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, tags="trajectory")
 
     def get_data(self):
         return {
@@ -345,6 +393,7 @@ class SpringScene:
         self.spring.connected_object = self.block
         self.is_released = False
         self.max_compression = 0
+        self.trajectory = []
         self.init_scene()
 
     def init_scene(self):
@@ -354,6 +403,7 @@ class SpringScene:
         self.draw_block()
         self.is_released = False
         self.max_compression = 0
+        self.trajectory = []
 
     def draw_wall(self):
         self.canvas.create_rectangle(50, 150, 90, 450, fill="#7f8c8d", outline="#7f8c8d")
@@ -374,7 +424,7 @@ class SpringScene:
             for i in range(coils):
                 nx = px + dx * step / length
                 ny = py + dy * step / length
-                self.canvas.create_line(px, py, nx, ny, fill="#f1c40f", width=4)
+                self.canvas.create_line(px, py, nx, ny, fill="#f1c40f", width=4, tags="spring")
                 px, py = nx, ny
 
     def draw_block(self):
@@ -402,6 +452,10 @@ class SpringScene:
             self.spring.update()
             self.block.update()
             
+            center_x = self.block.x + self.block.width / 2
+            center_y = self.block.y + self.block.height / 2
+            self.trajectory.append((center_x, center_y))
+            
             if self.block.x > 550:
                 self.block.x = 550
                 self.block.vx = 0
@@ -410,9 +464,19 @@ class SpringScene:
             self.spring.x2 = self.block.x
             self.spring.y2 = self.block.y + self.block.height / 2
             
-            self.canvas.delete("spring", "block")
+            self.canvas.delete("trajectory", "spring", "block")
+            self.draw_trajectory()
             self.draw_spring()
             self.draw_block()
+    
+    def draw_trajectory(self):
+        if len(self.trajectory) > 1:
+            for i in range(1, len(self.trajectory)):
+                x1, y1 = self.trajectory[i-1]
+                x2, y2 = self.trajectory[i]
+                alpha = i / len(self.trajectory)
+                color = f"#1a{int(255 * (1 - alpha)):02x}bc"
+                self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2, tags="trajectory")
 
     def get_data(self):
         compression = 120 - self.spring.get_length() if self.spring else 0

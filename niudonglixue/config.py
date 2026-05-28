@@ -10,6 +10,10 @@ DARK_THEME = "dark"
 GRAVITY = 9.8
 TIME_STEP = 0.016
 
+MIN_SPEED = 0.1
+MAX_SPEED = 3.0
+DEFAULT_SPEED = 1.0
+
 LEVELS = [
     {"id": 1, "name": "重力实验", "knowledge": "重力", "description": "物体由于地球吸引而受到的力"},
     {"id": 2, "name": "摩擦力实验", "knowledge": "摩擦力", "description": "阻碍物体相对运动的力"},
