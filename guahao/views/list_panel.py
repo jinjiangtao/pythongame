@@ -11,8 +11,8 @@ class ListPanel(ctk.CTkFrame):
         self.sort_reverse = False
         self.selected_item = None
         self.search_name = ""
-        self.search_department = ""
-        self.search_doctor = ""
+        self.search_department = "全部科室"
+        self.search_doctor = "全部医生"
         self.search_phone = ""
         self.create_widgets()
 
@@ -122,7 +122,7 @@ class ListPanel(ctk.CTkFrame):
         self.empty_label.pack(pady=50)
 
         self.button_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.button_frame.grid(row=3, column=0, padx=15, pady=10, sticky="ew")
+        self.button_frame.grid(row=2, column=0, padx=15, pady=10, sticky="ew")
         self.button_frame.grid_columnconfigure(0, weight=1)
         self.button_frame.grid_columnconfigure(1, weight=1)
 
@@ -192,8 +192,8 @@ class ListPanel(ctk.CTkFrame):
         self.doctor_search.set("全部医生")
         self.phone_search.delete(0, "end")
         self.search_name = ""
-        self.search_department = ""
-        self.search_doctor = ""
+        self.search_department = "全部科室"
+        self.search_doctor = "全部医生"
         self.search_phone = ""
         self.apply_filter_and_sort()
 
