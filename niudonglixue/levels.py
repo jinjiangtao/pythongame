@@ -388,8 +388,8 @@ class SpringScene:
     def __init__(self, canvas, colors):
         self.canvas = canvas
         self.colors = colors
-        self.block = Block(250, 270, 60, 60, mass=2.0)
-        self.spring = Spring(90, 300, 250, 300, k=50, rest_length=160)
+        self.block = Block(250, 270, 60, 60, mass=1.0)
+        self.spring = Spring(90, 300, 250, 300, k=100, rest_length=160)
         self.spring.connected_object = self.block
         self.is_released = False
         self.max_compression = 0
@@ -446,6 +446,8 @@ class SpringScene:
     def release(self):
         if not self.is_released:
             self.is_released = True
+            if self.max_compression == 0:
+                self.block.vx = 10
 
     def update(self):
         if self.is_released and self.spring and self.block:
