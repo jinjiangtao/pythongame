@@ -65,43 +65,43 @@ class GameWindow(ctk.CTk):
         self.canvas_frame.grid_columnconfigure(0, weight=1)
         self.canvas_frame.grid_rowconfigure(0, weight=1)
         
-        self.canvas = tk.Canvas(self.canvas_frame, width=600, height=450, 
+        self.canvas = tk.Canvas(self.canvas_frame, width=800, height=500, 
                                bg=COLORS[self.current_theme]["canvas_bg"],
                                highlightthickness=0)
-        self.canvas.grid(row=0, column=0, padx=10, pady=10)
+        self.canvas.grid(row=0, column=0, padx=10, pady=5)
         
         self.instruction_label = ctk.CTkLabel(self.canvas_frame, text=self.get_instruction(),
-                                             font=("Arial", 12))
-        self.instruction_label.grid(row=1, column=0, padx=10, pady=5)
+                                             font=("Arial", 11))
+        self.instruction_label.grid(row=1, column=0, padx=10, pady=2)
 
     def create_control_panel(self):
-        self.control_frame = ctk.CTkFrame(self, height=120, corner_radius=10)
+        self.control_frame = ctk.CTkFrame(self, height=100, corner_radius=10)
         self.control_frame.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
         self.control_frame.grid_columnconfigure(0, weight=1)
         
         self.operation_buttons = ctk.CTkFrame(self.control_frame)
-        self.operation_buttons.grid(row=0, column=0, padx=10, pady=10)
+        self.operation_buttons.grid(row=0, column=0, padx=10, pady=5)
         
         self.action_button = ctk.CTkButton(self.operation_buttons, text=self.get_action_button_text(),
-                                          command=self.perform_action, width=120, height=40,
-                                          font=("Arial", 14))
-        self.action_button.grid(row=0, column=0, padx=10)
+                                          command=self.perform_action, width=100, height=35,
+                                          font=("Arial", 12))
+        self.action_button.grid(row=0, column=0, padx=8)
         
         self.reset_button = ctk.CTkButton(self.operation_buttons, text="重置",
-                                         command=self.reset_scene, width=100, height=40)
-        self.reset_button.grid(row=0, column=1, padx=10)
+                                         command=self.reset_scene, width=80, height=35)
+        self.reset_button.grid(row=0, column=1, padx=8)
         
         self.next_button = ctk.CTkButton(self.operation_buttons, text="下一关",
-                                         command=self.next_level, width=100, height=40)
-        self.next_button.grid(row=0, column=2, padx=10)
+                                         command=self.next_level, width=80, height=35)
+        self.next_button.grid(row=0, column=2, padx=8)
         
         self.question_button = ctk.CTkButton(self.operation_buttons, text="答题",
-                                            command=self.show_question, width=100, height=40)
-        self.question_button.grid(row=0, column=3, padx=10)
+                                            command=self.show_question, width=80, height=35)
+        self.question_button.grid(row=0, column=3, padx=8)
         
         self.knowledge_button = ctk.CTkButton(self.operation_buttons, text="查看知识点",
-                                             command=self.show_knowledge, width=120, height=40)
-        self.knowledge_button.grid(row=0, column=4, padx=10)
+                                             command=self.show_knowledge, width=100, height=35)
+        self.knowledge_button.grid(row=0, column=4, padx=8)
         
         self.create_parameter_sliders()
 
@@ -124,31 +124,31 @@ class GameWindow(ctk.CTk):
 
     def create_slider(self, label, min_val, max_val, default, command):
         frame = ctk.CTkFrame(self.slider_frame)
-        frame.pack(side="left", padx=15)
+        frame.pack(side="left", padx=10)
         
-        label = ctk.CTkLabel(frame, text=label, font=("Arial", 12))
-        label.pack(pady=2)
+        label = ctk.CTkLabel(frame, text=label, font=("Arial", 10))
+        label.pack(pady=1)
         
         slider = ctk.CTkSlider(frame, from_=min_val, to=max_val, 
-                               command=command, width=150)
+                               command=command, width=120, height=20)
         slider.set(default)
-        slider.pack(pady=5)
+        slider.pack(pady=2)
         
-        value_label = ctk.CTkLabel(frame, text=f"{default:.1f}", font=("Arial", 12))
-        value_label.pack(pady=2)
+        value_label = ctk.CTkLabel(frame, text=f"{default:.1f}", font=("Arial", 10))
+        value_label.pack(pady=1)
         
         self.sliders[label] = {"slider": slider, "label": value_label}
 
     def create_status_bar(self):
-        self.status_frame = ctk.CTkFrame(self, height=50, corner_radius=10)
+        self.status_frame = ctk.CTkFrame(self, height=45, corner_radius=10)
         self.status_frame.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
         self.status_frame.grid_columnconfigure(1, weight=1)
         
-        self.data_display = ctk.CTkLabel(self.status_frame, text="", font=("Arial", 11))
-        self.data_display.grid(row=0, column=0, padx=15, pady=10)
+        self.data_display = ctk.CTkLabel(self.status_frame, text="", font=("Arial", 10))
+        self.data_display.grid(row=0, column=0, padx=15, pady=8)
         
         self.progress_display = ctk.CTkLabel(self.status_frame, text=self.get_progress_text(), 
-                                            font=("Arial", 11), text_color="#5cb85c")
+                                            font=("Arial", 10), text_color="#5cb85c")
         self.progress_display.grid(row=0, column=1, padx=15)
 
     def toggle_theme(self):

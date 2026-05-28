@@ -2,7 +2,7 @@ import customtkinter as ctk
 
 APP_TITLE = "牛顿力学科普小游戏"
 WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 700
+WINDOW_HEIGHT = 850
 
 LIGHT_THEME = "light"
 DARK_THEME = "dark"

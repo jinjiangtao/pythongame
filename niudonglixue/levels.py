@@ -8,7 +8,7 @@ class GravityScene:
         self.colors = colors
         self.ball = None
         self.start_y = 50
-        self.drop_height = 200
+        self.ground_y = 420
         self.is_dropped = False
         self.drop_time = 0
         self.init_scene()
@@ -21,15 +21,15 @@ class GravityScene:
         self.drop_time = 0
 
     def draw_ground(self):
-        self.canvas.create_rectangle(0, 400, 600, 450, fill=self.colors["accent"], outline="")
-        self.canvas.create_text(300, 425, text="地面", fill=self.colors["text"], font=("Arial", 12))
+        self.canvas.create_rectangle(0, self.ground_y, 800, 480, fill=self.colors["accent"], outline="")
+        self.canvas.create_text(400, 450, text="地面", fill=self.colors["text"], font=("Arial", 12))
 
     def draw_ball(self):
         if self.ball:
             self.ball.y = self.start_y
             self.ball.vy = 0
         else:
-            self.ball = Ball(275, self.start_y, 25, mass=2.0)
+            self.ball = Ball(375, self.start_y, 25, mass=2.0)
         self.update_display()
 
     def drop(self):
@@ -42,8 +42,8 @@ class GravityScene:
             self.ball.update()
             self.drop_time += 0.016
             
-            if self.ball.y + self.ball.radius * 2 >= 400:
-                self.ball.y = 400 - self.ball.radius * 2
+            if self.ball.y + self.ball.radius * 2 >= self.ground_y:
+                self.ball.y = self.ground_y - self.ball.radius * 2
                 self.ball.vy = 0
                 self.is_dropped = False
             
@@ -95,17 +95,17 @@ class FrictionScene:
             color = "#add8e6"
             pattern = "~~~~~~~~"
         
-        self.canvas.create_rectangle(0, 350, 600, 420, fill=color, outline="")
-        for i in range(0, 600, 30):
-            self.canvas.create_text(i + 15, 385, text=pattern[:5], fill="white", font=("Arial", 8))
-        self.canvas.create_text(300, 400, text=f"接触面: {self.surface_type == 'rough' and '粗糙' or '光滑'}", fill=self.colors["text"], font=("Arial", 12))
+        self.canvas.create_rectangle(0, 380, 800, 460, fill=color, outline="")
+        for i in range(0, 800, 30):
+            self.canvas.create_text(i + 15, 420, text=pattern[:5], fill="white", font=("Arial", 8))
+        self.canvas.create_text(400, 445, text=f"接触面: {self.surface_type == 'rough' and '粗糙' or '光滑'}", fill=self.colors["text"], font=("Arial", 12))
 
     def draw_block(self):
         if self.block:
             self.block.x = self.start_x
             self.block.vx = 0
         else:
-            self.block = Block(self.start_x, 280, 60, 60, mass=3.0)
+            self.block = Block(self.start_x, 310, 60, 60, mass=3.0)
         self.update_display()
 
     def set_friction(self, value):
@@ -173,7 +173,7 @@ class InclineScene:
 
     def draw_incline(self):
         angle_rad = math.radians(self.angle)
-        x1, y1 = 50, 400
+        x1, y1 = 100, 450
         x2 = x1 + self.incline_length * math.cos(angle_rad)
         y2 = y1 - self.incline_length * math.sin(angle_rad)
         
@@ -258,8 +258,8 @@ class LeverScene:
         self.draw_weights()
 
     def draw_pivot(self):
-        self.pivot_x = 300
-        self.pivot_y = 250
+        self.pivot_x = 400
+        self.pivot_y = 300
         self.canvas.create_oval(self.pivot_x - 15, self.pivot_y - 15,
                                self.pivot_x + 15, self.pivot_y + 15,
                                fill="#2ecc71", outline="#27ae60", width=2)
@@ -269,10 +269,10 @@ class LeverScene:
             self.lever.angle = 0
             self.lever.angular_velocity = 0
         else:
-            self.lever = Lever(self.pivot_x, self.pivot_y, length=300)
+            self.lever = Lever(self.pivot_x, self.pivot_y, length=350)
         
-        self.lever.left_distance = 300 * self.pivot_position
-        self.lever.right_distance = 300 * (1 - self.pivot_position)
+        self.lever.left_distance = 350 * self.pivot_position
+        self.lever.right_distance = 350 * (1 - self.pivot_position)
         self.lever.left_weight = self.left_weight
         self.lever.right_weight = self.right_weight
         
@@ -291,8 +291,8 @@ class LeverScene:
     def set_pivot(self, position):
         self.pivot_position = position
         if self.lever:
-            self.lever.left_distance = 300 * position
-            self.lever.right_distance = 300 * (1 - position)
+            self.lever.left_distance = 350 * position
+            self.lever.right_distance = 350 * (1 - position)
 
     def release(self):
         pass
@@ -354,29 +354,29 @@ class SpringScene:
         self.max_compression = 0
 
     def draw_wall(self):
-        self.canvas.create_rectangle(50, 200, 80, 400, fill="#7f8c8d", outline="#7f8c8d")
+        self.canvas.create_rectangle(50, 150, 90, 450, fill="#7f8c8d", outline="#7f8c8d")
 
     def draw_spring(self):
-        self.spring = Spring(80, 300, 200, 300, k=50, rest_length=120)
+        self.spring = Spring(90, 300, 250, 300, k=50, rest_length=160)
         
         if self.block:
             self.spring.x2 = self.block.x
             self.spring.y2 = self.block.y + self.block.height / 2
         else:
-            self.block = Block(200, 270, 60, 60, mass=2.0)
+            self.block = Block(250, 270, 60, 60, mass=2.0)
             self.spring.connected_object = self.block
         
         self.update_display()
 
     def draw_block(self):
         if not self.block:
-            self.block = Block(200, 270, 60, 60, mass=2.0)
+            self.block = Block(250, 270, 60, 60, mass=2.0)
             self.spring.connected_object = self.block
         self.update_display()
 
     def compress(self, distance):
-        target_x = 200 - distance
-        if target_x > 100:
+        target_x = 250 - distance
+        if target_x > 120:
             self.block.x = target_x
             self.max_compression = max(self.max_compression, distance)
             self.spring.x2 = self.block.x
@@ -391,8 +391,8 @@ class SpringScene:
             self.spring.update()
             self.block.update()
             
-            if self.block.x > 450:
-                self.block.x = 450
+            if self.block.x > 550:
+                self.block.x = 550
                 self.block.vx = 0
                 self.is_released = False
             
@@ -454,35 +454,34 @@ class InertiaScene:
         self.draw_platform()
         self.draw_block()
         self.is_pulled = False
+        self.update_display()
 
     def draw_platform(self):
         if self.platform:
-            self.platform.x = 200
+            self.platform.x = 250
             self.platform.vx = 0
         else:
-            self.platform = Block(200, 350, 200, 30, mass=1.0)
-        self.update_display()
+            self.platform = Block(250, 380, 250, 30, mass=1.0)
 
     def draw_block(self):
         if self.block:
-            self.block.x = 250
-            self.block.y = 290
+            self.block.x = 320
+            self.block.y = 320
             self.block.vx = 0
         else:
-            self.block = Block(250, 290, 100, 50, mass=2.0)
-        self.update_display()
+            self.block = Block(320, 320, 100, 50, mass=2.0)
 
     def pull(self):
         if not self.is_pulled:
-            self.platform.vx = 25
+            self.platform.vx = 30
             self.is_pulled = True
 
     def update(self):
         if self.is_pulled and self.platform:
             self.platform.update()
             
-            if self.platform.x > 450:
-                self.platform.x = 450
+            if self.platform.x > 500:
+                self.platform.x = 500
                 self.platform.vx = 0
             
             self.update_display()
@@ -496,7 +495,7 @@ class InertiaScene:
             self.platform.y + self.platform.height,
             fill="#95a5a6", outline="#7f8c8d", width=2, tags="platform"
         )
-        self.canvas.create_text(self.platform.x + 100, self.platform.y + 15, 
+        self.canvas.create_text(self.platform.x + 125, self.platform.y + 15, 
                                text="书本", fill=self.colors["text"], font=("Arial", 12))
         
         self.canvas.create_rectangle(
