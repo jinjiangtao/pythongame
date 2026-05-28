@@ -103,12 +103,12 @@ class Game:
             
             for dy in range(-5, 6):
                 for dx in range(-5, 6):
-                    obs_x, obs_y = overlap[0] + dx, overlap[1] + dy
-                    if 0 <= obs_x < obs_w and 0 <= obs_y < obs_h:
-                        if obstacle_mask.get_at((obs_x, obs_y)):
-                            car_x, car_y = obs_x - offset_x, obs_y - offset_y
-                            if 0 <= car_x < car_w and 0 <= car_y < car_h:
-                                if car_mask.get_at((car_x, car_y)):
+                    car_x, car_y = overlap[0] + dx, overlap[1] + dy
+                    if 0 <= car_x < car_w and 0 <= car_y < car_h:
+                        if car_mask.get_at((car_x, car_y)):
+                            obs_x, obs_y = car_x + offset_x, car_y + offset_y
+                            if 0 <= obs_x < obs_w and 0 <= obs_y < obs_h:
+                                if obstacle_mask.get_at((obs_x, obs_y)):
                                     overlap_area += 1
             return overlap_area > 10
         return False

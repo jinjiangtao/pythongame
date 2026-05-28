@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 from constants import *
 
 class PowerUp:
@@ -18,7 +19,7 @@ class PowerUp:
     def update(self, speed):
         self.x -= speed
         self.bob_offset = (self.bob_offset + 0.1) % (2 * 3.14159)
-        self.y = GROUND_Y - self.height - 80 + int(10 * pygame.math.sin(self.bob_offset))
+        self.y = GROUND_Y - self.height - 80 + int(10 * math.sin(self.bob_offset))
     
     def draw(self, screen):
         colors = {
