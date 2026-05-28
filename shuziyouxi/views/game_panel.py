@@ -1,10 +1,10 @@
 import customtkinter as ctk
 
-class GamePanel(ctk.CTkCanvas):
+class GamePanel(ctk.CTkFrame):
     """游戏面板组件 - 显示图案的画布区域"""
     
     def __init__(self, master):
-        super().__init__(master, bg="transparent", highlightthickness=0)
+        super().__init__(master, corner_radius=15)
         self.pattern_size = 50
         self.pattern_labels = []
     
@@ -30,4 +30,5 @@ class GamePanel(ctk.CTkCanvas):
     
     def get_size(self):
         """获取面板尺寸"""
+        self.update_idletasks()
         return (self.winfo_width(), self.winfo_height())

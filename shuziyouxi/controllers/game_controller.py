@@ -64,8 +64,12 @@ class GameController:
         self.view.enable_next(False)
         
         self.master.update_idletasks()
+        self.view.game_panel.update_idletasks()
         panel_width = self.view.game_panel.winfo_width()
         panel_height = self.view.game_panel.winfo_height()
+        
+        if panel_width < 100 or panel_height < 100:
+            panel_width, panel_height = 560, 280
         
         positions = self.question_generator.generate_positions(
             self.current_answer, panel_width, panel_height, 50
