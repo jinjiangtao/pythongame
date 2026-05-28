@@ -1,9 +1,33 @@
 import pygame
 import random
 import sys
+import os
 from constants import *
 from car import Car
 from obstacle import Obstacle
+
+def get_chinese_font(size):
+    font_names = ['simhei', 'simsun', 'msyh', 'microsoftyahei', 'kaiti', 'fangsong']
+    for font_name in font_names:
+        try:
+            return pygame.font.SysFont(font_name, size)
+        except:
+            continue
+    
+    font_paths = [
+        'C:\\Windows\\Fonts\\simhei.ttf',
+        'C:\\Windows\\Fonts\\simsun.ttc',
+        'C:\\Windows\\Fonts\\msyh.ttc',
+        'C:\\Windows\\Fonts\\msyhbd.ttc',
+    ]
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            try:
+                return pygame.font.Font(font_path, size)
+            except:
+                continue
+    
+    return pygame.font.Font(None, size)
 
 class Game:
     def __init__(self):
@@ -14,8 +38,8 @@ class Game:
         self.clock = pygame.time.Clock()
         self.reset()
         
-        self.font = pygame.font.Font(None, 36)
-        self.small_font = pygame.font.Font(None, 24)
+        self.font = get_chinese_font(36)
+        self.small_font = get_chinese_font(24)
         
         self.last_obstacle_time = 0
         self.obstacle_interval = random.randint(OBSTACLE_SPAWN_INTERVAL_MIN, OBSTACLE_SPAWN_INTERVAL_MAX)
