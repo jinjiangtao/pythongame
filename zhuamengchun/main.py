@@ -140,6 +140,7 @@ class SoundManager:
                     samples[i] = int(6000 * envelope * math.sin(2 * math.pi * freq * t))
             
             sound_array = np.array(samples, dtype=np.int16)
+            sound_array = np.column_stack([sound_array, sound_array])
             self.sounds[sound_type] = pygame.sndarray.make_sound(sound_array)
     
     def play(self, sound_type):
