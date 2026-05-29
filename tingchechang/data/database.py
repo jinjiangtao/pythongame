@@ -111,8 +111,11 @@ class DatabaseManager:
         cursor.execute('''
             UPDATE parking_spaces 
             SET status = 'occupied', plate_number = ?, occupied_since = ?
-            WHERE area = ? AND status = 'available'
-            LIMIT 1
+            WHERE id = (
+                SELECT id FROM parking_spaces 
+                WHERE area = ? AND status = 'available'
+                LIMIT 1
+            )
         ''', (plate_number, entry_time, area))
     
     def get_active_parking(self, plate_number=None):
