@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D装修效果图生成工具</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 3D装修效果图生成工具</h1>
+            <p class="subtitle">上传户型图 · 绘制墙体 · 生成3D效果</p>
+        </header>
+
+        <main class="main-content">
+            <section class="left-panel">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <h2>上传户型图</h2>
+                        <p>拖拽图片到此处，或点击选择文件</p>
+                        <p class="upload-hint">支持 JPG/PNG 格式</p>
+                        <input type="file" id="fileInput" accept="image/jpeg,image/png" hidden>
+                        <button class="upload-btn" id="uploadBtn">选择图片</button>
+                    </div>
+                </div>
+
+                <div class="drawing-area" id="drawingArea" style="display: none;">
+                    <div class="drawing-header">
+                        <h3>📐 墙体绘制</h3>
+                        <div class="drawing-controls">
+                            <button class="control-btn" id="undoBtn" title="撤销上一个点">
+                                <span>↩️</span> 撤销
+                            </button>
+                            <button class="control-btn" id="clearBtn" title="清除所有">
+                                <span>🗑️</span> 清除
+                            </button>
+                            <button class="control-btn primary" id="generateBtn" title="生成3D效果">
+                                <span>✨</span> 生成3D
+                            </button>
+                        </div>
+                    </div>
+                    <div class="canvas-container" id="canvasContainer">
+                        <img id="floorPlanImage" alt="户型图">
+                        <canvas id="wallCanvas"></canvas>
+                    </div>
+                    <div class="instructions">
+                        <p><strong>操作说明：</strong></p>
+                        <ul>
+                            <li>💡 点击画点绘制墙体</li>
+                            <li>💡 双击闭合当前房间</li>
+                            <li>💡 至少绘制 2-3 个房间</li>
+                            <li>💡 点击"生成3D"查看效果</li>
+                        </ul>
+                    </div>
+                    <div class="room-info" id="roomInfo">
+                        <span>已绘制房间: <strong id="roomCount">0</strong> 个</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="right-panel">
+                <div class="scene-container" id="sceneContainer">
+                    <div class="scene-placeholder" id="scenePlaceholder">
+                        <div class="placeholder-content">
+                            <div class="placeholder-icon">🏠</div>
+                            <h3>3D效果预览区</h3>
+                            <p>上传图片并绘制墙体后，<br>这里将显示3D装修效果</p>
+                        </div>
+                    </div>
+                    <canvas id="threeCanvas" style="display: none;"></canvas>
+                </div>
+                <div class="scene-controls" id="sceneControls" style="display: none;">
+                    <div class="control-hint">
+                        🖱️ 拖拽旋转 | 滚轮缩放
+                    </div>
+                    <button class="reset-btn" id="resetSceneBtn">
+                        <span>🔄</span> 重置场景
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="tips">
+                <span>💡 提示：建议使用清晰的户型图以获得最佳效果</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
