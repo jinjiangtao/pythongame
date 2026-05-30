@@ -19,10 +19,10 @@
                     <div class="upload-content">
                         <div class="upload-icon">📁</div>
                         <h2>上传户型图</h2>
-                        <p>拖拽图片到此处，或点击选择文件</p>
-                        <p class="upload-hint">支持 JPG/PNG 格式</p>
+                        <p>拖拽户型图到此处，或点击选择文件</p>
+                        <p class="upload-hint">支持 JPG/PNG 格式，上传后自动识别墙体</p>
                         <input type="file" id="fileInput" accept="image/jpeg,image/png" hidden>
-                        <button class="upload-btn" id="uploadBtn">选择图片</button>
+                        <button class="upload-btn" id="uploadBtn">选择户型图</button>
                     </div>
                 </div>
 
@@ -61,12 +61,29 @@
             </section>
 
             <section class="right-panel">
+                <div class="style-selector">
+                    <h4>🎨 装修风格</h4>
+                    <div class="style-buttons">
+                        <button class="style-btn active" data-style="modern">
+                            <span class="style-icon">✨</span>
+                            <span class="style-name">现代简约</span>
+                        </button>
+                        <button class="style-btn" data-style="wood">
+                            <span class="style-icon">🪵</span>
+                            <span class="style-name">原木日式</span>
+                        </button>
+                        <button class="style-btn" data-style="luxury">
+                            <span class="style-icon">💎</span>
+                            <span class="style-name">轻奢金属</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="scene-container" id="sceneContainer">
                     <div class="scene-placeholder" id="scenePlaceholder">
                         <div class="placeholder-content">
                             <div class="placeholder-icon">🏠</div>
                             <h3>3D效果预览区</h3>
-                            <p>上传图片并绘制墙体后，<br>这里将显示3D装修效果</p>
+                            <p>上传户型图后自动生成<br>3D装修效果图</p>
                         </div>
                     </div>
                     <canvas id="threeCanvas" style="display: none;"></canvas>

@@ -9,6 +9,7 @@ export class Scene3D {
         this.rooms = [];
         this.meshes = [];
         this.isInitialized = false;
+        this.currentStyle = null;
         
         this.wallHeight = 2.5;
         this.wallColor = 0xE5E7EB;
@@ -67,6 +68,7 @@ export class Scene3D {
         
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         this.scene.add(ambientLight);
+        this.ambientLight = ambientLight;
         
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
         directionalLight.position.set(10, 10, 10);
@@ -80,6 +82,7 @@ export class Scene3D {
         directionalLight.shadow.camera.top = 20;
         directionalLight.shadow.camera.bottom = -20;
         this.scene.add(directionalLight);
+        this.directionalLight = directionalLight;
         
         const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
         this.scene.add(hemisphereLight);
@@ -175,6 +178,11 @@ export class Scene3D {
             wall.castShadow = true;
             wall.receiveShadow = true;
             
+            wall.userData = {
+                type: 'wall',
+                roomId: room.id
+            };
+            
             this.scene.add(wall);
             this.meshes.push(wall);
         }
@@ -208,6 +216,11 @@ export class Scene3D {
         floor.position.y = 0.01;
         floor.receiveShadow = true;
         
+        floor.userData = {
+            type: 'floor',
+            roomId: room.id
+        };
+        
         this.scene.add(floor);
         this.meshes.push(floor);
     }
@@ -236,7 +249,8 @@ export class Scene3D {
             furniture.receiveShadow = true;
             
             furniture.userData = {
-                type: item.type,
+                type: 'furniture',
+                itemType: item.type,
                 roomId: roomId,
                 furnitureType: furnitureType.name
             };
@@ -304,5 +318,42 @@ export class Scene3D {
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(width, height);
+    }
+    
+    applyStyle(style) {
+        this.currentStyle = style;
+        
+        if (!this.isInitialized) return;
+        
+        this.meshes.forEach(mesh => {
+            if (mesh.userData.type === 'wall') {
+                if (mesh.material) {
+                    mesh.material.color.setHex(style.wallColor);
+                }
+            } else if (mesh.userData.type === 'floor') {
+                if (mesh.material) {
+                    mesh.material.color.setHex(style.floorColor);
+                }
+            } else if (mesh.userData.type === 'furniture') {
+                if (mesh.material) {
+                    mesh.material.color.setHex(style.furnitureColor);
+                }
+            }
+        });
+        
+        this.scene.children.forEach(child => {
+            if (child.type === 'AmbientLight' && this.ambientLight) {
+                this.ambientLight.intensity = style.ambientIntensity;
+            }
+            if (child.type === 'DirectionalLight' && this.directionalLight) {
+                this.directionalLight.intensity = style.directionalIntensity;
+            }
+        });
+    }
+    
+    updateScene() {
+        if (this.scene && this.camera && this.renderer) {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 }
