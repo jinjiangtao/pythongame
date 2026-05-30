@@ -23,12 +23,19 @@ export class WallDrawer {
     
     updateCanvasSize() {
         const rect = this.imageElement.getBoundingClientRect();
-        this.canvasElement.width = rect.width;
-        this.canvasElement.height = rect.height;
+        
+        this.canvasElement.width = this.imageElement.naturalWidth;
+        this.canvasElement.height = this.imageElement.naturalHeight;
+        
+        this.canvasElement.style.width = rect.width + 'px';
+        this.canvasElement.style.height = rect.height + 'px';
+        
         this.imageWidth = this.imageElement.naturalWidth;
         this.imageHeight = this.imageElement.naturalHeight;
-        this.scaleX = this.imageWidth / rect.width;
-        this.scaleY = this.imageHeight / rect.height;
+        this.displayWidth = rect.width;
+        this.displayHeight = rect.height;
+        this.scaleX = this.imageWidth / this.displayWidth;
+        this.scaleY = this.imageHeight / this.displayHeight;
     }
     
     bindEvents() {
@@ -44,8 +51,11 @@ export class WallDrawer {
         if (!this.isDrawing) return;
         
         const rect = this.canvasElement.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const displayX = e.clientX - rect.left;
+        const displayY = e.clientY - rect.top;
+        
+        const x = displayX * this.scaleX;
+        const y = displayY * this.scaleY;
         
         this.currentRoom.push({ x, y });
         this.redraw();
@@ -194,12 +204,12 @@ export class WallDrawer {
         return this.rooms.map(room => ({
             ...room,
             scaledPoints: room.points.map(p => ({
-                x: p.x * this.scaleX,
-                y: p.y * this.scaleY
+                x: p.x,
+                y: p.y
             })),
             scaledCentroid: {
-                x: this.calculateCentroid(room.points).x * this.scaleX,
-                y: this.calculateCentroid(room.points).y * this.scaleY
+                x: this.calculateCentroid(room.points).x,
+                y: this.calculateCentroid(room.points).y
             }
         }));
     }
