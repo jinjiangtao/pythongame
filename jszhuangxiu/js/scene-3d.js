@@ -103,35 +103,51 @@ export class Scene3D {
     }
     
     buildFromRooms(rooms, imageWidth, imageHeight) {
-        if (!this.isInitialized) {
-            this.init();
+        console.log('buildFromRooms 被调用', { rooms, imageWidth, imageHeight });
+        try {
+            if (!this.isInitialized) {
+                console.log('初始化3D场景');
+                this.init();
+            }
+            
+            this.clearScene();
+            this.rooms = rooms;
+            
+            const scale = 10 / Math.max(imageWidth, imageHeight);
+            const offsetX = 0;
+            const offsetZ = 0;
+            console.log('缩放比例:', scale);
+            
+            rooms.forEach((room, index) => {
+                console.log('处理房间', index, room);
+                const furnitureType = this.furnitureTypes[index % this.furnitureTypes.length];
+                
+                // 使用当前风格的颜色
+                const wallColor = this.currentStyle ? this.currentStyle.wallColor : this.wallColor;
+                const floorColor = this.currentStyle ? this.currentStyle.floorColor : this.floorColor;
+                const furnitureColor = this.currentStyle ? this.currentStyle.furnitureColor : furnitureType.color;
+                
+                this.addWalls(room.scaledPoints, scale, offsetX, offsetZ, wallColor, room.id);
+            
+            this.addFloor(room.scaledPoints, scale, offsetX, offsetZ, floorColor, room.id);
+            
+            this.addFurniture(room.scaledCentroid, scale, offsetX, offsetZ, furnitureType, room.id, furnitureColor);
+            });
+            
+            const centerX = (offsetX + 5);
+            const centerZ = (offsetZ + 5);
+            this.camera.position.set(centerX + 5, 5, centerZ + 5);
+            this.controls.target.set(centerX, 0, centerZ);
+            this.controls.update();
+            console.log('buildFromRooms 完成');
+        } catch (error) {
+            console.error('buildFromRooms 出错:', error);
+            throw error;
         }
-        
-        this.clearScene();
-        this.rooms = rooms;
-        
-        const scale = 10 / Math.max(imageWidth, imageHeight);
-        const offsetX = 0;
-        const offsetZ = 0;
-        
-        rooms.forEach((room, index) => {
-            const furnitureType = this.furnitureTypes[index % this.furnitureTypes.length];
-            
-            this.addWalls(room.scaledPoints, scale, offsetX, offsetZ, room.color);
-            
-            this.addFloor(room.scaledPoints, scale, offsetX, offsetZ, this.floorColor);
-            
-            this.addFurniture(room.scaledCentroid, scale, offsetX, offsetZ, furnitureType, room.id);
-        });
-        
-        const centerX = (offsetX + 5);
-        const centerZ = (offsetZ + 5);
-        this.camera.position.set(centerX + 5, 5, centerZ + 5);
-        this.controls.target.set(centerX, 0, centerZ);
-        this.controls.update();
     }
     
-    addWalls(points, scale, offsetX, offsetZ, color) {
+    addWalls(points, scale, offsetX, offsetZ, color, roomId) {
+        console.log('addWalls 被调用', { points, color, roomId });
         if (points.length < 3) return;
         
         const shape = new THREE.Shape();
@@ -147,8 +163,14 @@ export class Scene3D {
         }
         shape.lineTo(scaledPoints[0].x, scaledPoints[0].y);
         
+        // 处理颜色：可以是十六进制数字或字符串
+        let wallColor = color;
+        if (typeof color === 'string' && color.startsWith('#')) {
+            wallColor = parseInt(color.replace('#', '0x'));
+        }
+        
         const wallMaterial = new THREE.MeshStandardMaterial({
-            color: parseInt(color.replace('#', '0x')),
+            color: wallColor,
             roughness: 0.7,
             metalness: 0.1
         });
@@ -180,15 +202,17 @@ export class Scene3D {
             
             wall.userData = {
                 type: 'wall',
-                roomId: room.id
+                roomId: roomId
             };
             
             this.scene.add(wall);
             this.meshes.push(wall);
         }
+        console.log('addWalls 完成，添加了', scaledPoints.length, '面墙');
     }
     
-    addFloor(points, scale, offsetX, offsetZ, color) {
+    addFloor(points, scale, offsetX, offsetZ, color, roomId) {
+        console.log('addFloor 被调用', { points, color, roomId });
         if (points.length < 3) return;
         
         const shape = new THREE.Shape();
@@ -204,9 +228,15 @@ export class Scene3D {
         }
         shape.lineTo(scaledPoints[0].x, scaledPoints[0].y);
         
+        // 处理颜色
+        let floorColor = color;
+        if (typeof color === 'string' && color.startsWith('#')) {
+            floorColor = parseInt(color.replace('#', '0x'));
+        }
+        
         const floorGeometry = new THREE.ShapeGeometry(shape);
         const floorMaterial = new THREE.MeshStandardMaterial({
-            color: color,
+            color: floorColor,
             roughness: 0.9,
             metalness: 0
         });
@@ -218,21 +248,29 @@ export class Scene3D {
         
         floor.userData = {
             type: 'floor',
-            roomId: room.id
+            roomId: roomId
         };
         
         this.scene.add(floor);
         this.meshes.push(floor);
+        console.log('addFloor 完成');
     }
     
-    addFurniture(centroid, scale, offsetX, offsetZ, furnitureType, roomId) {
+    addFurniture(centroid, scale, offsetX, offsetZ, furnitureType, roomId, color) {
+        console.log('addFurniture 被调用', { centroid, furnitureType, roomId, color });
         const centerX = centroid.x * scale + offsetX;
         const centerZ = centroid.y * scale + offsetZ;
+        
+        // 处理颜色
+        let furnitureColor = color;
+        if (typeof color === 'string' && color.startsWith('#')) {
+            furnitureColor = parseInt(color.replace('#', '0x'));
+        }
         
         furnitureType.items.forEach(item => {
             const geometry = new THREE.BoxGeometry(item.size[0], item.size[1], item.size[2]);
             const material = new THREE.MeshStandardMaterial({
-                color: furnitureType.color,
+                color: furnitureColor,
                 roughness: 0.6,
                 metalness: 0.2
             });
@@ -258,6 +296,7 @@ export class Scene3D {
             this.scene.add(furniture);
             this.meshes.push(furniture);
         });
+        console.log('addFurniture 完成');
     }
     
     clearScene() {

@@ -292,32 +292,44 @@ class App {
     }
     
     handleGenerate() {
-        if (!this.wallDrawer) {
-            alert('请先上传户型图');
-            return;
+        console.log('handleGenerate 被调用');
+        try {
+            if (!this.wallDrawer) {
+                alert('请先上传户型图');
+                return;
+            }
+            
+            const roomCount = this.wallDrawer.getRoomCount();
+            console.log('房间数量:', roomCount);
+            if (roomCount < 1) {
+                alert('未检测到有效房间，请重新上传图片');
+                return;
+            }
+            
+            const rooms = this.wallDrawer.getRooms();
+            console.log('获取到的房间数据:', rooms);
+            this.detectedRooms = rooms;
+            
+            console.log('应用风格:', this.styles[this.currentStyle]);
+            this.scene3D.applyStyle(this.styles[this.currentStyle]);
+            
+            console.log('构建3D场景...');
+            this.scene3D.buildFromRooms(
+                rooms.map(room => ({
+                    ...room,
+                    scaledPoints: room.points,
+                    scaledCentroid: this.calculateCentroid(room.points)
+                })),
+                this.floorPlanImage.naturalWidth,
+                this.floorPlanImage.naturalHeight
+            );
+            
+            console.log('3D场景构建完成');
+            alert(`🎉 3D场景生成成功！共 ${roomCount} 个房间\n\n当前风格：${this.styles[this.currentStyle].name}\n\n操作提示：\n• 鼠标左键拖拽旋转视角\n• 鼠标滚轮缩放\n• 右键拖拽平移\n• 上方可切换不同装修风格`);
+        } catch (error) {
+            console.error('生成3D场景时出错:', error);
+            alert('生成3D场景时出错: ' + error.message);
         }
-        
-        const roomCount = this.wallDrawer.getRoomCount();
-        if (roomCount < 1) {
-            alert('未检测到有效房间，请重新上传图片');
-            return;
-        }
-        
-        const rooms = this.wallDrawer.getRooms();
-        this.detectedRooms = rooms;
-        
-        this.scene3D.applyStyle(this.styles[this.currentStyle]);
-        this.scene3D.buildFromRooms(
-            rooms.map(room => ({
-                ...room,
-                scaledPoints: room.points,
-                scaledCentroid: this.calculateCentroid(room.points)
-            })),
-            this.floorPlanImage.naturalWidth,
-            this.floorPlanImage.naturalHeight
-        );
-        
-        alert(`🎉 3D场景生成成功！共 ${roomCount} 个房间\n\n当前风格：${this.styles[this.currentStyle].name}\n\n操作提示：\n• 鼠标左键拖拽旋转视角\n• 鼠标滚轮缩放\n• 右键拖拽平移\n• 上方可切换不同装修风格`);
     }
     
     handleResetScene() {
