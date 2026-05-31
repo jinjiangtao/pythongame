@@ -17,6 +17,7 @@ class Coin:
             self.bob_offset += 0.1 * self.bob_direction
             if self.bob_offset > 5 or self.bob_offset < -5:
                 self.bob_direction *= -1
+            self.rect.y = self.y + self.bob_offset
     
     def draw(self, screen, camera_x):
         if not self.collected:

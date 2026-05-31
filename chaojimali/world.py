@@ -16,13 +16,14 @@ class World:
         
         self.platforms.append(Platform(0, ground_y, self.world_width, GROUND_HEIGHT))
         
-        self.platforms.append(Platform(300, 400, PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.platforms.append(Platform(500, 320, PLATFORM_WIDTH * 1.5, PLATFORM_HEIGHT))
-        self.platforms.append(Platform(700, 240, PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.platforms.append(Platform(900, 400, PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.platforms.append(Platform(1100, 320, PLATFORM_WIDTH * 2, PLATFORM_HEIGHT))
-        self.platforms.append(Platform(1400, 240, PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.platforms.append(Platform(1600, 400, PLATFORM_WIDTH * 1.5, PLATFORM_HEIGHT))
+        # 确保所有平台尺寸都是整数，避免晃动问题
+        self.platforms.append(Platform(300, 400, int(PLATFORM_WIDTH), PLATFORM_HEIGHT))
+        self.platforms.append(Platform(500, 320, int(PLATFORM_WIDTH * 1.5), PLATFORM_HEIGHT))
+        self.platforms.append(Platform(700, 240, int(PLATFORM_WIDTH), PLATFORM_HEIGHT))
+        self.platforms.append(Platform(900, 400, int(PLATFORM_WIDTH), PLATFORM_HEIGHT))
+        self.platforms.append(Platform(1100, 320, int(PLATFORM_WIDTH * 2), PLATFORM_HEIGHT))
+        self.platforms.append(Platform(1400, 240, int(PLATFORM_WIDTH), PLATFORM_HEIGHT))
+        self.platforms.append(Platform(1600, 400, int(PLATFORM_WIDTH * 1.5), PLATFORM_HEIGHT))
         
         self.coins.append(Coin(350, 360))
         self.coins.append(Coin(400, 360))
