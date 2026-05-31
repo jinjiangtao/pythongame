@@ -42,6 +42,19 @@ ALIEN_POINTS = 10
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("太空侵略者")
-font = pygame.font.Font(None, 74)
-small_font = pygame.font.Font(None, 36)
+
+font_names = ["Microsoft YaHei", "SimHei", "FangSong", "KaiTi", "SimSun"]
+font = None
+for font_name in font_names:
+    try:
+        font = pygame.font.SysFont(font_name, 74)
+        small_font = pygame.font.SysFont(font_name, 36)
+        break
+    except:
+        continue
+
+if font is None:
+    font = pygame.font.Font(None, 74)
+    small_font = pygame.font.Font(None, 36)
+
 clock = pygame.time.Clock()
