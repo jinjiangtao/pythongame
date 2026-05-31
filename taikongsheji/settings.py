@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -43,18 +44,36 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("太空侵略者")
 
-font_names = ["Microsoft YaHei", "SimHei", "FangSong", "KaiTi", "SimSun"]
-font = None
-for font_name in font_names:
-    try:
-        font = pygame.font.SysFont(font_name, 74)
-        small_font = pygame.font.SysFont(font_name, 36)
-        break
-    except:
-        continue
+def get_chinese_font(font_size):
+    font_paths = [
+        "C:/Windows/Fonts/msyh.ttc",
+        "C:/Windows/Fonts/simhei.ttf",
+        "C:/Windows/Fonts/simsun.ttc",
+        "C:/Windows/Fonts/kaiu.ttf",
+        "C:/Windows/Fonts/fangsong.ttf",
+    ]
+    
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            try:
+                return pygame.font.Font(font_path, font_size)
+            except:
+                continue
+    
+    sys_fonts = pygame.font.get_fonts()
+    chinese_fonts = ["msyh", "simhei", "simsun", "kaiu", "fangsong", 
+                     "microsoftyahei", "microsoft_yahei"]
+    
+    for font_name in chinese_fonts:
+        if font_name.lower() in [f.lower() for f in sys_fonts]:
+            try:
+                return pygame.font.SysFont(font_name, font_size)
+            except:
+                continue
+    
+    return pygame.font.Font(None, font_size)
 
-if font is None:
-    font = pygame.font.Font(None, 74)
-    small_font = pygame.font.Font(None, 36)
+font = get_chinese_font(74)
+small_font = get_chinese_font(36)
 
 clock = pygame.time.Clock()
