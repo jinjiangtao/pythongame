@@ -1,12 +1,37 @@
 import pygame
 import config
+import os
 
 class UI:
     def __init__(self):
         pygame.font.init()
-        self.font_large = pygame.font.Font(None, 60)
-        self.font_medium = pygame.font.Font(None, 40)
-        self.font_small = pygame.font.Font(None, 30)
+        
+        font_paths = [
+            "C:/Windows/Fonts/msyh.ttc",
+            "C:/Windows/Fonts/simhei.ttf",
+            "C:/Windows/Fonts/simsun.ttc"
+        ]
+        
+        font = None
+        valid_font_path = None
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    font = pygame.font.Font(font_path, 24)
+                    valid_font_path = font_path
+                    break
+                except:
+                    continue
+        
+        if valid_font_path:
+            self.font_large = pygame.font.Font(valid_font_path, 48)
+            self.font_medium = pygame.font.Font(valid_font_path, 32)
+            self.font_small = pygame.font.Font(valid_font_path, 22)
+        else:
+            self.font_large = pygame.font.Font(None, 60)
+            self.font_medium = pygame.font.Font(None, 40)
+            self.font_small = pygame.font.Font(None, 30)
+        
         self.timer_color = config.TEXT_COLOR
         self.message_surface = None
         self.message_timer = 0
