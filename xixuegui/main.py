@@ -6,7 +6,10 @@ from settings import (
     SCREEN_WIDTH,
     SCREEN_HEIGHT,
     FPS,
-    EXP_PER_LEVEL
+    EXP_PER_LEVEL,
+    FONT_PATH,
+    FONT_SIZE_MEDIUM,
+    FONT_SIZE_SMALL
 )
 from player import Player
 from enemy import Enemy
@@ -20,7 +23,12 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("吸血鬼幸存者 - Python版")
     clock = pygame.time.Clock()
-    font = pygame.font.Font(None, 36)
+    try:
+        font = pygame.font.Font(FONT_PATH, FONT_SIZE_MEDIUM)
+        small_font = pygame.font.Font(FONT_PATH, FONT_SIZE_SMALL)
+    except:
+        font = pygame.font.Font(None, FONT_SIZE_MEDIUM)
+        small_font = pygame.font.Font(None, FONT_SIZE_SMALL)
 
     player = Player()
     weapon = Weapon()
@@ -141,7 +149,7 @@ def main():
             hp_fill = (player.hp / player.max_hp) * hp_bar_width
             pygame.draw.rect(screen, (255, 0, 0), (20, 20, hp_bar_width, hp_bar_height))
             pygame.draw.rect(screen, (0, 255, 0), (20, 20, hp_fill, hp_bar_height))
-            hp_text = font.render(f"HP: {int(player.hp)}/{player.max_hp}", True, (255, 255, 255))
+            hp_text = small_font.render(f"生命值: {int(player.hp)}/{player.max_hp}", True, (255, 255, 255))
             screen.blit(hp_text, (20, 50))
 
             exp_bar_width = 200
@@ -149,10 +157,10 @@ def main():
             exp_fill = (player.exp / player.exp_to_next_level) * exp_bar_width
             pygame.draw.rect(screen, (100, 100, 100), (20, 80, exp_bar_width, exp_bar_height))
             pygame.draw.rect(screen, (255, 215, 0), (20, 80, exp_fill, exp_bar_height))
-            exp_text = font.render(f"EXP: {player.exp}/{player.exp_to_next_level}", True, (255, 255, 255))
+            exp_text = small_font.render(f"经验值: {player.exp}/{player.exp_to_next_level}", True, (255, 255, 255))
             screen.blit(exp_text, (20, 110))
 
-            level_text = font.render(f"等级: {player.level}", True, (255, 255, 255))
+            level_text = small_font.render(f"等级: {player.level}", True, (255, 255, 255))
             screen.blit(level_text, (20, 140))
 
         elif game_state == "upgrading":
@@ -167,7 +175,7 @@ def main():
             overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 200))
             screen.blit(overlay, (0, 0))
-            game_over_text = font.render("游戏结束! 按R重新开始", True, (255, 255, 255))
+            game_over_text = font.render("游戏结束! 按R键重新开始", True, (255, 255, 255))
             text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
             screen.blit(game_over_text, text_rect)
 

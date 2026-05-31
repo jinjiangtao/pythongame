@@ -1,5 +1,6 @@
 import pygame
 import random
+from settings import FONT_PATH, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM
 
 
 class UpgradeManager:
@@ -12,10 +13,16 @@ class UpgradeManager:
             {"name": "攻击范围+30", "effect": "attack_range", "value": 30}
         ]
         self.font = None
+        self.title_font = None
 
     def init_font(self):
         if not self.font:
-            self.font = pygame.font.Font(None, 36)
+            try:
+                self.font = pygame.font.Font(FONT_PATH, FONT_SIZE_MEDIUM)
+                self.title_font = pygame.font.Font(FONT_PATH, FONT_SIZE_LARGE)
+            except:
+                self.font = pygame.font.Font(None, FONT_SIZE_MEDIUM)
+                self.title_font = pygame.font.Font(None, FONT_SIZE_LARGE)
 
     def get_random_upgrades(self, count=3):
         return random.sample(self.upgrades, count)
@@ -41,7 +48,7 @@ class UpgradeManager:
         overlay.fill((0, 0, 0, 180))
         surface.blit(overlay, (0, 0))
 
-        title = self.font.render("选择升级 (点击选择)", True, (255, 255, 255))
+        title = self.title_font.render("选择升级 (点击选择)", True, (255, 255, 255))
         title_rect = title.get_rect(center=(screen_width // 2, 100))
         surface.blit(title, title_rect)
 
