@@ -31,9 +31,10 @@ class Game:
         shape_list = []
         
         pairs_per_shape = config.TOTAL_PAIRS // len(config.SHAPE_TYPES)
+        cards_per_shape = pairs_per_shape * 2
         
         for shape_type in config.SHAPE_TYPES:
-            for _ in range(pairs_per_shape):
+            for _ in range(cards_per_shape):
                 shape_list.append(shape_type)
         
         random.shuffle(shape_list)
