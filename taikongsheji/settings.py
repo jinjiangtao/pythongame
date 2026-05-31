@@ -1,0 +1,47 @@
+import pygame
+import random
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+
+PLAYER_COLOR = GREEN
+ALIEN_COLORS = [RED, BLUE, YELLOW]
+BULLET_COLOR = WHITE
+ALIEN_BULLET_COLOR = RED
+
+PLAYER_WIDTH = 50
+PLAYER_HEIGHT = 30
+PLAYER_SPEED = 7
+
+ALIEN_WIDTH = 40
+ALIEN_HEIGHT = 30
+ALIEN_SPEED = 2
+ALIEN_DROP_SPEED = 20
+ALIEN_HORIZONTAL_SPACE = 60
+ALIEN_VERTICAL_SPACE = 50
+ALIENS_PER_ROW = 8
+ALIEN_ROWS = 3
+
+BULLET_WIDTH = 5
+BULLET_HEIGHT = 15
+PLAYER_BULLET_SPEED = 10
+ALIEN_BULLET_SPEED = 5
+ALIEN_SHOOT_CHANCE = 0.005
+
+PLAYER_LIVES = 3
+ALIEN_POINTS = 10
+
+pygame.init()
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("太空侵略者")
+font = pygame.font.Font(None, 74)
+small_font = pygame.font.Font(None, 36)
+clock = pygame.time.Clock()
