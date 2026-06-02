@@ -3,7 +3,6 @@
 主窗口模块：负责界面布局和事件绑定
 """
 import customtkinter as ctk
-from tkinter.scrolledtext import ScrolledText
 from task_manager import TaskManager
 from utils import format_file_size, show_info, show_warning, show_error
 
@@ -19,8 +18,8 @@ class ImageCompressorApp(ctk.CTk):
 
         # 配置窗口
         self.title("图片批量压缩工具")
-        self.geometry("600x500")
-        self.minsize(600, 500)
+        self.geometry("600x550")
+        self.minsize(600, 550)
 
         # 设置深色主题
         ctk.set_appearance_mode("dark")
@@ -52,16 +51,13 @@ class ImageCompressorApp(ctk.CTk):
         list_frame = ctk.CTkFrame(self)
         list_frame.pack(pady=5, padx=20, fill="both", expand=True)
 
-        # 使用 ScrolledText 显示文件列表
-        self.file_list_text = ScrolledText(
+        # 使用 CTkTextbox 显示文件列表
+        self.file_list_text = ctk.CTkTextbox(
             list_frame,
             wrap="none",
-            bg="#1a1a1a",
-            fg="white",
-            insertbackground="white"
+            state="disabled"
         )
         self.file_list_text.pack(fill="both", expand=True, padx=5, pady=5)
-        self.file_list_text.config(state="disabled")  # 只读
 
         # 压缩质量区域
         quality_frame = ctk.CTkFrame(self)
@@ -194,14 +190,14 @@ class ImageCompressorApp(ctk.CTk):
 
     def _update_file_list(self):
         """更新文件列表显示"""
-        self.file_list_text.config(state="normal")
+        self.file_list_text.configure(state="normal")
         self.file_list_text.delete("1.0", "end")
 
         for file_path, size in self.task_manager.file_selector.selected_files:
             size_str = format_file_size(size)
             self.file_list_text.insert("end", f"{file_path} ({size_str})\n")
 
-        self.file_list_text.config(state="disabled")
+        self.file_list_text.configure(state="disabled")
 
     def _update_file_count(self):
         """更新文件数量显示"""
