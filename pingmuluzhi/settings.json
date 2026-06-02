@@ -7,6 +7,21 @@
     "record_system_audio": false,
     "last_recordings": [
         {
+            "name": "recording_20260602_115201.mp4",
+            "path": "recording_20260602_115201.mp4",
+            "time": "2026-06-02 11:52:07"
+        },
+        {
+            "name": "recording_20260602_115128.mp4",
+            "path": "recording_20260602_115128.mp4",
+            "time": "2026-06-02 11:51:34"
+        },
+        {
+            "name": "recording_20260602_114837.mp4",
+            "path": "recording_20260602_114837.mp4",
+            "time": "2026-06-02 11:48:44"
+        },
+        {
             "name": "recording_20260602_114518.mp4",
             "path": "recording_20260602_114518.mp4",
             "time": "2026-06-02 11:45:25"
