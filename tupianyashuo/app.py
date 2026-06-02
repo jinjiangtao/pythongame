@@ -145,10 +145,13 @@ class ImageCompressorApp(ctk.CTk):
             show_warning("提示", "请先选择输出文件夹！")
             return
 
-        # 禁用按钮
+        # 禁用按钮，防止重复点击
         self.compress_btn.configure(state="disabled")
         self.select_btn.configure(state="disabled")
         self.output_btn.configure(state="disabled")
+
+        # 重置进度条
+        self.progress_bar.set(0)
 
         # 获取压缩质量
         quality = self.quality_var.get()
@@ -163,11 +166,20 @@ class ImageCompressorApp(ctk.CTk):
     def _on_progress_update(self, current, total):
         """进度更新回调"""
         progress = current / total
+        # 使用 after() 方法确保在主线程中更新 UI
+        self.progress_bar.after(0, self._update_progress, progress)
+
+    def _update_progress(self, progress):
+        """在主线程中更新进度条"""
         self.progress_bar.set(progress)
-        self.update_idletasks()
 
     def _on_compression_complete(self, success_count, fail_count, errors):
         """压缩完成回调"""
+        # 使用 after() 方法确保在主线程中更新 UI
+        self.after(0, self._handle_completion, success_count, fail_count, errors)
+
+    def _handle_completion(self, success_count, fail_count, errors):
+        """在主线程中处理压缩完成"""
         # 恢复按钮状态
         self.compress_btn.configure(state="normal")
         self.select_btn.configure(state="normal")
