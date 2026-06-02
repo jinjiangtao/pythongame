@@ -1,0 +1,7 @@
+# 全局过滤所有目录下的__pycache__文件夹
+__pycache__/
+
+# 连带pyc缓存文件一起忽略
+*.pyc
+*.pyo
+*.pyd
