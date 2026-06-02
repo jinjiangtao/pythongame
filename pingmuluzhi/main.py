@@ -457,21 +457,41 @@ class ScreenRecorderApp:
         self.progress_dialog.grab_set()
     
     def update_compression_progress(self, progress):
-        if self.progress_bar:
-            self.progress_bar.set(progress / 100)
-            self.progress_label.configure(text=f"正在压缩... {progress}%")
+        if self.progress_dialog and self.progress_bar and self.progress_label:
+            try:
+                self.root.after(0, lambda: self._update_progress_ui(progress))
+            except:
+                pass
+    
+    def _update_progress_ui(self, progress):
+        try:
+            if self.progress_bar and self.progress_label:
+                self.progress_bar.set(progress / 100)
+                self.progress_label.configure(text=f"正在压缩... {progress}%")
+        except:
+            pass
     
     def cancel_compression(self):
         if self.compressor:
             self.compressor.cancel()
         if self.progress_dialog:
-            self.progress_dialog.destroy()
+            try:
+                self.progress_dialog.destroy()
+            except:
+                pass
             self.progress_dialog = None
+            self.progress_bar = None
+            self.progress_label = None
     
     def on_compression_complete(self, success, error_message):
         if self.progress_dialog:
-            self.progress_dialog.destroy()
+            try:
+                self.progress_dialog.destroy()
+            except:
+                pass
             self.progress_dialog = None
+            self.progress_bar = None
+            self.progress_label = None
         
         if success:
             output_path = generate_compressed_filename(self.recorder.video_path)
