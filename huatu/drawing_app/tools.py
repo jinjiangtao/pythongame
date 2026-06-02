@@ -30,23 +30,28 @@ class BrushTool(Tool):
     
     def on_press(self, event):
         super().on_press(event)
-        self.last_x = event.x
-        self.last_y = event.y
+        scale = self.canvas.scale
+        self.last_x = int(event.x / scale)
+        self.last_y = int(event.y / scale)
         self.canvas.save_history()
     
     def on_drag(self, event):
         if not self.drawing:
             return
         
+        scale = self.canvas.scale
+        x = int(event.x / scale)
+        y = int(event.y / scale)
+        
         color = self.canvas.get_color()
         width = self.canvas.get_line_width()
         
-        self.canvas.draw.line([self.last_x, self.last_y, event.x, event.y], 
+        self.canvas.draw.line([self.last_x, self.last_y, x, y], 
                             fill=color, width=width)
         self.canvas.redraw()
         
-        self.last_x = event.x
-        self.last_y = event.y
+        self.last_x = x
+        self.last_y = y
 
 class EraserTool(Tool):
     def __init__(self, canvas):
@@ -56,31 +61,41 @@ class EraserTool(Tool):
     
     def on_press(self, event):
         super().on_press(event)
-        self.last_x = event.x
-        self.last_y = event.y
+        scale = self.canvas.scale
+        self.last_x = int(event.x / scale)
+        self.last_y = int(event.y / scale)
         self.canvas.save_history()
     
     def on_drag(self, event):
         if not self.drawing:
             return
         
+        scale = self.canvas.scale
+        x = int(event.x / scale)
+        y = int(event.y / scale)
+        
         color = self.canvas.background_color
         width = self.canvas.get_line_width()
         
-        self.canvas.draw.line([self.last_x, self.last_y, event.x, event.y], 
+        self.canvas.draw.line([self.last_x, self.last_y, x, y], 
                             fill=color, width=width)
         self.canvas.redraw()
         
-        self.last_x = event.x
-        self.last_y = event.y
+        self.last_x = x
+        self.last_y = y
 
 class LineTool(Tool):
     def __init__(self, canvas):
         super().__init__(canvas)
         self.temp_line = None
+        self.image_start_x = 0
+        self.image_start_y = 0
     
     def on_press(self, event):
         super().on_press(event)
+        scale = self.canvas.scale
+        self.image_start_x = int(event.x / scale)
+        self.image_start_y = int(event.y / scale)
         self.canvas.save_history()
     
     def on_drag(self, event):
@@ -102,10 +117,14 @@ class LineTool(Tool):
         if self.temp_line:
             self.canvas.delete(self.temp_line)
         
+        scale = self.canvas.scale
+        x = int(event.x / scale)
+        y = int(event.y / scale)
+        
         color = self.canvas.get_color()
         width = self.canvas.get_line_width()
         
-        self.canvas.draw.line([self.start_x, self.start_y, event.x, event.y],
+        self.canvas.draw.line([self.image_start_x, self.image_start_y, x, y],
                             fill=color, width=width)
         self.canvas.redraw()
         
@@ -117,12 +136,17 @@ class RectangleTool(Tool):
         super().__init__(canvas)
         self.temp_rect = None
         self.fill = False
+        self.image_start_x = 0
+        self.image_start_y = 0
     
     def set_fill(self, fill):
         self.fill = fill
     
     def on_press(self, event):
         super().on_press(event)
+        scale = self.canvas.scale
+        self.image_start_x = int(event.x / scale)
+        self.image_start_y = int(event.y / scale)
         self.canvas.save_history()
     
     def on_drag(self, event):
@@ -147,11 +171,15 @@ class RectangleTool(Tool):
         if self.temp_rect:
             self.canvas.delete(self.temp_rect)
         
+        scale = self.canvas.scale
+        x = int(event.x / scale)
+        y = int(event.y / scale)
+        
         color = self.canvas.get_color()
         width = self.canvas.get_line_width()
         
-        x1, y1 = min(self.start_x, event.x), min(self.start_y, event.y)
-        x2, y2 = max(self.start_x, event.x), max(self.start_y, event.y)
+        x1, y1 = min(self.image_start_x, x), min(self.image_start_y, y)
+        x2, y2 = max(self.image_start_x, x), max(self.image_start_y, y)
         
         if self.fill:
             self.canvas.draw.rectangle([x1, y1, x2, y2], fill=color)
@@ -170,12 +198,17 @@ class CircleTool(Tool):
         super().__init__(canvas)
         self.temp_circle = None
         self.fill = False
+        self.image_start_x = 0
+        self.image_start_y = 0
     
     def set_fill(self, fill):
         self.fill = fill
     
     def on_press(self, event):
         super().on_press(event)
+        scale = self.canvas.scale
+        self.image_start_x = int(event.x / scale)
+        self.image_start_y = int(event.y / scale)
         self.canvas.save_history()
     
     def on_drag(self, event):
@@ -200,11 +233,15 @@ class CircleTool(Tool):
         if self.temp_circle:
             self.canvas.delete(self.temp_circle)
         
+        scale = self.canvas.scale
+        x = int(event.x / scale)
+        y = int(event.y / scale)
+        
         color = self.canvas.get_color()
         width = self.canvas.get_line_width()
         
-        x1, y1 = min(self.start_x, event.x), min(self.start_y, event.y)
-        x2, y2 = max(self.start_x, event.x), max(self.start_y, event.y)
+        x1, y1 = min(self.image_start_x, x), min(self.image_start_y, y)
+        x2, y2 = max(self.image_start_x, x), max(self.image_start_y, y)
         
         if self.fill:
             self.canvas.draw.ellipse([x1, y1, x2, y2], fill=color)
