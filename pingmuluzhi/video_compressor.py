@@ -1,8 +1,7 @@
 import os
-import subprocess
 import threading
 import time
-import shutil
+import cv2
 
 
 class VideoCompressor:
@@ -12,25 +11,6 @@ class VideoCompressor:
         self.compression_thread = None
         self.progress_callback = None
         self.complete_callback = None
-        self.ffmpeg_path = self._find_ffmpeg()
-
-    def _find_ffmpeg(self):
-        ffmpeg_path = shutil.which("ffmpeg")
-        if ffmpeg_path:
-            return ffmpeg_path
-        
-        common_paths = [
-            "C:\\ffmpeg\\bin\\ffmpeg.exe",
-            "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe",
-            "C:\\Program Files (x86)\\ffmpeg\\bin\\ffmpeg.exe",
-            os.path.join(os.path.dirname(__file__), "ffmpeg.exe")
-        ]
-        
-        for path in common_paths:
-            if os.path.exists(path):
-                return path
-        
-        return "ffmpeg"
 
     def compress_video(self, input_path, output_path, compression_level, progress_callback=None, complete_callback=None):
         self.progress_callback = progress_callback
@@ -50,108 +30,86 @@ class VideoCompressor:
                     self.complete_callback(False, f"输入文件不存在: {input_path}")
                 return
 
-            if not self.ffmpeg_path:
+            cap = cv2.VideoCapture(input_path)
+            if not cap.isOpened():
                 if self.complete_callback:
-                    self.complete_callback(False, "未找到 ffmpeg，请先安装 ffmpeg 并添加到系统 PATH")
+                    self.complete_callback(False, "无法打开视频文件")
                 return
 
-            ffmpeg_cmd = self._build_ffmpeg_command(input_path, output_path, compression_level)
-            
-            self.process = subprocess.Popen(
-                ffmpeg_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True,
-                bufsize=1,
-                shell=True
-            )
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-            total_duration = self._get_video_duration(input_path)
+            if fps <= 0:
+                fps = 30
+
+            if compression_level == "medium":
+                new_width = 1280
+                new_height = 720
+                target_fps = 15
+            else:
+                new_width = width
+                new_height = height
+                target_fps = fps
+
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             
-            for line in self.process.stdout:
+            out = cv2.VideoWriter(output_path, fourcc, target_fps, (new_width, new_height))
+
+            frame_count = 0
+            last_report_time = 0
+            
+            while cap.isOpened():
                 if self.is_cancelled:
-                    self._terminate_process()
+                    cap.release()
+                    out.release()
+                    if os.path.exists(output_path):
+                        try:
+                            os.remove(output_path)
+                        except:
+                            pass
                     if self.complete_callback:
                         self.complete_callback(False, "压缩已取消")
                     return
 
-                progress = self._parse_progress(line, total_duration)
-                if progress is not None and self.progress_callback:
-                    self.progress_callback(progress)
+                ret, frame = cap.read()
+                if not ret:
+                    break
 
-            self.process.wait()
+                if compression_level == "medium":
+                    frame = cv2.resize(frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
 
-            if self.process.returncode == 0 and os.path.exists(output_path):
+                if compression_level == "medium" and target_fps != fps:
+                    if frame_count % int(fps / target_fps) == 0:
+                        out.write(frame)
+                else:
+                    out.write(frame)
+
+                frame_count += 1
+                current_time = time.time()
+                
+                if total_frames > 0 and current_time - last_report_time > 0.1:
+                    progress = min(100, int((frame_count / total_frames) * 100))
+                    if self.progress_callback:
+                        self.progress_callback(progress)
+                    last_report_time = current_time
+
+            cap.release()
+            out.release()
+
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                if self.progress_callback:
+                    self.progress_callback(100)
                 if self.complete_callback:
                     self.complete_callback(True, None)
             else:
-                error_msg = f"压缩失败，返回码: {self.process.returncode}"
-                if self.process.returncode == 1:
-                    error_msg = "压缩失败，请检查 ffmpeg 是否正确安装"
-                elif self.process.returncode == -1073741515:
-                    error_msg = "ffmpeg 执行被中断"
                 if self.complete_callback:
-                    self.complete_callback(False, error_msg)
+                    self.complete_callback(False, "压缩失败，无法生成输出文件")
 
-        except FileNotFoundError:
-            if self.complete_callback:
-                self.complete_callback(False, "未找到 ffmpeg 可执行文件，请安装 ffmpeg 并添加到系统 PATH")
         except Exception as e:
             if self.complete_callback:
                 self.complete_callback(False, str(e))
-        finally:
-            self.process = None
-
-    def _build_ffmpeg_command(self, input_path, output_path, compression_level):
-        cmd = f'"{self.ffmpeg_path}" -i "{input_path}" -y'
-
-        if compression_level == "light":
-            cmd += ' -c:v libx264 -crf 23 -c:a aac -b:a 128k'
-        elif compression_level == "medium":
-            cmd += ' -c:v libx264 -crf 23 -vf scale=1280:720 -r 15 -c:a aac -b:a 128k'
-
-        cmd += f' "{output_path}"'
-        return cmd
-
-    def _get_video_duration(self, input_path):
-        try:
-            result = subprocess.run(
-                f'"{self.ffmpeg_path}" -i "{input_path}"',
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-                shell=True
-            )
-            for line in result.stderr.split('\n'):
-                if "Duration:" in line:
-                    parts = line.split(',')[0].split(' ')[1]
-                    h, m, s = parts.split(':')
-                    return float(h) * 3600 + float(m) * 60 + float(s)
-        except:
-            pass
-        return 1.0
-
-    def _parse_progress(self, line, total_duration):
-        if "time=" in line:
-            try:
-                time_str = line.split("time=")[1].split(' ')[0]
-                h, m, s = time_str.split(':')
-                current_time = float(h) * 3600 + float(m) * 60 + float(s)
-                if total_duration > 0:
-                    return min(100, int((current_time / total_duration) * 100))
-            except:
-                pass
-        return None
-
-    def _terminate_process(self):
-        if self.process:
-            try:
-                self.process.terminate()
-                time.sleep(0.5)
-                if self.process.poll() is None:
-                    self.process.kill()
-            except:
-                pass
 
     def cancel(self):
         self.is_cancelled = True

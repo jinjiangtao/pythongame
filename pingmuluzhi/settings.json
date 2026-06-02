@@ -7,6 +7,31 @@
     "record_system_audio": false,
     "last_recordings": [
         {
+            "name": "[\u538b\u7f29\u7248] recording_20260602_120654_\u538b\u7f29\u7248.mp4",
+            "path": "recording_20260602_120654_\u538b\u7f29\u7248.mp4",
+            "time": "2026-06-02 12:07:18"
+        },
+        {
+            "name": "recording_20260602_120654.mp4",
+            "path": "recording_20260602_120654.mp4",
+            "time": "2026-06-02 12:07:01"
+        },
+        {
+            "name": "recording_20260602_120041.mp4",
+            "path": "recording_20260602_120041.mp4",
+            "time": "2026-06-02 12:00:47"
+        },
+        {
+            "name": "recording_20260602_115849.mp4",
+            "path": "recording_20260602_115849.mp4",
+            "time": "2026-06-02 11:59:06"
+        },
+        {
+            "name": "recording_20260602_115824.mp4",
+            "path": "recording_20260602_115824.mp4",
+            "time": "2026-06-02 11:58:31"
+        },
+        {
             "name": "recording_20260602_115201.mp4",
             "path": "recording_20260602_115201.mp4",
             "time": "2026-06-02 11:52:07"

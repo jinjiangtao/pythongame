@@ -484,6 +484,9 @@ class ScreenRecorderApp:
             self.progress_label = None
     
     def on_compression_complete(self, success, error_message):
+        self.root.after(0, lambda: self._on_compression_complete_ui(success, error_message))
+    
+    def _on_compression_complete_ui(self, success, error_message):
         if self.progress_dialog:
             try:
                 self.progress_dialog.destroy()
@@ -494,27 +497,30 @@ class ScreenRecorderApp:
             self.progress_label = None
         
         if success:
-            output_path = generate_compressed_filename(self.recorder.video_path)
-            
-            original_size = os.path.getsize(self.recorder.video_path)
-            compressed_size = os.path.getsize(output_path)
-            compression_ratio = (1 - compressed_size / original_size) * 100
-            
-            self.show_compress_result_dialog(output_path, original_size, compressed_size, compression_ratio)
-            
-            compressed_name = os.path.basename(output_path)
-            self.recording_history.insert(0, {
-                'name': f"[压缩版] {compressed_name}",
-                'path': output_path,
-                'time': time.strftime("%Y-%m-%d %H:%M:%S")
-            })
-            if len(self.recording_history) > 20:
-                self.recording_history = self.recording_history[:20]
-            
-            self.settings['last_recordings'] = self.recording_history
-            self.save_settings()
-            
-            self.history_listbox.insert(0, f"[压缩版] {compressed_name}")
+            try:
+                output_path = generate_compressed_filename(self.recorder.video_path)
+                
+                original_size = os.path.getsize(self.recorder.video_path)
+                compressed_size = os.path.getsize(output_path)
+                compression_ratio = (1 - compressed_size / original_size) * 100
+                
+                self.show_compress_result_dialog(output_path, original_size, compressed_size, compression_ratio)
+                
+                compressed_name = os.path.basename(output_path)
+                self.recording_history.insert(0, {
+                    'name': f"[压缩版] {compressed_name}",
+                    'path': output_path,
+                    'time': time.strftime("%Y-%m-%d %H:%M:%S")
+                })
+                if len(self.recording_history) > 20:
+                    self.recording_history = self.recording_history[:20]
+                
+                self.settings['last_recordings'] = self.recording_history
+                self.save_settings()
+                
+                self.history_listbox.insert(0, f"[压缩版] {compressed_name}")
+            except Exception as e:
+                messagebox.showerror("压缩失败", f"处理压缩结果时出错:\n{str(e)}")
         else:
             if error_message != "压缩已取消":
                 messagebox.showerror("压缩失败", f"压缩过程中发生错误:\n{error_message}")
