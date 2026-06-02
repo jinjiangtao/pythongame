@@ -438,7 +438,7 @@ class ImageCompressorApp(ctk.CTk):
             size_str = format_file_size(size)
             display_text = f"{file_path}  ({size_str})"
 
-            var = tk.BooleanVar(value=False)
+            var = ctk.BooleanVar(value=False)
             self.checkbox_vars[idx] = var
 
             cb = ctk.CTkCheckBox(
@@ -446,8 +446,7 @@ class ImageCompressorApp(ctk.CTk):
                 text=display_text,
                 variable=var,
                 command=self._on_checkbox_change,
-                font=("", 11),
-                anchor="w"
+                font=("", 11)
             )
             cb.pack(fill="x", padx=5, pady=2)
 
