@@ -7,6 +7,11 @@
     "record_system_audio": false,
     "last_recordings": [
         {
+            "name": "recording_20260602_113827.mp4",
+            "path": "recording_20260602_113827.mp4",
+            "time": "2026-06-02 11:38:37"
+        },
+        {
             "name": "recording_20260602_111450.mp4",
             "path": "recording_20260602_111450.mp4",
             "time": "2026-06-02 11:15:21"

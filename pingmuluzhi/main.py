@@ -13,6 +13,7 @@ from audio_capturer import AudioCapturer
 from annotator import AnnotationOverlay
 from tray_icon import TrayIcon
 from area_selector import AreaSelector
+from video_compressor import VideoCompressor, generate_compressed_filename
 
 
 class ScreenRecorderApp:
@@ -68,7 +69,8 @@ class ScreenRecorderApp:
             'record_cursor': True,
             'record_microphone': True,
             'record_system_audio': False,
-            'last_recordings': []
+            'last_recordings': [],
+            'ask_compress': True
         }
     
     def save_settings(self):
@@ -197,6 +199,13 @@ class ScreenRecorderApp:
         browse_btn = ctk.CTkButton(save_path_frame, text="浏览", command=self.browse_save_path, width=60)
         browse_btn.pack(side="left", padx=5)
         
+        compress_frame = ctk.CTkFrame(tab)
+        compress_frame.pack(pady=10, padx=10, fill="x")
+        
+        self.ask_compress_var = ctk.BooleanVar(value=self.settings.get('ask_compress', True))
+        compress_check = ctk.CTkCheckBox(compress_frame, text="录制完成后询问是否压缩", variable=self.ask_compress_var)
+        compress_check.pack(pady=5)
+        
         save_settings_btn = ctk.CTkButton(tab, text="保存设置", command=self.save_settings_action)
         save_settings_btn.pack(pady=10)
     
@@ -248,6 +257,7 @@ class ScreenRecorderApp:
         self.settings['record_cursor'] = self.cursor_var.get()
         self.settings['record_microphone'] = self.mic_var.get()
         self.settings['save_path'] = self.save_path_entry.get()
+        self.settings['ask_compress'] = self.ask_compress_var.get()
         self.save_settings()
         messagebox.showinfo("提示", "设置已保存")
     
@@ -376,6 +386,163 @@ class ScreenRecorderApp:
             self.history_listbox.insert(0, recording_name)
             
             messagebox.showinfo("提示", f"录制完成！\n文件已保存到:\n{video_path}")
+            
+            self.check_compress_video(video_path)
+    
+    def check_compress_video(self, video_path):
+        if not self.settings.get('ask_compress', True):
+            return
+        
+        result = self.show_compress_dialog()
+        if result == "light":
+            self.start_compression(video_path, "light")
+        elif result == "medium":
+            self.start_compression(video_path, "medium")
+    
+    def show_compress_dialog(self):
+        dialog = ctk.CTkToplevel(self.root)
+        dialog.title("视频压缩")
+        dialog.geometry("300x200")
+        dialog.attributes("-topmost", True)
+        
+        label = ctk.CTkLabel(dialog, text="是否对刚刚录制的视频进行压缩？")
+        label.pack(pady=10)
+        
+        var = ctk.StringVar(value="none")
+        
+        none_btn = ctk.CTkRadioButton(dialog, text="不压缩", variable=var, value="none")
+        none_btn.pack(pady=5)
+        
+        light_btn = ctk.CTkRadioButton(dialog, text="轻度压缩（降低码率约30%，画质基本无损）", variable=var, value="light")
+        light_btn.pack(pady=5)
+        
+        medium_btn = ctk.CTkRadioButton(dialog, text="中度压缩（分辨率缩放到720p，帧率降为原一半）", variable=var, value="medium")
+        medium_btn.pack(pady=5)
+        
+        confirm_btn = ctk.CTkButton(dialog, text="确定", command=dialog.destroy)
+        confirm_btn.pack(pady=10)
+        
+        dialog.grab_set()
+        self.root.wait_window(dialog)
+        
+        return var.get()
+    
+    def start_compression(self, input_path, level):
+        output_path = generate_compressed_filename(input_path)
+        
+        self.progress_dialog = ctk.CTkToplevel(self.root)
+        self.progress_dialog.title("压缩进度")
+        self.progress_dialog.geometry("300x120")
+        self.progress_dialog.attributes("-topmost", True)
+        
+        self.progress_label = ctk.CTkLabel(self.progress_dialog, text="正在压缩...")
+        self.progress_label.pack(pady=10)
+        
+        self.progress_bar = ctk.CTkProgressBar(self.progress_dialog, width=250)
+        self.progress_bar.set(0)
+        self.progress_bar.pack(pady=10)
+        
+        self.cancel_btn = ctk.CTkButton(self.progress_dialog, text="取消", command=self.cancel_compression)
+        self.cancel_btn.pack(pady=5)
+        
+        self.compressor = VideoCompressor()
+        self.compressor.compress_video(
+            input_path,
+            output_path,
+            level,
+            progress_callback=self.update_compression_progress,
+            complete_callback=self.on_compression_complete
+        )
+        
+        self.progress_dialog.grab_set()
+    
+    def update_compression_progress(self, progress):
+        if self.progress_bar:
+            self.progress_bar.set(progress / 100)
+            self.progress_label.configure(text=f"正在压缩... {progress}%")
+    
+    def cancel_compression(self):
+        if self.compressor:
+            self.compressor.cancel()
+        if self.progress_dialog:
+            self.progress_dialog.destroy()
+            self.progress_dialog = None
+    
+    def on_compression_complete(self, success, error_message):
+        if self.progress_dialog:
+            self.progress_dialog.destroy()
+            self.progress_dialog = None
+        
+        if success:
+            output_path = generate_compressed_filename(self.recorder.video_path)
+            
+            original_size = os.path.getsize(self.recorder.video_path)
+            compressed_size = os.path.getsize(output_path)
+            compression_ratio = (1 - compressed_size / original_size) * 100
+            
+            self.show_compress_result_dialog(output_path, original_size, compressed_size, compression_ratio)
+            
+            compressed_name = os.path.basename(output_path)
+            self.recording_history.insert(0, {
+                'name': f"[压缩版] {compressed_name}",
+                'path': output_path,
+                'time': time.strftime("%Y-%m-%d %H:%M:%S")
+            })
+            if len(self.recording_history) > 20:
+                self.recording_history = self.recording_history[:20]
+            
+            self.settings['last_recordings'] = self.recording_history
+            self.save_settings()
+            
+            self.history_listbox.insert(0, f"[压缩版] {compressed_name}")
+        else:
+            if error_message != "压缩已取消":
+                messagebox.showerror("压缩失败", f"压缩过程中发生错误:\n{error_message}")
+    
+    def show_compress_result_dialog(self, output_path, original_size, compressed_size, ratio):
+        dialog = ctk.CTkToplevel(self.root)
+        dialog.title("压缩完成")
+        dialog.geometry("350x200")
+        dialog.attributes("-topmost", True)
+        
+        original_size_str = self.format_file_size(original_size)
+        compressed_size_str = self.format_file_size(compressed_size)
+        
+        label1 = ctk.CTkLabel(dialog, text=f"原文件大小: {original_size_str}")
+        label1.pack(pady=5)
+        
+        label2 = ctk.CTkLabel(dialog, text=f"压缩后大小: {compressed_size_str}")
+        label2.pack(pady=5)
+        
+        label3 = ctk.CTkLabel(dialog, text=f"压缩率: {ratio:.1f}%")
+        label3.pack(pady=10)
+        
+        frame = ctk.CTkFrame(dialog)
+        frame.pack(pady=5)
+        
+        open_folder_btn = ctk.CTkButton(frame, text="打开文件夹", command=lambda: self.open_compressed_folder(output_path))
+        open_folder_btn.pack(side="left", padx=5)
+        
+        play_btn = ctk.CTkButton(frame, text="播放压缩版", command=lambda: self.play_compressed_video(output_path))
+        play_btn.pack(side="left", padx=5)
+        
+        dialog.grab_set()
+    
+    def format_file_size(self, size_bytes):
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        else:
+            return f"{size_bytes / (1024 * 1024):.1f} MB"
+    
+    def open_compressed_folder(self, file_path):
+        folder = os.path.dirname(file_path)
+        subprocess.run(['explorer', folder], shell=True)
+    
+    def play_compressed_video(self, file_path):
+        if os.path.exists(file_path):
+            subprocess.run(['start', file_path], shell=True)
     
     def update_duration(self):
         if self.is_recording and not self.is_paused:
