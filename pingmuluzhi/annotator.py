@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 import threading
 import time
 
@@ -23,6 +22,7 @@ class AnnotationOverlay:
         self.current_line = []
         
         self.overlay_thread = None
+        self.running = False
     
     def create_overlay(self):
         self.root = tk.Tk()
@@ -118,19 +118,32 @@ class AnnotationOverlay:
     def start(self):
         if self.root is None:
             self.create_overlay()
+        
+        self.running = True
         self.show()
         
-        self.overlay_thread = threading.Thread(target=self.run)
-        self.overlay_thread.daemon = True
-        self.overlay_thread.start()
+        if self.overlay_thread is None or not self.overlay_thread.is_alive():
+            self.overlay_thread = threading.Thread(target=self.run, daemon=True)
+            self.overlay_thread.start()
     
     def run(self):
-        self.root.mainloop()
+        while self.running:
+            try:
+                self.root.update()
+                time.sleep(0.01)
+            except Exception:
+                break
     
     def stop(self):
+        self.running = False
         self.hide()
         if self.root:
-            self.root.quit()
+            try:
+                self.root.destroy()
+                self.root = None
+            except Exception:
+                pass
+        self.overlay_thread = None
     
     def get_lines(self):
         return self.lines.copy()

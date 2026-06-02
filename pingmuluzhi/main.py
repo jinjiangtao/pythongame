@@ -12,6 +12,7 @@ from recorder import ScreenRecorder
 from audio_capturer import AudioCapturer
 from annotator import AnnotationOverlay
 from tray_icon import TrayIcon
+from area_selector import AreaSelector
 
 
 class ScreenRecorderApp:
@@ -251,8 +252,15 @@ class ScreenRecorderApp:
         messagebox.showinfo("提示", "设置已保存")
     
     def select_custom_area(self):
-        messagebox.showinfo("提示", "请使用鼠标拖拽选择录制区域")
-        self.custom_area = None
+        self.root.iconify()
+        
+        def on_area_selected(area):
+            self.custom_area = area
+            self.custom_area_label.configure(text=f"区域: {area[0]},{area[1]} {area[2]}x{area[3]}")
+            self.root.deiconify()
+        
+        selector = AreaSelector(on_select_callback=on_area_selected)
+        selector.start()
     
     def start_recording(self):
         self.record_mode = self.mode_var.get()

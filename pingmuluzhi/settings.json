@@ -5,5 +5,21 @@
     "record_cursor": true,
     "record_microphone": true,
     "record_system_audio": false,
-    "last_recordings": []
+    "last_recordings": [
+        {
+            "name": "recording_20260602_110121.mp4",
+            "path": "recording_20260602_110121.mp4",
+            "time": "2026-06-02 11:01:48"
+        },
+        {
+            "name": "recording_20260602_105933.mp4",
+            "path": "recording_20260602_105933.mp4",
+            "time": "2026-06-02 10:59:51"
+        },
+        {
+            "name": "recording_20260602_105826.mp4",
+            "path": "recording_20260602_105826.mp4",
+            "time": "2026-06-02 10:59:16"
+        }
+    ]
 }
