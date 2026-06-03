@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
 import customtkinter as ctk
 from canvas import DrawingCanvas
-from tools import BrushTool, EraserTool, LineTool, RectangleTool, CircleTool, FillTool
+from tools import BrushTool, EraserTool, LineTool, RectangleTool, CircleTool, FillTool, PanTool
 
 class DrawingApp(ctk.CTk):
     def __init__(self):
@@ -23,7 +23,7 @@ class DrawingApp(ctk.CTk):
         self.init_menubar()
         self.init_layout()
         
-        self.update_status("就绪")
+        self.update_status("就绪 | 缩放: 100%")
     
     def init_menubar(self):
         menubar = tk.Menu(self)
@@ -43,6 +43,12 @@ class DrawingApp(ctk.CTk):
         edit_menu.add_command(label="清空画布", command=self.clear_canvas)
         menubar.add_cascade(label="编辑", menu=edit_menu)
         
+        view_menu = tk.Menu(menubar, tearoff=0)
+        view_menu.add_command(label="放大", command=lambda: self.zoom_in(), accelerator="Ctrl++")
+        view_menu.add_command(label="缩小", command=lambda: self.zoom_out(), accelerator="Ctrl+-")
+        view_menu.add_command(label="重置视图", command=lambda: self.reset_view(), accelerator="Ctrl+0")
+        menubar.add_cascade(label="视图", menu=view_menu)
+        
         help_menu = tk.Menu(menubar, tearoff=0)
         help_menu.add_command(label="关于", command=self.show_about)
         menubar.add_cascade(label="帮助", menu=help_menu)
@@ -54,6 +60,9 @@ class DrawingApp(ctk.CTk):
         self.bind_all("<Control-s>", lambda e: self.save_image())
         self.bind_all("<Control-z>", lambda e: self.undo())
         self.bind_all("<Control-y>", lambda e: self.redo())
+        self.bind_all("<Control-+>", lambda e: self.zoom_in())
+        self.bind_all("<Control-minus>", lambda e: self.zoom_out())
+        self.bind_all("<Control-0>", lambda e: self.reset_view())
     
     def init_layout(self):
         self.grid_columnconfigure(0, weight=0)
@@ -71,6 +80,7 @@ class DrawingApp(ctk.CTk):
         toolbar.grid_propagate(False)
         
         self.create_tool_buttons(toolbar)
+        self.create_zoom_controls(toolbar)
         self.create_color_picker(toolbar)
         self.create_line_width_slider(toolbar)
         self.create_fill_checkbox(toolbar)
@@ -86,11 +96,12 @@ class DrawingApp(ctk.CTk):
             ("rectangle", "矩形"),
             ("circle", "圆形"),
             ("fill", "填充"),
+            ("pan", "抓手"),
         ]
         
         for tool_name, label in tool_buttons:
             btn = ctk.CTkButton(
-                tools_frame, 
+                tools_frame,
                 text=label,
                 command=lambda name=tool_name: self.select_tool(name),
                 width=120,
@@ -98,6 +109,45 @@ class DrawingApp(ctk.CTk):
             )
             btn.pack(pady=3)
             self.tools[tool_name] = btn
+    
+    def create_zoom_controls(self, parent):
+        zoom_frame = ctk.CTkFrame(parent)
+        zoom_frame.pack(pady=10, padx=5, fill="x")
+        
+        ctk.CTkLabel(zoom_frame, text="缩放控制").pack(pady=5)
+        
+        button_frame = ctk.CTkFrame(zoom_frame, fg_color="transparent")
+        button_frame.pack(pady=5, fill="x")
+        
+        zoom_out_btn = ctk.CTkButton(
+            button_frame,
+            text="-",
+            command=self.zoom_out,
+            width=40,
+            height=30
+        )
+        zoom_out_btn.pack(side="left", padx=5)
+        
+        self.zoom_label = ctk.CTkLabel(button_frame, text="100%")
+        self.zoom_label.pack(side="left", padx=5)
+        
+        zoom_in_btn = ctk.CTkButton(
+            button_frame,
+            text="+",
+            command=self.zoom_in,
+            width=40,
+            height=30
+        )
+        zoom_in_btn.pack(side="left", padx=5)
+        
+        reset_btn = ctk.CTkButton(
+            zoom_frame,
+            text="重置视图",
+            command=self.reset_view,
+            width=120,
+            height=30
+        )
+        reset_btn.pack(pady=5)
     
     def create_color_picker(self, parent):
         color_frame = ctk.CTkFrame(parent)
@@ -179,13 +229,28 @@ class DrawingApp(ctk.CTk):
         self.canvas_frame.grid_columnconfigure(0, weight=1)
         self.canvas_frame.grid_rowconfigure(0, weight=1)
         
-        canvas_container = ctk.CTkScrollableFrame(self.canvas_frame, width=850, height=650)
-        canvas_container.grid(row=0, column=0, sticky="nsew")
-        canvas_container.grid_columnconfigure(0, weight=1)
-        canvas_container.grid_rowconfigure(0, weight=1)
+        container = ctk.CTkFrame(self.canvas_frame)
+        container.grid(row=0, column=0, sticky="nsew")
+        container.grid_columnconfigure(0, weight=1)
+        container.grid_rowconfigure(0, weight=1)
         
-        self.canvas = DrawingCanvas(canvas_container, width=850, height=650)
+        v_scrollbar = tk.Scrollbar(container, orient="vertical")
+        v_scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        h_scrollbar = tk.Scrollbar(container, orient="horizontal")
+        h_scrollbar.grid(row=1, column=0, sticky="ew")
+        
+        self.canvas = DrawingCanvas(
+            container,
+            width=850,
+            height=650,
+            xscrollcommand=h_scrollbar.set,
+            yscrollcommand=v_scrollbar.set
+        )
         self.canvas.grid(row=0, column=0, sticky="nsew")
+        
+        v_scrollbar.config(command=self.canvas.yview)
+        h_scrollbar.config(command=self.canvas.xview)
         
         self.init_tools()
     
@@ -196,13 +261,14 @@ class DrawingApp(ctk.CTk):
         self.rectangle_tool = RectangleTool(self.canvas)
         self.circle_tool = CircleTool(self.canvas)
         self.fill_tool = FillTool(self.canvas)
+        self.pan_tool = PanTool(self.canvas)
         
         self.select_tool("brush")
     
     def create_status_bar(self):
         self.status_bar = ctk.CTkLabel(
             self,
-            text="就绪",
+            text="就绪 | 缩放: 100%",
             height=25,
             fg_color="gray80"
         )
@@ -229,6 +295,8 @@ class DrawingApp(ctk.CTk):
             self.canvas.set_tool(self.circle_tool)
         elif tool_name == "fill":
             self.canvas.set_tool(self.fill_tool)
+        elif tool_name == "pan":
+            self.canvas.set_tool(self.pan_tool)
     
     def set_color(self, color):
         self.canvas.set_color(color)
@@ -251,6 +319,20 @@ class DrawingApp(ctk.CTk):
     def update_status(self, text):
         if self.status_bar:
             self.status_bar.configure(text=text)
+        if hasattr(self, 'zoom_label'):
+            self.zoom_label.configure(text=f"{int(self.canvas.scale * 100)}%")
+    
+    def zoom_in(self):
+        self.canvas.zoom(1.2)
+        self.update_status(f"就绪 | 缩放: {int(self.canvas.scale * 100)}%")
+    
+    def zoom_out(self):
+        self.canvas.zoom(0.8)
+        self.update_status(f"就绪 | 缩放: {int(self.canvas.scale * 100)}%")
+    
+    def reset_view(self):
+        self.canvas.reset_view()
+        self.update_status("就绪 | 缩放: 100%")
     
     def new_canvas(self):
         if self.canvas.can_undo():
@@ -264,7 +346,7 @@ class DrawingApp(ctk.CTk):
                 return
         
         self.canvas.new_canvas()
-        self.update_status("新建画布")
+        self.update_status("新建画布 | 缩放: 100%")
     
     def open_image(self):
         if self.canvas.can_undo():
@@ -288,7 +370,7 @@ class DrawingApp(ctk.CTk):
         
         if filepath:
             if self.canvas.open_image(filepath):
-                self.update_status(f"已打开: {filepath}")
+                self.update_status(f"已打开: {filepath} | 缩放: 100%")
             else:
                 messagebox.showerror("错误", "无法打开图片文件")
     
@@ -304,28 +386,28 @@ class DrawingApp(ctk.CTk):
         
         if filepath:
             self.canvas.save_image(filepath)
-            self.update_status(f"已保存: {filepath}")
+            self.update_status(f"已保存: {filepath} | 缩放: {int(self.canvas.scale * 100)}%")
     
     def undo(self):
         if self.canvas.undo():
-            self.update_status("撤销")
+            self.update_status(f"撤销 | 缩放: {int(self.canvas.scale * 100)}%")
         else:
-            self.update_status("无法撤销")
+            self.update_status(f"无法撤销 | 缩放: {int(self.canvas.scale * 100)}%")
     
     def redo(self):
         if self.canvas.redo():
-            self.update_status("重做")
+            self.update_status(f"重做 | 缩放: {int(self.canvas.scale * 100)}%")
         else:
-            self.update_status("无法重做")
+            self.update_status(f"无法重做 | 缩放: {int(self.canvas.scale * 100)}%")
     
     def clear_canvas(self):
         result = messagebox.askyesno("确认", "确定要清空画布吗？")
         if result:
             self.canvas.clear()
-            self.update_status("画布已清空")
+            self.update_status(f"画布已清空 | 缩放: {int(self.canvas.scale * 100)}%")
     
     def show_about(self):
         messagebox.showinfo(
             "关于",
-            "简易画图板 v1.0\n\n一个功能实用的绘图工具，支持多种绘图工具和撤销功能。"
+            "简易画图板 v2.1\n\n画布操作增强:\n- 缩放 (Ctrl+滚轮, +/-按钮)\n- 重置视图\n- 抓手工具\n- 滚动条支持"
         )
