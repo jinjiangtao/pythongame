@@ -1,4 +1,5 @@
 import tkinter as tk
+import customtkinter as ctk
 from PIL import Image, ImageTk, ImageDraw
 from history import HistoryManager
 from utils import flood_fill
@@ -278,9 +279,21 @@ class DrawingCanvas(tk.Canvas):
         self.reset_view()
     
     def show_text_dialog(self, x, y):
+        canvas_root_x = self.winfo_rootx()
+        canvas_root_y = self.winfo_rooty()
+        
+        screen_x = x * self.scale + self.offset_x
+        screen_y = y * self.scale + self.offset_y
+        
+        dialog_x = canvas_root_x + screen_x
+        dialog_y = canvas_root_y + screen_y
+        
+        dialog_x = max(0, min(dialog_x, self.winfo_screenwidth() - 420))
+        dialog_y = max(0, min(dialog_y, self.winfo_screenheight() - 320))
+        
         dialog = tk.Toplevel(self)
         dialog.title("输入文字")
-        dialog.geometry("400x300")
+        dialog.geometry(f"400x300+{int(dialog_x)}+{int(dialog_y)}")
         dialog.transient(self)
         dialog.grab_set()
         
@@ -289,9 +302,10 @@ class DrawingCanvas(tk.Canvas):
         
         ctk.CTkLabel(text_frame, text="请输入文字:").pack(pady=5)
         
-        text_input = ctk.CTkTextbox(text_frame, height=80, width=350)
+        text_input = ctk.CTkTextbox(text_frame, height=80, width=350, activate_scrollbars=True)
         text_input.pack(pady=5)
-        text_input.focus_set()
+        
+        dialog.after(100, lambda: text_input.focus())
         
         settings_frame = ctk.CTkFrame(text_frame)
         settings_frame.pack(pady=10, fill="x")
@@ -383,12 +397,48 @@ class DrawingCanvas(tk.Canvas):
     
     def draw_text(self, x, y, text, font_name="Arial", font_size=24, color="#000000"):
         from PIL import ImageFont
+        import os
+        
+        chinese_fonts = [
+            "simhei.ttf",
+            "simkai.ttf",
+            "simsun.ttc",
+            "msyh.ttc",
+            "msyhl.ttc",
+            "kaiti.ttf",
+            "simfang.ttf"
+        ]
+        
+        font_paths = [
+            os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts", font)
+            for font in chinese_fonts
+        ]
+        
+        font = None
         try:
             font = ImageFont.truetype(font_name.lower() + ".ttf", font_size)
+            font.getsize(text)
         except:
+            pass
+        
+        if font is None:
             try:
                 font = ImageFont.truetype("arial.ttf", font_size)
+                font.getsize(text)
             except:
-                font = ImageFont.load_default()
+                pass
+        
+        if font is None:
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    try:
+                        font = ImageFont.truetype(font_path, font_size)
+                        font.getsize(text)
+                        break
+                    except:
+                        continue
+        
+        if font is None:
+            font = ImageFont.load_default()
         
         self.draw.text((x, y), text, fill=color, font=font)
