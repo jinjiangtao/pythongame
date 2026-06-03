@@ -399,9 +399,15 @@ class DrawingCanvas(tk.Canvas):
         from PIL import ImageFont
         import os
         
+        def contains_chinese(s):
+            for char in s:
+                if '\u4e00' <= char <= '\u9fff':
+                    return True
+            return False
+        
         chinese_fonts = [
             "simhei.ttf",
-            "simkai.ttf",
+            "simkai.ttf", 
             "simsun.ttc",
             "msyh.ttc",
             "msyhl.ttc",
@@ -415,25 +421,30 @@ class DrawingCanvas(tk.Canvas):
         ]
         
         font = None
-        try:
-            font = ImageFont.truetype(font_name.lower() + ".ttf", font_size)
-            font.getsize(text)
-        except:
-            pass
+        has_chinese = contains_chinese(text)
         
-        if font is None:
+        if has_chinese:
+            for font_path in font_paths:
+                if os.path.exists(font_path):
+                    try:
+                        font = ImageFont.truetype(font_path, font_size)
+                        break
+                    except:
+                        continue
+        else:
             try:
-                font = ImageFont.truetype("arial.ttf", font_size)
-                font.getsize(text)
+                font = ImageFont.truetype(font_name.lower() + ".ttf", font_size)
             except:
-                pass
+                try:
+                    font = ImageFont.truetype("arial.ttf", font_size)
+                except:
+                    pass
         
         if font is None:
             for font_path in font_paths:
                 if os.path.exists(font_path):
                     try:
                         font = ImageFont.truetype(font_path, font_size)
-                        font.getsize(text)
                         break
                     except:
                         continue
