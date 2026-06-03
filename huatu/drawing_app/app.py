@@ -320,6 +320,18 @@ class DrawingApp(ctk.CTk):
     def on_zoom_changed(self, zoom_percent):
         if hasattr(self, 'zoom_label'):
             self.zoom_label.configure(text=f"{zoom_percent}%")
+        if self.status_bar:
+            current_text = self.status_bar.cget("text")
+            if "缩放:" in current_text:
+                parts = current_text.split(" | ")
+                new_parts = []
+                for part in parts:
+                    if part.startswith("缩放:"):
+                        new_parts.append(f"缩放: {zoom_percent}%")
+                    else:
+                        new_parts.append(part)
+                new_text = " | ".join(new_parts)
+                self.status_bar.configure(text=new_text)
     
     def update_status(self, text):
         if self.status_bar:
