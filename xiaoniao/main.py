@@ -121,7 +121,7 @@ def main():
         
         instructions = [
             "游戏说明:",
-            "1. 点击并拖拽弹弓发射小鸟",
+            "1. 点击并拖拽小鸟发射",
             "2. 击打猪头获得 100 分",
             "3. 击打方块获得 20 分",
             "4. 消灭所有猪头获胜",
@@ -130,8 +130,8 @@ def main():
         ]
         
         for i, text in enumerate(instructions):
-            text_surface = small_font.render(text, True, WHITE)
-            screen.blit(text_surface, (20, SCREEN_HEIGHT - 150 + i * 22))
+            text_surface = small_font.render(text, True, (50, 50, 50))
+            screen.blit(text_surface, (SCREEN_WIDTH - 180, 80 + i * 22))
         
         if game_state.win:
             win_text = big_font.render("胜利!", True, GREEN)

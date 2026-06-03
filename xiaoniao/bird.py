@@ -6,7 +6,7 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, GRAVITY, BIRD_R
 class Bird:
     def __init__(self):
         self.x = SLINGSHOT_X
-        self.y = SLINGSHOT_Y
+        self.y = SLINGSHOT_Y - 30
         self.vx = 0
         self.vy = 0
         self.radius = BIRD_RADIUS
@@ -36,7 +36,7 @@ class Bird:
     def reset(self):
         """重置小鸟到弹弓位置"""
         self.x = SLINGSHOT_X
-        self.y = SLINGSHOT_Y
+        self.y = SLINGSHOT_Y - 30
         self.vx = 0
         self.vy = 0
         self.is_flying = False

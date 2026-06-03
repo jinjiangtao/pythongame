@@ -8,6 +8,8 @@ class Slingshot:
     def __init__(self):
         self.x = SLINGSHOT_X
         self.y = SLINGSHOT_Y
+        self.top_x = SLINGSHOT_X
+        self.top_y = SLINGSHOT_Y - 30
         self.is_dragging = False
         self.drag_start = (0, 0)
         self.drag_end = (0, 0)
@@ -19,7 +21,7 @@ class Slingshot:
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            if self.is_near_slingshot(mouse_x, mouse_y) and not bird.is_flying:
+            if self.is_near_bird(mouse_x, mouse_y, bird) and not bird.is_flying:
                 self.is_dragging = True
                 self.drag_start = (mouse_x, mouse_y)
                 self.drag_end = (mouse_x, mouse_y)
@@ -28,35 +30,38 @@ class Slingshot:
             if self.is_dragging:
                 self.is_dragging = False
                 if not bird.is_flying and game_state.birds_left > 0:
-                    self.launch_bird(bird)
-                    game_state.birds_left -= 1
+                    self.launch_bird(bird, game_state)
         
         elif event.type == pygame.MOUSEMOTION:
             if self.is_dragging:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                dx = mouse_x - (self.x)
-                dy = mouse_y - (self.y - 30)
+                dx = mouse_x - self.top_x
+                dy = mouse_y - self.top_y
                 distance = math.sqrt(dx * dx + dy * dy)
                 
                 if distance > MAX_DRAG_DISTANCE:
                     ratio = MAX_DRAG_DISTANCE / distance
-                    mouse_x = self.x + dx * ratio
-                    mouse_y = (self.y - 30) + dy * ratio
+                    mouse_x = self.top_x + dx * ratio
+                    mouse_y = self.top_y + dy * ratio
                 
                 self.drag_end = (mouse_x, mouse_y)
     
-    def is_near_slingshot(self, x, y):
-        """检测鼠标是否在弹弓附近"""
-        distance = math.sqrt((x - self.x)**2 + (y - (self.y - 30))**2)
-        return distance < 50
+    def is_near_bird(self, x, y, bird):
+        """检测鼠标是否在小鸟附近"""
+        distance = math.sqrt((x - bird.x)**2 + (y - bird.y)**2)
+        return distance < 100
     
-    def launch_bird(self, bird):
+    def launch_bird(self, bird, game_state):
         """发射小鸟"""
-        dx = self.x - self.drag_end[0]
-        dy = (self.y - 30) - self.drag_end[1]
-        force_x = dx * FORCE_MULTIPLIER
-        force_y = dy * FORCE_MULTIPLIER
-        bird.launch(force_x, force_y)
+        dx = self.top_x - self.drag_end[0]
+        dy = self.top_y - self.drag_end[1]
+        distance = math.sqrt(dx * dx + dy * dy)
+        if distance > 0:
+            force = distance * (FORCE_MULTIPLIER / MAX_DRAG_DISTANCE) * 15
+            force_x = (dx / distance) * force
+            force_y = (dy / distance) * force
+            bird.launch(force_x, force_y)
+            game_state.birds_left -= 1
     
     def get_bird_position(self):
         """获取小鸟当前应该显示的位置"""
