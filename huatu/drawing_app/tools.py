@@ -328,6 +328,6 @@ class TextTool(Tool):
     def __init__(self, canvas):
         super().__init__(canvas)
     
-    def on_click(self, event):
+    def on_press(self, event):
         self.canvas.save_history()
         self.canvas.show_text_dialog(event.x, event.y)
