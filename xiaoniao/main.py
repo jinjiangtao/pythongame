@@ -2,6 +2,7 @@
 
 import pygame
 import sys
+import os
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, LIGHT_GREEN, WHITE, RED, GREEN, INITIAL_BIRDS, GROUND_HEIGHT, PIG_SCORE, BLOCK_SCORE
 from bird import Bird
 from pig import Pig
@@ -25,14 +26,16 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("愤怒的小鸟 - 简化版")
     
-    try:
-        font = pygame.font.Font("simhei.ttf", 36)
-        big_font = pygame.font.Font("simhei.ttf", 72)
-        small_font = pygame.font.Font("simhei.ttf", 24)
-    except:
-        font = pygame.font.SysFont("Microsoft YaHei", 36)
-        big_font = pygame.font.SysFont("Microsoft YaHei", 72)
-        small_font = pygame.font.SysFont("Microsoft YaHei", 24)
+    import os
+    font_path = "C:/Windows/Fonts/simhei.ttf"
+    if os.path.exists(font_path):
+        font = pygame.font.Font(font_path, 36)
+        big_font = pygame.font.Font(font_path, 72)
+        small_font = pygame.font.Font(font_path, 24)
+    else:
+        font = pygame.font.Font(None, 36)
+        big_font = pygame.font.Font(None, 72)
+        small_font = pygame.font.Font(None, 24)
     
     bird = Bird()
     slingshot = Slingshot()
