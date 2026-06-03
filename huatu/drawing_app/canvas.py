@@ -32,9 +32,14 @@ class DrawingCanvas(tk.Canvas):
         self.history.save_state(self.image)
         
         self.current_tool = None
+        self.zoom_callback = None
+        
         self.bind_events()
         
         self.redraw()
+    
+    def set_zoom_callback(self, callback):
+        self.zoom_callback = callback
     
     def bind_events(self):
         self.bind("<Button-1>", self.on_mouse_down)
@@ -141,6 +146,9 @@ class DrawingCanvas(tk.Canvas):
         
         self.redraw()
         self.update_scrollregion()
+        
+        if self.zoom_callback:
+            self.zoom_callback(int(self.scale * 100))
     
     def zoom(self, factor, center_viewport=True):
         if center_viewport:
@@ -154,6 +162,9 @@ class DrawingCanvas(tk.Canvas):
             self.scale = new_scale
             self.redraw()
             self.update_scrollregion()
+            
+            if self.zoom_callback:
+                self.zoom_callback(int(self.scale * 100))
     
     def set_zoom(self, scale):
         self.scale = max(self.min_scale, min(self.max_scale, scale))

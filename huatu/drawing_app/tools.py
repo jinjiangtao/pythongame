@@ -39,20 +39,49 @@ class BrushTool(Tool):
         self.last_x = event.x
         self.last_y = event.y
         self.canvas.save_history()
+        self._draw_point(event.x, event.y)
+        self.canvas.redraw()
     
     def on_drag(self, event):
         if not self.drawing:
             return
         
-        color = self.canvas.get_color()
-        width = self.canvas.get_line_width()
-        
-        self.canvas.draw.line([self.last_x, self.last_y, event.x, event.y], 
-                            fill=color, width=width)
+        self._draw_segment(self.last_x, self.last_y, event.x, event.y)
         self.canvas.redraw()
         
         self.last_x = event.x
         self.last_y = event.y
+    
+    def _draw_segment(self, x1, y1, x2, y2):
+        color = self.canvas.get_color()
+        width = self.canvas.get_line_width()
+        
+        dx = x2 - x1
+        dy = y2 - y1
+        distance = (dx * dx + dy * dy) ** 0.5
+        
+        if distance == 0:
+            distance = 1
+        
+        step = max(1, width // 4)
+        
+        for i in range(int(distance) + 1):
+            t = i / distance if distance > 0 else 0
+            x = x1 + dx * t
+            y = y1 + dy * t
+            self._draw_point(x, y)
+    
+    def _draw_point(self, x, y):
+        color = self.canvas.get_color()
+        width = self.canvas.get_line_width()
+        
+        radius = width // 2
+        x1 = x - radius
+        y1 = y - radius
+        x2 = x + radius
+        y2 = y + radius
+        
+        self.canvas.draw.ellipse([x1, y1, x2, y2], fill=color)
 
 class EraserTool(Tool):
     def __init__(self, canvas):
@@ -65,20 +94,49 @@ class EraserTool(Tool):
         self.last_x = event.x
         self.last_y = event.y
         self.canvas.save_history()
+        self._draw_point(event.x, event.y)
+        self.canvas.redraw()
     
     def on_drag(self, event):
         if not self.drawing:
             return
         
-        color = self.canvas.background_color
-        width = self.canvas.get_line_width()
-        
-        self.canvas.draw.line([self.last_x, self.last_y, event.x, event.y], 
-                            fill=color, width=width)
+        self._draw_segment(self.last_x, self.last_y, event.x, event.y)
         self.canvas.redraw()
         
         self.last_x = event.x
         self.last_y = event.y
+    
+    def _draw_segment(self, x1, y1, x2, y2):
+        color = self.canvas.background_color
+        width = self.canvas.get_line_width()
+        
+        dx = x2 - x1
+        dy = y2 - y1
+        distance = (dx * dx + dy * dy) ** 0.5
+        
+        if distance == 0:
+            distance = 1
+        
+        step = max(1, width // 4)
+        
+        for i in range(int(distance) + 1):
+            t = i / distance if distance > 0 else 0
+            x = x1 + dx * t
+            y = y1 + dy * t
+            self._draw_point(x, y)
+    
+    def _draw_point(self, x, y):
+        color = self.canvas.background_color
+        width = self.canvas.get_line_width()
+        
+        radius = width // 2
+        x1 = x - radius
+        y1 = y - radius
+        x2 = x + radius
+        y2 = y + radius
+        
+        self.canvas.draw.ellipse([x1, y1, x2, y2], fill=color)
 
 class LineTool(Tool):
     def __init__(self, canvas):

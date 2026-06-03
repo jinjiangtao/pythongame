@@ -253,6 +253,7 @@ class DrawingApp(ctk.CTk):
         h_scrollbar.config(command=self.canvas.xview)
         
         self.init_tools()
+        self.canvas.set_zoom_callback(self.on_zoom_changed)
     
     def init_tools(self):
         self.brush_tool = BrushTool(self.canvas)
@@ -315,6 +316,10 @@ class DrawingApp(ctk.CTk):
         self.fill_mode = self.fill_var.get()
         self.rectangle_tool.set_fill(self.fill_mode)
         self.circle_tool.set_fill(self.fill_mode)
+    
+    def on_zoom_changed(self, zoom_percent):
+        if hasattr(self, 'zoom_label'):
+            self.zoom_label.configure(text=f"{zoom_percent}%")
     
     def update_status(self, text):
         if self.status_bar:
