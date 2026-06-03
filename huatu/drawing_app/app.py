@@ -9,7 +9,7 @@ class DrawingApp(ctk.CTk):
         super().__init__()
         
         self.title("简易画图板")
-        self.geometry("1000x700")
+        self.geometry("1000x800")
         self.resizable(False, False)
         
         self.canvas_frame = None
@@ -117,7 +117,7 @@ class DrawingApp(ctk.CTk):
         ctk.CTkLabel(zoom_frame, text="缩放控制").pack(pady=5)
         
         button_frame = ctk.CTkFrame(zoom_frame, fg_color="transparent")
-        button_frame.pack(pady=5, fill="x")
+        button_frame.pack(pady=5, padx=5)
         
         zoom_out_btn = ctk.CTkButton(
             button_frame,
@@ -128,7 +128,7 @@ class DrawingApp(ctk.CTk):
         )
         zoom_out_btn.pack(side="left", padx=5)
         
-        self.zoom_label = ctk.CTkLabel(button_frame, text="100%")
+        self.zoom_label = ctk.CTkLabel(button_frame, text="100%", width=50)
         self.zoom_label.pack(side="left", padx=5)
         
         zoom_in_btn = ctk.CTkButton(
@@ -243,7 +243,7 @@ class DrawingApp(ctk.CTk):
         self.canvas = DrawingCanvas(
             container,
             width=850,
-            height=650,
+            height=750,
             xscrollcommand=h_scrollbar.set,
             yscrollcommand=v_scrollbar.set
         )

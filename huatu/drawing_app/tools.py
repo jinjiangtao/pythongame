@@ -21,6 +21,12 @@ class Tool:
     
     def on_click(self, event):
         pass
+    
+    def screen_to_canvas(self, x, y):
+        return (x - self.canvas.offset_x) / self.canvas.scale, (y - self.canvas.offset_y) / self.canvas.scale
+    
+    def canvas_to_screen(self, x, y):
+        return x * self.canvas.scale + self.canvas.offset_x, y * self.canvas.scale + self.canvas.offset_y
 
 class BrushTool(Tool):
     def __init__(self, canvas):
@@ -93,8 +99,11 @@ class LineTool(Tool):
         color = self.canvas.get_color()
         width = self.canvas.get_line_width()
         
+        start_x, start_y = self.canvas_to_screen(self.start_x, self.start_y)
+        end_x, end_y = self.canvas_to_screen(event.x, event.y)
+        
         self.temp_line = self.canvas.create_line(
-            self.start_x, self.start_y, event.x, event.y,
+            start_x, start_y, end_x, end_y,
             fill=color, width=width
         )
     
@@ -138,8 +147,11 @@ class RectangleTool(Tool):
         outline = color
         fill_color = color if self.fill else ""
         
+        x1, y1 = self.canvas_to_screen(self.start_x, self.start_y)
+        x2, y2 = self.canvas_to_screen(event.x, event.y)
+        
         self.temp_rect = self.canvas.create_rectangle(
-            self.start_x, self.start_y, event.x, event.y,
+            x1, y1, x2, y2,
             outline=outline, fill=fill_color, width=width
         )
     
@@ -191,8 +203,11 @@ class CircleTool(Tool):
         outline = color
         fill_color = color if self.fill else ""
         
+        x1, y1 = self.canvas_to_screen(self.start_x, self.start_y)
+        x2, y2 = self.canvas_to_screen(event.x, event.y)
+        
         self.temp_circle = self.canvas.create_oval(
-            self.start_x, self.start_y, event.x, event.y,
+            x1, y1, x2, y2,
             outline=outline, fill=fill_color, width=width
         )
     
