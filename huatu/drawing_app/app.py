@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
 import customtkinter as ctk
 from canvas import DrawingCanvas
-from tools import BrushTool, EraserTool, LineTool, RectangleTool, CircleTool, FillTool, PanTool
+from tools import BrushTool, EraserTool, LineTool, RectangleTool, CircleTool, FillTool, PanTool, TextTool
 
 class DrawingApp(ctk.CTk):
     def __init__(self):
@@ -97,6 +97,7 @@ class DrawingApp(ctk.CTk):
             ("circle", "圆形"),
             ("fill", "填充"),
             ("pan", "抓手"),
+            ("text", "文字"),
         ]
         
         for tool_name, label in tool_buttons:
@@ -263,6 +264,7 @@ class DrawingApp(ctk.CTk):
         self.circle_tool = CircleTool(self.canvas)
         self.fill_tool = FillTool(self.canvas)
         self.pan_tool = PanTool(self.canvas)
+        self.text_tool = TextTool(self.canvas)
         
         self.select_tool("brush")
     
@@ -298,6 +300,8 @@ class DrawingApp(ctk.CTk):
             self.canvas.set_tool(self.fill_tool)
         elif tool_name == "pan":
             self.canvas.set_tool(self.pan_tool)
+        elif tool_name == "text":
+            self.canvas.set_tool(self.text_tool)
     
     def set_color(self, color):
         self.canvas.set_color(color)

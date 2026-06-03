@@ -276,3 +276,119 @@ class DrawingCanvas(tk.Canvas):
         self.history.clear()
         self.history.save_state(self.image)
         self.reset_view()
+    
+    def show_text_dialog(self, x, y):
+        dialog = tk.Toplevel(self)
+        dialog.title("输入文字")
+        dialog.geometry("400x300")
+        dialog.transient(self)
+        dialog.grab_set()
+        
+        text_frame = ctk.CTkFrame(dialog)
+        text_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        
+        ctk.CTkLabel(text_frame, text="请输入文字:").pack(pady=5)
+        
+        text_input = ctk.CTkTextbox(text_frame, height=80, width=350)
+        text_input.pack(pady=5)
+        text_input.focus_set()
+        
+        settings_frame = ctk.CTkFrame(text_frame)
+        settings_frame.pack(pady=10, fill="x")
+        
+        font_frame = ctk.CTkFrame(settings_frame)
+        font_frame.pack(pady=5, padx=5, fill="x")
+        ctk.CTkLabel(font_frame, text="字体:").pack(side="left", padx=5)
+        
+        available_fonts = [
+            "Arial",
+            "Times New Roman",
+            "Courier New",
+            "Verdana",
+            "Georgia",
+            "Comic Sans MS",
+            "Trebuchet MS",
+            "Impact"
+        ]
+        
+        font_var = tk.StringVar(value=available_fonts[0])
+        font_menu = ctk.CTkOptionMenu(
+            font_frame,
+            variable=font_var,
+            values=available_fonts,
+            width=150
+        )
+        font_menu.pack(side="left", padx=5)
+        
+        size_frame = ctk.CTkFrame(settings_frame)
+        size_frame.pack(pady=5, padx=5, fill="x")
+        ctk.CTkLabel(size_frame, text="字号:").pack(side="left", padx=5)
+        
+        size_var = tk.IntVar(value=24)
+        size_slider = ctk.CTkSlider(
+            size_frame,
+            from_=12,
+            to=72,
+            variable=size_var,
+            width=200
+        )
+        size_slider.pack(side="left", padx=5)
+        
+        size_label = ctk.CTkLabel(size_frame, text="24")
+        size_label.pack(side="left", padx=5)
+        
+        def update_size_label(value):
+            size_label.configure(text=str(int(float(value))))
+        
+        size_slider.configure(command=update_size_label)
+        
+        color_label = ctk.CTkLabel(settings_frame, text=f"颜色: {self.current_color}")
+        color_label.pack(pady=5)
+        
+        button_frame = ctk.CTkFrame(dialog)
+        button_frame.pack(pady=10, padx=10, fill="x")
+        
+        def on_confirm():
+            text = text_input.get("1.0", "end-1c").strip()
+            if text:
+                font_name = font_var.get()
+                font_size = int(size_var.get())
+                self.draw_text(x, y, text, font_name, font_size, self.current_color)
+                self.redraw()
+            dialog.destroy()
+        
+        def on_cancel():
+            dialog.destroy()
+        
+        confirm_btn = ctk.CTkButton(
+            button_frame,
+            text="确认",
+            command=on_confirm,
+            width=100
+        )
+        confirm_btn.pack(side="left", padx=10, expand=True)
+        
+        cancel_btn = ctk.CTkButton(
+            button_frame,
+            text="取消",
+            command=on_cancel,
+            width=100
+        )
+        cancel_btn.pack(side="left", padx=10, expand=True)
+        
+        dialog.bind("<Return>", lambda e: on_confirm())
+        dialog.bind("<Escape>", lambda e: on_cancel())
+        
+        dialog.wait_window()
+    
+    def draw_text(self, x, y, text, font_name="Arial", font_size=24, color="#000000"):
+        from PIL import ImageFont
+        try:
+            font = ImageFont.truetype(font_name.lower() + ".ttf", font_size)
+        except:
+            try:
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except:
+                font = ImageFont.load_default()
+        
+        self.draw.text((x, y), text, fill=color, font=font)

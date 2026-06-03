@@ -323,3 +323,11 @@ class PanTool(Tool):
         
         self.last_pan_x = event.x
         self.last_pan_y = event.y
+
+class TextTool(Tool):
+    def __init__(self, canvas):
+        super().__init__(canvas)
+    
+    def on_click(self, event):
+        self.canvas.save_history()
+        self.canvas.show_text_dialog(event.x, event.y)
