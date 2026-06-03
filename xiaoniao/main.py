@@ -25,9 +25,14 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("愤怒的小鸟 - 简化版")
     
-    font = pygame.font.Font(None, 36)
-    big_font = pygame.font.Font(None, 72)
-    small_font = pygame.font.Font(None, 24)
+    try:
+        font = pygame.font.Font("simhei.ttf", 36)
+        big_font = pygame.font.Font("simhei.ttf", 72)
+        small_font = pygame.font.Font("simhei.ttf", 24)
+    except:
+        font = pygame.font.SysFont("Microsoft YaHei", 36)
+        big_font = pygame.font.SysFont("Microsoft YaHei", 72)
+        small_font = pygame.font.SysFont("Microsoft YaHei", 24)
     
     bird = Bird()
     slingshot = Slingshot()
@@ -88,6 +93,7 @@ def main():
         slingshot.draw(screen)
         
         if not bird.is_flying:
+            bird.x, bird.y = slingshot.get_bird_position()
             bird.draw(screen)
         
         for block in blocks:

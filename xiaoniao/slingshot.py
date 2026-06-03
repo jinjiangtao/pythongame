@@ -34,29 +34,35 @@ class Slingshot:
         elif event.type == pygame.MOUSEMOTION:
             if self.is_dragging:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                dx = mouse_x - self.x
-                dy = mouse_y - self.y
+                dx = mouse_x - (self.x)
+                dy = mouse_y - (self.y - 30)
                 distance = math.sqrt(dx * dx + dy * dy)
                 
                 if distance > MAX_DRAG_DISTANCE:
                     ratio = MAX_DRAG_DISTANCE / distance
                     mouse_x = self.x + dx * ratio
-                    mouse_y = self.y + dy * ratio
+                    mouse_y = (self.y - 30) + dy * ratio
                 
                 self.drag_end = (mouse_x, mouse_y)
     
     def is_near_slingshot(self, x, y):
         """检测鼠标是否在弹弓附近"""
-        distance = math.sqrt((x - self.x)**2 + (y - self.y)**2)
+        distance = math.sqrt((x - self.x)**2 + (y - (self.y - 30))**2)
         return distance < 50
     
     def launch_bird(self, bird):
         """发射小鸟"""
         dx = self.x - self.drag_end[0]
-        dy = self.y - self.drag_end[1]
-        force_x = dx * FORCE_MULTIPLIER / MAX_DRAG_DISTANCE
-        force_y = dy * FORCE_MULTIPLIER / MAX_DRAG_DISTANCE
+        dy = (self.y - 30) - self.drag_end[1]
+        force_x = dx * FORCE_MULTIPLIER
+        force_y = dy * FORCE_MULTIPLIER
         bird.launch(force_x, force_y)
+    
+    def get_bird_position(self):
+        """获取小鸟当前应该显示的位置"""
+        if self.is_dragging:
+            return self.drag_end
+        return (self.x, self.y - 30)
     
     def draw(self, screen):
         """绘制弹弓"""
