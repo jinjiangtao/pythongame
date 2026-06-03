@@ -93,6 +93,22 @@ def main():
             if p.life <= 0:
                 particles.remove(p)
         
+        slingshot.draw(screen)
+        
+        if not bird.is_flying:
+            if slingshot.is_dragging:
+                bird.x, bird.y = slingshot.get_bird_position()
+            bird.draw(screen)
+        
+        for block in blocks:
+            block.draw(screen)
+        
+        for pig in pigs:
+            pig.draw(screen)
+        
+        for p in particles:
+            p.draw(screen)
+        
         score_text = font.render(f"得分: {game_state.score}", True, WHITE)
         screen.blit(score_text, (20, 20))
         
@@ -115,23 +131,8 @@ def main():
         ]
         
         for i, text in enumerate(instructions):
-            text_surface = small_font.render(text, True, (50, 50, 50))
-            screen.blit(text_surface, (SCREEN_WIDTH - 180, 80 + i * 22))
-        
-        slingshot.draw(screen)
-        
-        if not bird.is_flying:
-            bird.x, bird.y = slingshot.get_bird_position()
-            bird.draw(screen)
-        
-        for block in blocks:
-            block.draw(screen)
-        
-        for pig in pigs:
-            pig.draw(screen)
-        
-        for p in particles:
-            p.draw(screen)
+            text_surface = small_font.render(text, True, (80, 80, 80))
+            screen.blit(text_surface, (SCREEN_WIDTH - 200, SCREEN_HEIGHT - 160 + i * 22))
         
         if game_state.win:
             win_text = big_font.render("胜利!", True, GREEN)
