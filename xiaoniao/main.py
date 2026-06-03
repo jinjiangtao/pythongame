@@ -83,8 +83,9 @@ def main():
             if not bird.is_flying and game_state.birds_left > 0:
                 game_state.check_lose()
         
-        if not bird.is_flying and not slingshot.is_dragging and not game_state.is_game_over() and game_state.birds_left > 0:
-            bird.reset()
+        if not bird.is_flying and not game_state.is_game_over() and game_state.birds_left > 0:
+            if bird.y > GROUND_HEIGHT - 50 or bird.x < -50 or bird.x > SCREEN_WIDTH + 50:
+                bird.reset()
         
         game_state.check_win(pigs)
         

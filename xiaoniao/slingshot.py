@@ -56,8 +56,8 @@ class Slingshot:
         dx = self.top_x - self.drag_end[0]
         dy = self.top_y - self.drag_end[1]
         distance = math.sqrt(dx * dx + dy * dy)
-        if distance > 0:
-            force = distance * (FORCE_MULTIPLIER / MAX_DRAG_DISTANCE) * 40
+        if distance > 5:
+            force = distance * FORCE_MULTIPLIER
             force_x = (dx / distance) * force
             force_y = (dy / distance) * force
             bird.launch(force_x, force_y)
