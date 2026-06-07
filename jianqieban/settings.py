@@ -1,0 +1,7 @@
+DATABASE_NAME = "clipboard_history.db"
+MAX_HISTORY_COUNT = 100
+POLL_INTERVAL = 0.5
+WINDOW_WIDTH = 700
+WINDOW_HEIGHT = 500
+FONT_FAMILY = "Microsoft YaHei"
+APP_NAME = "剪贴板历史管理器"
