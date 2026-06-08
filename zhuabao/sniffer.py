@@ -6,8 +6,15 @@
 import threading
 import time
 import socket
+import re
 import pcap
 from protocol_parser import Packet
+
+try:
+    import winreg
+    HAS_WINREG = True
+except ImportError:
+    HAS_WINREG = False
 
 
 class Sniffer:
@@ -22,7 +29,7 @@ class Sniffer:
         self.packet_callback = None
         self.current_device = None
         self.devices = []
-        self.device_descriptions = {}  # 存储设备描述
+        self.device_info = {}  # 存储设备完整信息 (friendly_name, ip_addresses, is_connected)
         self.load_devices()
 
     def load_devices(self):
@@ -32,18 +39,18 @@ class Sniffer:
         try:
             all_devices = pcap.findalldevs()
             self.devices = []
-            self.device_descriptions = {}
+            self.device_info = {}
             
             # 为每个设备尝试获取更详细信息
             for dev in all_devices:
                 self.devices.append(dev)
-                self.device_descriptions[dev] = self._get_device_description(dev)
+                self.device_info[dev] = self._get_device_info(dev)
             
             # 打印调试信息
             print(f"发现 {len(self.devices)} 个网络设备:")
             for i, dev in enumerate(self.devices):
-                desc = self.device_descriptions.get(dev, "")
-                print(f"  [{i}] {dev} - {desc}")
+                info = self.device_info.get(dev, {})
+                print(f"  [{i}] {dev} -> {info}")
                 
         except Exception as e:
             print(f"加载网卡失败: {e}")
@@ -51,21 +58,83 @@ class Sniffer:
             traceback.print_exc()
             self.devices = []
 
-    def _get_device_description(self, device_name):
+    def _extract_guid(self, device_name):
         """
-        尝试获取设备的友好名称
+        从设备名称中提取 GUID
         """
-        # 对于 Windows，尝试从设备名中识别常见名称
-        device_lower = device_name.lower()
-        if "loopback" in device_lower:
-            return "Loopback (本地回环)"
-        elif "wlan" in device_lower or "wifi" in device_lower or "wi-fi" in device_lower:
-            return "Wi-Fi 适配器"
-        elif "ethernet" in device_lower or "eth" in device_lower:
-            return "以太网适配器"
-        elif "npf" in device_lower:
-            return "标准网络适配器"
-        return ""
+        # 匹配类似 {12345678-1234-1234-1234-123456789ABC} 的 GUID
+        match = re.search(r'\{[0-9A-Fa-f-]+\}', device_name)
+        if match:
+            return match.group(0)
+        return None
+
+    def _get_device_info(self, device_name):
+        """
+        获取设备的完整信息，包括友好名称和IP地址
+        """
+        info = {
+            'friendly_name': '',
+            'ip_addresses': [],
+            'is_connected': False
+        }
+        
+        # 尝试从 Windows 注册表获取友好名称
+        if HAS_WINREG:
+            guid = self._extract_guid(device_name)
+            if guid:
+                try:
+                    # 打开注册表路径
+                    network_key = winreg.OpenKey(
+                        winreg.HKEY_LOCAL_MACHINE,
+                        r"SYSTEM\CurrentControlSet\Control\Network\{4d36e972-e325-11ce-bfc1-08002be10318}"
+                    )
+                    
+                    try:
+                        # 打开 GUID 对应的子键
+                        guid_key = winreg.OpenKey(network_key, guid)
+                        try:
+                            # 打开 Connection 子键
+                            connection_key = winreg.OpenKey(guid_key, "Connection")
+                            try:
+                                # 读取 Name 字段
+                                name, _ = winreg.QueryValueEx(connection_key, "Name")
+                                info['friendly_name'] = name
+                            finally:
+                                winreg.CloseKey(connection_key)
+                        except FileNotFoundError:
+                            pass
+                        finally:
+                            winreg.CloseKey(guid_key)
+                    except FileNotFoundError:
+                        pass
+                    finally:
+                        winreg.CloseKey(network_key)
+                except Exception as e:
+                    print(f"读取注册表失败: {e}")
+        
+        # 如果注册表获取失败，尝试简单匹配
+        if not info['friendly_name']:
+            device_lower = device_name.lower()
+            if "loopback" in device_lower:
+                info['friendly_name'] = "Loopback (本地回环)"
+            elif "wlan" in device_lower or "wifi" in device_lower or "wi-fi" in device_lower:
+                info['friendly_name'] = "WLAN"
+            elif "ethernet" in device_lower or "eth" in device_lower:
+                info['friendly_name'] = "以太网"
+            elif "npf" in device_lower:
+                info['friendly_name'] = "本地连接"
+            else:
+                info['friendly_name'] = device_name
+        
+        # 尝试获取 IP 地址
+        try:
+            # 简单的方法：获取本地所有 IP 地址，但无法精确对应到网卡
+            # 这里我们可以后续改进，暂时标记为已连接
+            info['is_connected'] = True
+        except:
+            pass
+        
+        return info
 
     def get_devices(self):
         """
