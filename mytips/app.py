@@ -70,7 +70,7 @@ class StickyNotesApp:
                 if note.reminder_time and note.reminder_time == now:
                     key = f"{note_id}_{note.reminder_time}"
                     if key not in checked_reminders:
-                        self.root.after(0, lambda n=note: ReminderAlert(self.root, n.content))
+                        self.root.after(0, lambda n=note: ReminderAlert(self.root, n.content, n))
                         checked_reminders.add(key)
             time.sleep(1)
             

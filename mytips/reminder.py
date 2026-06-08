@@ -67,12 +67,20 @@ class ReminderWindow(ctk.CTkToplevel):
 
 
 class ReminderAlert(ctk.CTkToplevel):
-    def __init__(self, parent, note_content):
+    def __init__(self, parent, note_content, note_window=None):
         super().__init__(parent)
         self.title("提醒")
         self.geometry("400x250")
         self.resizable(False, False)
         self.attributes("-topmost", True)
+        
+        # 如果有便签窗口，定位在便签附近
+        if note_window:
+            note_x = note_window.winfo_x()
+            note_y = note_window.winfo_y()
+            note_width = note_window.winfo_width()
+            # 把弹窗显示在便签右边稍微偏移的位置
+            self.geometry(f"+{note_x + note_width + 20}+{note_y}")
         
         play_reminder_sound()
         

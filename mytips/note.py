@@ -39,10 +39,15 @@ class NoteWindow(ctk.CTkToplevel):
         self.title_bar.bind('<Button-1>', self._on_drag_start)
         self.title_bar.bind('<B1-Motion>', self._on_drag_motion)
         
+        self.minimize_btn = ctk.CTkButton(self.title_bar, text="−", width=30, height=25,
+                                          fg_color="transparent", hover_color="#aaaaaa",
+                                          text_color="#333333", command=self._on_minimize)
+        self.minimize_btn.pack(side="right", padx=5, pady=2)
+        
         self.close_btn = ctk.CTkButton(self.title_bar, text="✕", width=30, height=25,
                                        fg_color="transparent", hover_color="#ff6666",
                                        text_color="#333333", command=self._on_close)
-        self.close_btn.pack(side="right", padx=5, pady=2)
+        self.close_btn.pack(side="right", padx=0, pady=2)
         
         self.content_frame = ctk.CTkFrame(self, fg_color=bg_color)
         self.content_frame.pack(fill="both", expand=True)
@@ -206,6 +211,9 @@ class NoteWindow(ctk.CTkToplevel):
         if self.on_close_callback:
             self.on_close_callback(self)
         self.destroy()
+        
+    def _on_minimize(self):
+        self.withdraw()
         
     def set_on_close(self, callback):
         self.on_close_callback = callback
