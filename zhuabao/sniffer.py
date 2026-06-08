@@ -17,10 +17,12 @@ class Sniffer:
 
     def __init__(self):
         self.is_running = False
+        self.is_paused = False
         self.capture_thread = None
         self.pcap_obj = None
         self.packet_callback = None
         self.current_device = None
+        self.current_bpf_filter = ""
         self.devices = []
         self.device_descriptions = {}  # 存储设备描述
         self.load_devices()
@@ -82,6 +84,7 @@ class Sniffer:
 
         self.current_device = device_name
         self.packet_callback = callback
+        self.current_bpf_filter = bpf_filter
 
         try:
             print(f"正在打开设备: {device_name}")
@@ -102,6 +105,7 @@ class Sniffer:
                     # 忽略过滤器错误，继续抓包
 
             self.is_running = True
+            self.is_paused = False
             self.capture_thread = threading.Thread(target=self._capture_loop, daemon=True)
             self.capture_thread.start()
             print("抓包已启动")
@@ -111,6 +115,26 @@ class Sniffer:
             import traceback
             traceback.print_exc()
             return False
+
+    def pause(self):
+        """
+        暂停抓包
+        """
+        if self.is_running and not self.is_paused:
+            self.is_paused = True
+            print("抓包已暂停")
+            return True
+        return False
+
+    def resume(self):
+        """
+        继续抓包
+        """
+        if self.is_running and self.is_paused:
+            self.is_paused = False
+            print("抓包已继续")
+            return True
+        return False
 
     def _capture_loop(self):
         """
@@ -123,6 +147,10 @@ class Sniffer:
             for timestamp, raw_data in self.pcap_obj:
                 if not self.is_running:
                     break
+                
+                # 如果暂停了，跳过处理但继续捕获循环
+                if self.is_paused:
+                    continue
                 
                 packet_count += 1
                 # 每10个包打印一次，避免刷屏
@@ -145,6 +173,7 @@ class Sniffer:
                 traceback.print_exc()
         finally:
             self.is_running = False
+            self.is_paused = False
             print(f"抓包循环结束，共捕获 {packet_count} 个包")
 
     def stop(self):
@@ -153,6 +182,7 @@ class Sniffer:
         """
         print("正在停止抓包...")
         self.is_running = False
+        self.is_paused = False
         if self.capture_thread and self.capture_thread.is_alive():
             try:
                 self.capture_thread.join(timeout=2.0)  # 增加等待时间
