@@ -1,10 +1,10 @@
 
-from PIL import Image, ImageDraw, ImageFont, ImageOps
-import math
+from PIL import Image, ImageDraw, ImageFont
 from utils import hex_to_rgba, calculate_position
 
 
 def create_text_watermark(text, font_name, font_size, color, opacity, rotation):
+    """创建文字水印"""
     try:
         font = ImageFont.truetype(font_name, font_size)
     except:
@@ -31,6 +31,7 @@ def create_text_watermark(text, font_name, font_size, color, opacity, rotation):
 
 
 def create_image_watermark(image_path, scale, opacity):
+    """创建图片水印"""
     wm_img = Image.open(image_path)
     if wm_img.mode != 'RGBA':
         wm_img = wm_img.convert('RGBA')
@@ -41,31 +42,29 @@ def create_image_watermark(image_path, scale, opacity):
     
     if opacity < 1.0:
         alpha = wm_img.split()[3]
-        alpha = alpha.point(lambda p: p * opacity)
+        alpha = alpha.point(lambda p: int(p * opacity))
         wm_img.putalpha(alpha)
     
     return wm_img
 
 
 def apply_watermark(base_img, wm_img, position, margin):
-    base_w, base_h = base_img.size
-    wm_w, wm_h = wm_img.size
-    
-    pos = calculate_position(base_w, base_h, wm_w, wm_h, position, margin)
-    
+    """应用水印到图片"""
     result = base_img.copy()
+    pos = calculate_position(base_img.size[0], base_img.size[1], wm_img.size[0], wm_img.size[1], position, margin)
     result.paste(wm_img, pos, wm_img)
-    
     return result
 
 
 def process_image(input_path, output_path, settings):
+    """处理单张图片"""
     base_img = Image.open(input_path)
     
-    # 始终以RGBA模式处理
+    # 转换为RGBA模式进行处理
     if base_img.mode != 'RGBA':
         base_img = base_img.convert('RGBA')
     
+    # 创建水印
     if settings['mode'] == 'text':
         wm_img = create_text_watermark(
             settings['text'],
@@ -82,22 +81,21 @@ def process_image(input_path, output_path, settings):
             settings['opacity']
         )
     
+    # 应用水印
     result = apply_watermark(base_img, wm_img, settings['position'], settings['margin'])
     
-    # 处理保存
+    # 保存文件
     output_format = settings['output_format']
-    if output_format == '统一转成JPG':
-        # 转JPG，需要处理alpha通道
+    ext = input_path.split('.')[-1].lower()
+    
+    # 判断是否需要保存为JPG
+    save_as_jpg = (output_format == '统一转成JPG') or (ext in ['jpg', 'jpeg'])
+    
+    if save_as_jpg:
+        # 保存为JPG，需要处理透明度
         background = Image.new('RGB', result.size, (255, 255, 255))
-        background.paste(result, mask=result.split()[3])
+        background.paste(result, (0, 0), mask=result.split()[3])
         background.save(output_path, 'JPEG', quality=settings['jpg_quality'])
     else:
-        ext = input_path.split('.')[-1].lower()
-        if ext in ['jpg', 'jpeg']:
-            # 原格式是JPG，处理alpha通道
-            background = Image.new('RGB', result.size, (255, 255, 255))
-            background.paste(result, mask=result.split()[3])
-            background.save(output_path, 'JPEG', quality=settings['jpg_quality'])
-        else:
-            # 保持原格式，直接保存
-            result.save(output_path)
+        # 保持原格式
+        result.save(output_path)
