@@ -146,7 +146,7 @@ class NoteWindow(ctk.CTkToplevel):
         self._update_db()
         
     def _show_reminder_dialog(self):
-        ReminderWindow(self, self.note_id, self.db, self._on_reminder_set)
+        ReminderWindow(self, self.note_id, self.db, self._on_reminder_set, self)
         
     def _on_reminder_set(self, reminder_time):
         self.reminder_time = reminder_time

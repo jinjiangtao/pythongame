@@ -4,7 +4,7 @@ from utils import play_reminder_sound
 
 
 class ReminderWindow(ctk.CTkToplevel):
-    def __init__(self, parent, note_id, db, on_save=None):
+    def __init__(self, parent, note_id, db, on_save=None, note_window=None):
         super().__init__(parent)
         self.note_id = note_id
         self.db = db
@@ -12,6 +12,14 @@ class ReminderWindow(ctk.CTkToplevel):
         self.title("设置提醒")
         self.geometry("350x300")
         self.resizable(False, False)
+        
+        # 如果有便签窗口，定位在便签附近
+        if note_window:
+            note_x = note_window.winfo_x()
+            note_y = note_window.winfo_y()
+            note_width = note_window.winfo_width()
+            # 把弹窗显示在便签右边稍微偏移的位置
+            self.geometry(f"+{note_x + note_width + 20}+{note_y}")
         
         self._create_widgets()
         
