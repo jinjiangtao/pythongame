@@ -5,7 +5,7 @@ from image_list import ImageList
 from preview import PreviewPanel
 from processor import BatchProcessor
 from settings import DEFAULT_SETTINGS, COLOR_PRESETS, POSITION_MAP
-from utils import get_image_files, get_available_fonts
+from utils import get_image_files, get_available_fonts, get_default_chinese_font
 
 
 class WatermarkApp(ctk.CTk):
@@ -19,7 +19,7 @@ class WatermarkApp(ctk.CTk):
         
         self.settings = DEFAULT_SETTINGS.copy()
         self.settings['mode'] = 'text'
-        self.settings['font'] = get_available_fonts()[0]
+        self.settings['font'] = get_default_chinese_font()
         self.settings['output_mode'] = '新文件夹'
         self.settings['watermark_image'] = None
         

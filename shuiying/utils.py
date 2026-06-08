@@ -1,5 +1,6 @@
 
 import os
+import sys
 from PIL import Image, ImageTk
 from settings import SUPPORTED_FORMATS
 
@@ -60,11 +61,37 @@ def calculate_position(img_width, img_height, wm_width, wm_height, position, mar
 
 
 def get_available_fonts():
-    import sys
+    """获取可用字体 - 优先支持中文"""
     if sys.platform == 'win32':
-        fonts = ['Arial', 'Microsoft YaHei', 'SimHei', 'SimSun', 'KaiTi']
+        fonts = [
+            'Microsoft YaHei',  # 微软雅黑
+            'SimHei',  # 黑体
+            'SimSun',  # 宋体
+            'KaiTi',  # 楷体
+            'Arial'
+        ]
     elif sys.platform == 'darwin':
-        fonts = ['Arial', 'Helvetica', 'PingFang SC', 'STHeiti']
+        fonts = [
+            'PingFang SC',  # 苹方
+            'STHeiti',  # 华文黑体
+            'Arial',
+            'Helvetica'
+        ]
     else:
-        fonts = ['Arial', 'DejaVu Sans']
+        fonts = [
+            'WenQuanYi Micro Hei',
+            'Noto Sans CJK SC',
+            'Arial',
+            'DejaVu Sans'
+        ]
     return fonts
+
+
+def get_default_chinese_font():
+    """获取默认的中文字体"""
+    if sys.platform == 'win32':
+        return 'Microsoft YaHei'
+    elif sys.platform == 'darwin':
+        return 'PingFang SC'
+    else:
+        return 'WenQuanYi Micro Hei'

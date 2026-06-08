@@ -1,15 +1,83 @@
 
 from PIL import Image, ImageDraw, ImageFont
+import sys
 from utils import calculate_position
 
 
+def get_chinese_font():
+    """获取支持中文的字体"""
+    # 常见的中文字体
+    chinese_fonts = []
+    
+    if sys.platform == 'win32':
+        # Windows 系统
+        chinese_fonts = [
+            'C:\\Windows\\Fonts\\msyh.ttc',  # 微软雅黑
+            'C:\\Windows\\Fonts\\simhei.ttf',  # 黑体
+            'C:\\Windows\\Fonts\\simsun.ttc',  # 宋体
+            'C:\\Windows\\Fonts\\simkai.ttf',  # 楷体
+            'Microsoft YaHei',
+            'SimHei',
+            'SimSun',
+            'KaiTi'
+        ]
+    elif sys.platform == 'darwin':
+        # macOS 系统
+        chinese_fonts = [
+            '/System/Library/Fonts/STHeiti Light.ttc',  # 华文黑体
+            '/System/Library/Fonts/PingFang.ttc',  # 苹方
+            'PingFang SC',
+            'STHeiti'
+        ]
+    else:
+        # Linux 系统
+        chinese_fonts = [
+            '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc',  # 文泉驿微米黑
+            'WenQuanYi Micro Hei',
+            'Noto Sans CJK SC'
+        ]
+    
+    # 尝试加载字体
+    for font_name in chinese_fonts:
+        try:
+            font = ImageFont.truetype(font_name, 30)
+            print(f"[字体] 加载成功: {font_name}")
+            return font_name
+        except Exception as e:
+            continue
+    
+    # 如果都失败了，返回默认
+    print("[字体] 使用默认字体")
+    return None
+
+
 def create_text_watermark(text, font_name, font_size, color, opacity, rotation):
-    """创建文字水印 - 基于最简单的工作原理"""
+    """创建文字水印 - 支持中文"""
+    # 尝试获取中文字体
+    use_font_name = font_name
+    font = None
+    
+    # 首先尝试用户指定的字体
     try:
         font = ImageFont.truetype(font_name, font_size)
+        print(f"[字体] 使用: {font_name}")
     except Exception as e:
-        print(f"使用默认字体 (无法加载 {font_name})")
-        font = ImageFont.load_default()
+        print(f"[字体] 无法加载 {font_name}: {e}")
+        
+        # 尝试中文字体
+        chinese_font_name = get_chinese_font()
+        if chinese_font_name:
+            try:
+                font = ImageFont.truetype(chinese_font_name, font_size)
+                use_font_name = chinese_font_name
+                print(f"[字体] 回退到中文: {use_font_name}")
+            except Exception as e2:
+                print(f"[字体] 也无法加载中文: {e2}")
+        
+        # 最后尝试默认
+        if not font:
+            font = ImageFont.load_default()
+            print(f"[字体] 使用默认")
     
     # 获取文字尺寸
     bbox = font.getbbox(text)
@@ -80,7 +148,7 @@ def apply_watermark(base_img, wm_img, position, margin):
 
 
 def process_image(input_path, output_path, settings):
-    """处理单张图片 - 这是核心功能，必须确保正常工作"""
+    """处理单张图片 - 核心功能"""
     print(f"[水印处理] 开始: {input_path}")
     
     # 1. 打开原图
