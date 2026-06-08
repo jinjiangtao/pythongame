@@ -1,4 +1,3 @@
-
 """
 辅助函数文件
 提供通用的辅助功能
@@ -59,16 +58,56 @@ def format_hex_dump(data):
 def check_npcap_installed():
     """
     检查Npcap驱动是否已安装
+    增强版检测逻辑：检查多个位置
     """
+    # 检查常见的安装路径
+    npcap_paths = [
+        # 系统路径
+        os.path.join(os.environ.get('SystemRoot', 'C:\\Windows'), 'System32'),
+        # Npcap 默认安装路径
+        r"C:\Windows\System32\Npcap",
+        r"C:\Program Files\Npcap",
+        r"C:\Program Files (x86)\Npcap"
+    ]
+    
+    npcap_files = ['Packet.dll', 'wpcap.dll', 'npf.sys']
+    
+    print("正在检查 Npcap 安装状态...")
+    
+    # 检查文件检查
+    for check_path in npcap_paths:
+        for dll_file in npcap_files:
+            try:
+                full_path = os.path.join(check_path, dll_file)
+                if os.path.exists(full_path):
+                    print(f"找到 Npcap 文件: {full_path}")
+                    return True
+            except:
+                continue
+    
+    # 检查注册表（可选，但可能需要管理员权限才能看到）
     try:
-        system32 = os.path.join(os.environ['SystemRoot'], 'System32')
-        if os.path.exists(os.path.join(system32, 'Packet.dll')):
-            return True
-        if os.path.exists(os.path.join(system32, 'wpcap.dll')):
-            return True
-        return False
-    except Exception:
-        return False
+        import winreg
+        key_path = r"SOFTWARE\Npcap"
+        # 尝试打开注册表查找
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path):
+                print("在注册表中找到 Npcap 安装信息")
+                return True
+        except WindowsError:
+            pass
+            
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path):
+                print("在当前用户注册表中找到 Npcap 信息")
+                return True
+        except WindowsError:
+            pass
+    except ImportError:
+        pass
+    
+    print("未找到 Npcap")
+    return False
 
 
 def is_admin():

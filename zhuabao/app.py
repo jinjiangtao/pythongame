@@ -46,7 +46,7 @@ class App(ctk.CTk):
         top_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
 
         ctk.CTkLabel(top_frame, text="网卡:").pack(side="left", padx=5)
-        self.device_combo = ctk.CTkComboBox(top_frame, values=[], state="readonly")
+        self.device_combo = ctk.CTkComboBox(top_frame, values=[], state="readonly", width=400)
         self.device_combo.pack(side="left", padx=5)
 
         self.start_btn = ctk.CTkButton(top_frame, text="开始抓包", command=self._toggle_capture)
@@ -81,12 +81,33 @@ class App(ctk.CTk):
 
     def _load_devices(self):
         """
-        加载网卡列表
+        加载网卡列表，显示友好名称
         """
         devices = self.sniffer.get_devices()
-        self.device_combo.configure(values=devices)
-        if devices:
-            self.device_combo.set(devices[0])
+        self.device_map = {}  # 保存显示名和实际名的映射
+        display_names = []
+        
+        for dev in devices:
+            desc = self.sniffer.device_descriptions.get(dev, "")
+            if desc:
+                display_name = f"{desc} - {dev}"
+            else:
+                display_name = dev
+            display_names.append(display_name)
+            self.device_map[display_name] = dev
+        
+        self.device_combo.configure(values=display_names)
+        
+        # 默认选择 Loopback（如果有）
+        for i, display_name in enumerate(display_names):
+            if "loopback" in display_name.lower() or "127.0.0.1" in display_name:
+                self.device_combo.set(display_name)
+                print(f"默认选择 Loopback 网卡: {display_name}")
+                break
+        else:
+            if devices:
+                self.device_combo.set(display_names[0])
+                print(f"默认选择第一个网卡: {display_names[0]}")
 
     def _toggle_capture(self):
         """
@@ -101,14 +122,19 @@ class App(ctk.CTk):
         """
         开始抓包
         """
-        device = self.device_combo.get()
-        if not device:
+        display_name = self.device_combo.get()
+        if not display_name:
             messagebox.showwarning("警告", "请选择网卡")
             return
+            
+        device_name = self.device_map.get(display_name, display_name)
+        print(f"选择的网卡: {device_name}")
 
-        if self.sniffer.start(device, self._on_packet, self.current_filter):
+        if self.sniffer.start(device_name, self._on_packet, self.current_filter):
             self.start_btn.configure(text="停止抓包")
             self._update_status("正在捕获...")
+        else:
+            messagebox.showerror("错误", "启动抓包失败！\n请确保：\n1. 已正确安装 Npcap\n2. 以管理员权限运行\n3. 检查控制台日志")
 
     def _stop_capture(self):
         """
