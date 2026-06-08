@@ -61,7 +61,8 @@ def apply_watermark(base_img, wm_img, position, margin):
 
 def process_image(input_path, output_path, settings):
     base_img = Image.open(input_path)
-    original_mode = base_img.mode
+    
+    # 始终以RGBA模式处理
     if base_img.mode != 'RGBA':
         base_img = base_img.convert('RGBA')
     
@@ -83,23 +84,20 @@ def process_image(input_path, output_path, settings):
     
     result = apply_watermark(base_img, wm_img, settings['position'], settings['margin'])
     
-    if original_mode != 'RGBA':
-        result = result.convert(original_mode)
-    
+    # 处理保存
     output_format = settings['output_format']
     if output_format == '统一转成JPG':
-        if result.mode in ('RGBA', 'P'):
-            background = Image.new('RGB', result.size, (255, 255, 255))
-            background.paste(result, mask=result.split()[3] if result.mode == 'RGBA' else None)
-            result = background
-        result.save(output_path, 'JPEG', quality=settings['jpg_quality'])
+        # 转JPG，需要处理alpha通道
+        background = Image.new('RGB', result.size, (255, 255, 255))
+        background.paste(result, mask=result.split()[3])
+        background.save(output_path, 'JPEG', quality=settings['jpg_quality'])
     else:
         ext = input_path.split('.')[-1].lower()
         if ext in ['jpg', 'jpeg']:
-            if result.mode == 'RGBA':
-                background = Image.new('RGB', result.size, (255, 255, 255))
-                background.paste(result, mask=result.split()[3])
-                result = background
-            result.save(output_path, 'JPEG', quality=settings['jpg_quality'])
+            # 原格式是JPG，处理alpha通道
+            background = Image.new('RGB', result.size, (255, 255, 255))
+            background.paste(result, mask=result.split()[3])
+            background.save(output_path, 'JPEG', quality=settings['jpg_quality'])
         else:
+            # 保持原格式，直接保存
             result.save(output_path)

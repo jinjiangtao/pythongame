@@ -46,10 +46,10 @@ class WatermarkApp(ctk.CTk):
         btn_frame = ctk.CTkFrame(left_frame, fg_color='transparent')
         btn_frame.grid(row=1, column=0, padx=5, pady=5, sticky='ew')
         
-        ctk.CTkButton(btn_frame, text='添加图片', command=self._add_images).pack(side='left', padx=2)
-        ctk.CTkButton(btn_frame, text='添加文件夹', command=self._add_folder).pack(side='left', padx=2)
-        ctk.CTkButton(btn_frame, text='全选', command=self.image_list.select_all).pack(side='left', padx=2)
-        ctk.CTkButton(btn_frame, text='清空', command=self.image_list.clear).pack(side='left', padx=2)
+        ctk.CTkButton(btn_frame, text='添加图片', command=self._add_images, width=100, height=32).pack(side='left', padx=5, pady=5)
+        ctk.CTkButton(btn_frame, text='添加文件夹', command=self._add_folder, width=100, height=32).pack(side='left', padx=5, pady=5)
+        ctk.CTkButton(btn_frame, text='全选', command=self.image_list.select_all, width=80, height=32).pack(side='left', padx=5, pady=5)
+        ctk.CTkButton(btn_frame, text='清空', command=self.image_list.clear, width=80, height=32).pack(side='left', padx=5, pady=5)
     
     def _create_right_panel(self):
         right_frame = ctk.CTkFrame(self)
@@ -148,27 +148,34 @@ class WatermarkApp(ctk.CTk):
         output_frame = ctk.CTkFrame(right_frame)
         output_frame.grid(row=3, column=0, padx=5, pady=5, sticky='ew')
         
+        # 第一行：输出模式
+        row1 = ctk.CTkFrame(output_frame, fg_color='transparent')
+        row1.pack(fill='x', pady=3)
         self.output_mode_var = ctk.StringVar(value='新文件夹')
-        ctk.CTkRadioButton(output_frame, text='输出到新文件夹', variable=self.output_mode_var, value='新文件夹').pack(side='left', padx=5)
-        ctk.CTkRadioButton(output_frame, text='覆盖原图', variable=self.output_mode_var, value='覆盖').pack(side='left', padx=5)
+        ctk.CTkRadioButton(row1, text='输出到新文件夹', variable=self.output_mode_var, value='新文件夹').pack(side='left', padx=5)
+        ctk.CTkRadioButton(row1, text='覆盖原图', variable=self.output_mode_var, value='覆盖').pack(side='left', padx=5)
         
-        ctk.CTkLabel(output_frame, text='格式:').pack(side='left', padx=5)
-        self.format_combo = ctk.CTkComboBox(output_frame, values=['保持原格式', '统一转成JPG'], width=120)
+        # 第二行：格式、质量、命名
+        row2 = ctk.CTkFrame(output_frame, fg_color='transparent')
+        row2.pack(fill='x', pady=3)
+        
+        ctk.CTkLabel(row2, text='格式:').pack(side='left', padx=5)
+        self.format_combo = ctk.CTkComboBox(row2, values=['保持原格式', '统一转成JPG'], width=120)
         self.format_combo.set(self.settings['output_format'])
         self.format_combo.pack(side='left', padx=5)
         
-        ctk.CTkLabel(output_frame, text='JPG质量:').pack(side='left', padx=5)
-        self.quality_slider = ctk.CTkSlider(output_frame, from_=10, to=100, number_of_steps=90, width=100)
+        ctk.CTkLabel(row2, text='JPG质量:').pack(side='left', padx=5)
+        self.quality_slider = ctk.CTkSlider(row2, from_=10, to=100, number_of_steps=90, width=100)
         self.quality_slider.set(self.settings['jpg_quality'])
         self.quality_slider.pack(side='left', padx=5)
         
-        ctk.CTkLabel(output_frame, text='命名:').pack(side='left', padx=5)
-        self.name_rule_combo = ctk.CTkComboBox(output_frame, values=['原文件名_watermarked', '自定义前缀'], width=150)
+        ctk.CTkLabel(row2, text='命名:').pack(side='left', padx=5)
+        self.name_rule_combo = ctk.CTkComboBox(row2, values=['原文件名_watermarked', '自定义前缀'], width=150)
         self.name_rule_combo.set(self.settings['filename_rule'])
         self.name_rule_combo.pack(side='left', padx=5)
         self.name_rule_combo.bind('<<ComboboxSelected>>', self._on_name_rule_change)
         
-        self.prefix_entry = ctk.CTkEntry(output_frame, width=80)
+        self.prefix_entry = ctk.CTkEntry(row2, width=80)
         self.prefix_entry.insert(0, self.settings['custom_prefix'])
         self.prefix_entry.pack(side='left', padx=5)
         self.prefix_entry.configure(state='disabled')
@@ -176,14 +183,14 @@ class WatermarkApp(ctk.CTk):
         action_frame = ctk.CTkFrame(right_frame)
         action_frame.grid(row=4, column=0, padx=5, pady=5, sticky='ew')
         
-        self.start_btn = ctk.CTkButton(action_frame, text='开始处理', command=self._start_processing)
+        self.start_btn = ctk.CTkButton(action_frame, text='开始处理', command=self._start_processing, height=36)
         self.start_btn.pack(side='left', padx=5, fill='x', expand=True)
         
-        self.progress = ctk.CTkProgressBar(action_frame)
+        self.progress = ctk.CTkProgressBar(action_frame, height=12)
         self.progress.pack(side='left', padx=5, fill='x', expand=True)
         self.progress.set(0)
         
-        self.progress_label = ctk.CTkLabel(action_frame, text='0/0')
+        self.progress_label = ctk.CTkLabel(action_frame, text='0/0', width=50)
         self.progress_label.pack(side='left', padx=5)
     
     def _add_images(self):
@@ -317,3 +324,4 @@ class WatermarkApp(ctk.CTk):
 def run():
     app = WatermarkApp()
     app.mainloop()
+
