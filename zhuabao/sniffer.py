@@ -1,6 +1,6 @@
 """
 抓包核心引擎
-使用pcap-ct进行网络数据包捕获，增强支持 Windows Loopback
+使用pcap-ct进行网络数据包捕获，修复API调用问题
 """
 
 import threading
@@ -53,7 +53,7 @@ class Sniffer:
 
     def _get_device_description(self, device_name):
         """
-        尝试获取设备的友好描述
+        尝试获取设备的友好名称
         """
         # 对于 Windows，尝试从设备名中识别常见名称
         device_lower = device_name.lower()
@@ -75,7 +75,7 @@ class Sniffer:
 
     def start(self, device_name, callback, bpf_filter=""):
         """
-        开始抓包，增强支持 Windows Loopback
+        开始抓包，使用正确的 pcap-ct API
         """
         if self.is_running:
             return False
@@ -86,23 +86,12 @@ class Sniffer:
         try:
             print(f"正在打开设备: {device_name}")
             
-            # 对于 Windows 系统，特别优化参数
-            # 首先尝试使用标准方式打开
-            try:
-                self.pcap_obj = pcap.pcap(
-                    name=device_name,
-                    promisc=True,
-                    timeout_ms=100,  # 增加超时时间，提高稳定性
-                    immediate=True  # 启用即时模式，让包尽快返回
-                )
-            except Exception as e1:
-                print(f"标准打开方式失败: {e1}")
-                # 如果失败，尝试其他参数组合
-                self.pcap_obj = pcap.pcap(
-                    name=device_name,
-                    promisc=True,
-                    timeout_ms=100
-                )
+            # 打开设备，使用标准参数
+            self.pcap_obj = pcap.pcap(
+                name=device_name,
+                promisc=True,
+                timeout_ms=100
+            )
             
             if bpf_filter:
                 try:
@@ -125,33 +114,30 @@ class Sniffer:
 
     def _capture_loop(self):
         """
-        抓包循环，在单独线程中运行，增强错误处理
+        抓包循环，使用正确的迭代方式
         """
         packet_count = 0
         print("抓包循环开始")
         try:
-            while self.is_running and self.pcap_obj:
-                try:
-                    # 使用非阻塞方式读取，超时后检查运行状态
-                    results = self.pcap_obj.next()
-                    if results:
-                        timestamp, raw_data = results
-                        packet_count += 1
-                        # 每10个包打印一次，避免刷屏
-                        if packet_count % 10 == 0:
-                            print(f"已捕获 {packet_count} 个包")
-                        
-                        packet = Packet(raw_data, timestamp)
-                        if self.packet_callback:
-                            self.packet_callback(packet)
-                except StopIteration:
-                    # 正常结束
+            # 使用正确的迭代方式获取数据包
+            for timestamp, raw_data in self.pcap_obj:
+                if not self.is_running:
                     break
-                except Exception as e:
-                    if self.is_running:
-                        print(f"读取数据包异常: {e}")
-                    time.sleep(0.01)
+                
+                packet_count += 1
+                # 每10个包打印一次，避免刷屏
+                if packet_count % 10 == 0:
+                    print(f"已捕获 {packet_count} 个包")
+                
+                try:
+                    packet = Packet(raw_data, timestamp)
+                    if self.packet_callback:
+                        self.packet_callback(packet)
+                except Exception as pe:
+                    print(f"解析数据包异常: {pe}")
                     
+        except StopIteration:
+            print("抓包迭代器结束")
         except Exception as e:
             if self.is_running:
                 print(f"抓包过程出错: {e}")
