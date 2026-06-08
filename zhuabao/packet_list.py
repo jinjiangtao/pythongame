@@ -1,4 +1,3 @@
-
 """
 数据包列表组件
 显示捕获的数据包列表
@@ -41,7 +40,7 @@ class PacketList(ctk.CTkFrame):
         self.tree.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        self.tree.bind("&lt;&lt;TreeviewSelect&gt;&gt;", self._on_select)
+        self.tree.bind("<<TreeviewSelect>>", self._on_select)
 
     def add_packet(self, packet):
         """
@@ -76,7 +75,7 @@ class PacketList(ctk.CTkFrame):
         if selected_items:
             item = selected_items[0]
             index = self.tree.index(item)
-            if 0 &lt;= index &lt; len(self.packets):
+            if 0 <= index < len(self.packets):
                 self.on_select_callback(self.packets[index])
 
     def get_packet_count(self):

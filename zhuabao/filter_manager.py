@@ -1,4 +1,3 @@
-
 """
 过滤器管理
 提供BPF过滤器快捷按钮和输入框
@@ -25,7 +24,7 @@ class FilterManager(ctk.CTkFrame):
 
         self.filter_entry = ctk.CTkEntry(self, placeholder_text="例如: tcp port 80")
         self.filter_entry.pack(side="left", fill="x", expand=True, padx=5)
-        self.filter_entry.bind("&lt;Return&gt;", lambda e: self._apply_filter())
+        self.filter_entry.bind("<Return>", lambda e: self._apply_filter())
 
         btn_frame = ctk.CTkFrame(self)
         btn_frame.pack(side="left", padx=5)

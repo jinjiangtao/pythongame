@@ -41,10 +41,18 @@ def format_hex_dump(data):
     lines = []
     for i in range(0, len(data), 16):
         chunk = data[i:i+16]
-        hex_part = " ".join(f"{b:02x}" for b in chunk)
-        ascii_part = "".join(chr(b) if 32 &lt;= b &lt; 127 else "." for b in chunk)
+        hex_parts = []
+        ascii_chars = []
+        for b in chunk:
+            hex_parts.append(f"{b:02x}")
+            if 32 <= b < 127:
+                ascii_chars.append(chr(b))
+            else:
+                ascii_chars.append(".")
+        hex_part = " ".join(hex_parts)
+        ascii_part = "".join(ascii_chars)
         offset = f"{i:04x}"
-        lines.append(f"{offset}  {hex_part:&lt;48}  {ascii_part}")
+        lines.append(f"{offset}  {hex_part:<48}  {ascii_part}")
     return lines
 
 

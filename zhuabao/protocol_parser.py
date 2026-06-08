@@ -1,4 +1,3 @@
-
 """
 协议解析器
 解析以太网帧、IP、TCP、UDP、ARP、ICMP等协议
@@ -57,7 +56,7 @@ class Packet:
             self.parse_arp(eth_length)
         else:
             self.protocol = "OTHER"
-            self.summary = f"Ethernet: {self.ethernet['src_mac']} -&gt; {self.ethernet['dst_mac']}"
+            self.summary = f"Ethernet: {self.ethernet['src_mac']} -> {self.ethernet['dst_mac']}"
 
     def parse_ip(self, offset):
         """
@@ -67,8 +66,8 @@ class Packet:
         iph = struct.unpack('!BBHHHBBH4s4s', ip_header)
 
         version_ihl = iph[0]
-        version = version_ihl &gt;&gt; 4
-        ihl = version_ihl &amp; 0xF
+        version = version_ihl >> 4
+        ihl = version_ihl & 0xF
         iph_length = ihl * 4
 
         self.ip = {
@@ -96,7 +95,7 @@ class Packet:
             self.parse_icmp(offset + iph_length)
         else:
             self.protocol = f"IP-{iph[6]}"
-            self.summary = f"IP: {self.src_ip} -&gt; {self.dst_ip}"
+            self.summary = f"IP: {self.src_ip} -> {self.dst_ip}"
 
     def parse_tcp(self, offset):
         """
@@ -106,15 +105,15 @@ class Packet:
         tcph = struct.unpack('!HHLLBBHHH', tcp_header)
 
         data_offset_reserved = tcph[4]
-        tcph_length = (data_offset_reserved &gt;&gt; 4) * 4
+        tcph_length = (data_offset_reserved >> 4) * 4
 
         self.tcp = {
             'src_port': tcph[0],
             'dst_port': tcph[1],
             'seq': tcph[2],
             'ack': tcph[3],
-            'data_offset': data_offset_reserved &gt;&gt; 4,
-            'reserved': data_offset_reserved &amp; 0xF,
+            'data_offset': data_offset_reserved >> 4,
+            'reserved': data_offset_reserved & 0xF,
             'flags': tcph[5],
             'window': tcph[6],
             'checksum': tcph[7],
@@ -130,7 +129,7 @@ class Packet:
         elif tcph[1] == 443 or tcph[0] == 443:
             self.protocol = "HTTPS"
 
-        self.summary = f"TCP: {self.src_ip}:{self.src_port} -&gt; {self.dst_ip}:{self.dst_port}"
+        self.summary = f"TCP: {self.src_ip}:{self.src_port} -> {self.dst_ip}:{self.dst_port}"
 
     def parse_udp(self, offset):
         """
@@ -149,7 +148,7 @@ class Packet:
         self.protocol = "UDP"
         self.src_port = str(udph[0])
         self.dst_port = str(udph[1])
-        self.summary = f"UDP: {self.src_ip}:{self.src_port} -&gt; {self.dst_ip}:{self.dst_port}"
+        self.summary = f"UDP: {self.src_ip}:{self.src_port} -> {self.dst_ip}:{self.dst_port}"
 
     def parse_icmp(self, offset):
         """
@@ -165,7 +164,7 @@ class Packet:
         }
 
         self.protocol = "ICMP"
-        self.summary = f"ICMP: {self.src_ip} -&gt; {self.dst_ip} Type={icmph[0]}"
+        self.summary = f"ICMP: {self.src_ip} -> {self.dst_ip} Type={icmph[0]}"
 
     def parse_arp(self, offset):
         """
@@ -195,7 +194,7 @@ class Packet:
         elif arph[4] == 2:
             self.summary = f"ARP Reply: {self.src_ip} is at {self.arp['sender_mac']}"
         else:
-            self.summary = f"ARP: {self.src_ip} -&gt; {self.dst_ip}"
+            self.summary = f"ARP: {self.src_ip} -> {self.dst_ip}"
 
     def get_tree_data(self):
         """
