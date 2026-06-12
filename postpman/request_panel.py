@@ -52,7 +52,7 @@ class RequestPanel(ctk.CTkFrame):
         
         self.button_frame = ctk.CTkFrame(self)
         self.button_frame.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
-        self.button_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        self.button_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
         
         self.send_button = ctk.CTkButton(self.button_frame, text="Send", command=self.on_send)
         self.send_button.grid(row=0, column=0, padx=5, sticky="ew")
@@ -61,19 +61,27 @@ class RequestPanel(ctk.CTkFrame):
                                            command=self.on_cancel, state="disabled")
         self.cancel_button.grid(row=0, column=1, padx=5, sticky="ew")
         
+        self.import_curl_button = ctk.CTkButton(self.button_frame, text="Import cURL", 
+                                                 command=self.on_import_curl)
+        self.import_curl_button.grid(row=0, column=2, padx=5, sticky="ew")
+        
         self.clear_button = ctk.CTkButton(self.button_frame, text="Clear", command=self.on_clear)
-        self.clear_button.grid(row=0, column=2, padx=5, sticky="ew")
+        self.clear_button.grid(row=0, column=3, padx=5, sticky="ew")
         
         self.grid_rowconfigure(1, weight=1)
         
         self.send_callback = None
         self.cancel_callback = None
+        self.import_curl_callback = None
 
     def set_send_callback(self, callback):
         self.send_callback = callback
 
     def set_cancel_callback(self, callback):
         self.cancel_callback = callback
+
+    def set_import_curl_callback(self, callback):
+        self.import_curl_callback = callback
 
     def on_send(self):
         if self.send_callback:
@@ -86,6 +94,10 @@ class RequestPanel(ctk.CTkFrame):
             self.cancel_callback()
             self.send_button.configure(state="normal")
             self.cancel_button.configure(state="disabled")
+
+    def on_import_curl(self):
+        if self.import_curl_callback:
+            self.import_curl_callback()
 
     def on_clear(self):
         self.method_var.set("GET")

@@ -3,6 +3,18 @@ from typing import List, Dict, Any
 from config_manager import ConfigManager
 
 
+def get_display_name(item: Dict[str, Any]) -> str:
+    headers = item.get("headers", {})
+    for key, value in headers.items():
+        if key.lower() == 'x-name':
+            return value
+    
+    method = item.get("method", "GET")
+    url = item.get("url", "")
+    display_url = url[:30] + "..." if len(url) > 30 else url
+    return f"{method} {display_url}"
+
+
 class HistoryPanel(ctk.CTkFrame):
     def __init__(self, parent, on_select_callback):
         super().__init__(parent)
@@ -38,15 +50,13 @@ class HistoryPanel(ctk.CTkFrame):
             frame.grid(row=i + 1, column=0, sticky="ew", pady=2)
             frame.grid_columnconfigure(1, weight=1)
             
-            method_label = ctk.CTkLabel(frame, text=item["method"], width=60)
-            method_label.grid(row=0, column=0, padx=5, sticky="w")
+            display_name = get_display_name(item)
             
-            url_label = ctk.CTkLabel(frame, text=item["url"], anchor="w")
-            url_label.grid(row=0, column=1, padx=5, sticky="ew")
+            name_label = ctk.CTkLabel(frame, text=display_name, anchor="w")
+            name_label.grid(row=0, column=0, padx=5, sticky="ew", columnspan=2)
             
             frame.bind("<Button-1>", lambda e, item=item: self.on_select(item))
-            method_label.bind("<Button-1>", lambda e, item=item: self.on_select(item))
-            url_label.bind("<Button-1>", lambda e, item=item: self.on_select(item))
+            name_label.bind("<Button-1>", lambda e, item=item: self.on_select(item))
             
             self.history_items.append(frame)
 

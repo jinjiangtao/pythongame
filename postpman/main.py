@@ -4,6 +4,8 @@ from response_panel import ResponsePanel
 from history_panel import HistoryPanel
 from http_client import HttpClient
 from config_manager import ConfigManager, RequestConfig
+from curl_import_dialog import CurlImportDialog
+from curl_parser import get_display_name
 import os
 
 
@@ -38,6 +40,7 @@ class App(ctk.CTk):
         self.request_panel.grid(row=0, column=0, sticky="nsew")
         self.request_panel.set_send_callback(self.send_request)
         self.request_panel.set_cancel_callback(self.cancel_request)
+        self.request_panel.set_import_curl_callback(self.import_curl)
         
         self.response_panel = ResponsePanel(self.main_frame)
         self.response_panel.grid(row=1, column=0, sticky="nsew")
@@ -87,6 +90,27 @@ class App(ctk.CTk):
 
     def on_history_select(self, item):
         self.request_panel.set_request_data(item)
+
+    def import_curl(self):
+        def on_curl_imported(result):
+            if result:
+                request_data = {
+                    "method": result["method"],
+                    "url": result["url"],
+                    "headers": result["headers"],
+                    "body": result["body"],
+                    "body_type": result["body_type"],
+                    "timeout": 30
+                }
+                
+                self.request_panel.set_request_data(request_data)
+                
+                self.history_panel.add_history(request_data)
+                
+                self.show_message("Success", "cURL command imported successfully!")
+        
+        dialog = CurlImportDialog(self, on_curl_imported)
+        self.wait_window(dialog)
 
     def save_request(self):
         data = self.request_panel.get_request_data()
