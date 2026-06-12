@@ -17,7 +17,7 @@ class App(ctk.CTk):
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
         
-        self.http_client = HttpClient()
+        self.http_client = HttpClient(self)
         self.config_manager = ConfigManager()
         
         self.grid_columnconfigure(0, weight=0)

@@ -15,13 +15,23 @@ class ResponseData:
 
 
 class HttpClient:
-    def __init__(self):
+    def __init__(self, root_widget=None):
         self.session = requests.Session()
         self.current_thread: Optional[threading.Thread] = None
         self.cancel_event = threading.Event()
+        self.root_widget = root_widget
+
+    def set_root_widget(self, root_widget):
+        self.root_widget = root_widget
 
     def cancel_request(self):
         self.cancel_event.set()
+
+    def _schedule_callback(self, callback, response_data):
+        if self.root_widget:
+            self.root_widget.after(0, lambda: callback(response_data))
+        else:
+            callback(response_data)
 
     def _send_request(self, method: str, url: str, headers: Dict[str, str], 
                       body: Any, body_type: str, timeout: int,
@@ -32,7 +42,7 @@ class HttpClient:
         try:
             if self.cancel_event.is_set():
                 response_data.error = "Request cancelled"
-                callback(response_data)
+                self._schedule_callback(callback, response_data)
                 return
 
             data = None
@@ -64,7 +74,7 @@ class HttpClient:
             
             if self.cancel_event.is_set():
                 response_data.error = "Request cancelled"
-                callback(response_data)
+                self._schedule_callback(callback, response_data)
                 return
 
             response_data.status_code = response.status_code
@@ -81,7 +91,7 @@ class HttpClient:
         finally:
             response_data.response_time = time.time() - start_time
             response_data.success = not response_data.error
-            callback(response_data)
+            self._schedule_callback(callback, response_data)
 
     def send_request(self, method: str, url: str, headers: Dict[str, str] = None,
                      body: Any = None, body_type: str = "none", 
