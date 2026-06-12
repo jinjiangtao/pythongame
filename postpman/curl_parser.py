@@ -33,6 +33,9 @@ class CurlParser:
         
         self._parse_tokens(tokens[1:])
         
+        if not self.url:
+            raise ValueError("未找到有效的 URL")
+        
         self._detect_json_body()
         
         return {
@@ -47,6 +50,8 @@ class CurlParser:
         command = command.strip()
         
         command = re.sub(r'\\\s*\n', ' ', command)
+        
+        command = re.sub(r'\^\s*\n', ' ', command)
         
         command = re.sub(r'\s+', ' ', command)
         
@@ -122,13 +127,13 @@ class CurlParser:
             
             elif token in ('-A', '--user-agent'):
                 if i + 1 < len(tokens):
-                    self.headers["User-Agent"] = tokens[i + 1]
+                    self.headers["User-Agent"] = self._strip_quotes(tokens[i + 1])
                     i += 2
                     continue
             
             elif token in ('-e', '--referer'):
                 if i + 1 < len(tokens):
-                    self.headers["Referer"] = tokens[i + 1]
+                    self.headers["Referer"] = self._strip_quotes(tokens[i + 1])
                     i += 2
                     continue
             
@@ -140,7 +145,7 @@ class CurlParser:
             
             elif token in ('-b', '--cookie'):
                 if i + 1 < len(tokens):
-                    self.headers["Cookie"] = tokens[i + 1]
+                    self.headers["Cookie"] = self._strip_quotes(tokens[i + 1])
                     i += 2
                     continue
             
@@ -150,30 +155,38 @@ class CurlParser:
                 continue
             
             elif not token.startswith('-'):
-                if self._is_url(token):
-                    self.url = token
+                candidate_url = self._strip_quotes(token)
+                if self._is_url(candidate_url):
+                    self.url = candidate_url
                 i += 1
                 continue
             
             i += 1
     
     def _parse_header(self, header_str: str):
+        header_str = self._strip_quotes(header_str)
         if ':' in header_str:
             key, value = header_str.split(':', 1)
             self.headers[key.strip()] = value.strip()
     
     def _parse_data(self, data_str: str):
-        self.body = data_str
+        self.body = self._strip_quotes(data_str)
         self.body_type = "raw"
     
     def _parse_urlencoded_data(self, data_str: str):
+        data_str = self._strip_quotes(data_str)
         if '=' in data_str:
             key, value = data_str.split('=', 1)
             self.body = {key: value}
             self.body_type = "x-www-form-urlencoded"
     
+    def _strip_quotes(self, s: str) -> str:
+        if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+            return s[1:-1]
+        return s
+    
     def _is_url(self, token: str) -> bool:
-        return token.startswith('http://') or token.startswith('https://') or token.startswith('www.')
+        return token.startswith('http://') or token.startswith('https://') or token.startswith('www.') or token.startswith('/')
     
     def _detect_json_body(self):
         if self.body and self.body_type == "raw":
